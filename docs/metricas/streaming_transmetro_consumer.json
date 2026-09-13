@@ -1,0 +1,11 @@
+{
+  "fecha": "2026-09-12T22:52:51-06:00",
+  "topic": "transmetro-validaciones",
+  "group_id": "bronze-transmetro-v1",
+  "mensajes_consumidos": 10,
+  "eventos_nuevos": 0,
+  "duplicados_tecnicos": 10,
+  "mensajes_invalidos": 0,
+  "parquet_creados": 0,
+  "parquet_paths": []
+}

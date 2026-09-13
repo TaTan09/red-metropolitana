@@ -3,3 +3,4 @@ pyarrow>=17,<22
 psycopg2-binary>=2.9,<3
 SQLAlchemy>=2.0,<3
 python-dotenv>=1.0,<2
+confluent-kafka>=2.6,<4
