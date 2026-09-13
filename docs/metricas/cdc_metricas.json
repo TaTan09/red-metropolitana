@@ -1,0 +1,24 @@
+{
+  "fecha": "2026-09-12T23:56:16-06:00",
+  "source_file": "cdc_padron_usuarios.csv",
+  "source_sha256": "68e4d9dd258809dd4a45a0c5f9023ad6f3b5d32912e4447b9d20b9a7258de5c4",
+  "bronze_path": "data/bronze/cdc_padron_usuarios/fecha_ingesta=2026-09-12/part-68e4d9dd2588.parquet",
+  "bronze_created_this_run": false,
+  "total_cdc": 31050,
+  "operaciones": {
+    "INSERT": 10800,
+    "UPDATE": 16200,
+    "DELETE": 4050
+  },
+  "tipos_llave": {
+    "TRANSMETRO": 22326,
+    "TRANSURBANO": 5223,
+    "SIN_TARJETA": 2206,
+    "METRORIEL": 1295
+  },
+  "tm_tarjetas_no_delete": 15611,
+  "tm_tarjetas_unicas_final": 17432,
+  "tm_activas_final": 15096,
+  "tm_inactivas_final": 2336,
+  "tm_delete_sin_cuerpo_previo_visible": 1821
+}
