@@ -21,5 +21,12 @@ services:
       retries: 10
       start_period: 5s
 
+  kafka:
+    image: apache/kafka:4.3.1
+    container_name: red_metropolitana_kafka
+    restart: unless-stopped
+    ports:
+      - "9092:9092"
+
 volumes:
   postgres_data:
