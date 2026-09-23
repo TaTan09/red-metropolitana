@@ -159,4 +159,24 @@ Con PostgreSQL y Staging cargados:
 python scripts/run_dbt.py build
 ```
 
-El build crea Silver y Gold y ejecuta pruebas de claves, relaciones y conteos. El [DDL](sql/ddl/gold_model.sql) es el entregable estructural de referencia; dbt materializa las tablas. Prefect permanece pendiente.
+El build crea Silver y Gold y ejecuta pruebas de claves, relaciones y conteos. El [DDL](sql/ddl/gold_model.sql) es el entregable estructural de referencia; dbt materializa las tablas.
+
+## Ejecución completa de Fase 1
+
+Desde la raíz del repositorio, coloca los nueve archivos oficiales en `data/raw/` y configura `.env` a partir de `.env.example`: contraseña PostgreSQL, host/puerto y una `GOLD_PSEUDONYM_KEY` privada y estable de al menos 32 bytes. Activa el entorno virtual e instala las dependencias:
+
+```powershell
+pip install -r requirements.txt
+docker compose up -d
+python orchestration/flows/fase1_pipeline.py
+```
+
+El comando inicia localmente el flujo Prefect **dos veces** para demostrar idempotencia. En cada corrida valida PostgreSQL/Kafka, ingiere Batch y CDC a Bronze Parquet, publica y consume ambos CSV por Kafka, reconstruye las 13 tablas Staging, ejecuta `python scripts/run_dbt.py build` (Silver, Gold y pruebas) y consulta los conteos finales. Los consumidores terminan tras 15 segundos sin mensajes, con un límite de 30 minutos por proceso; una etapa fallida detiene el flujo.
+
+El flujo no borra Bronze, el estado de deduplicación ni volúmenes. Compara SHA-256 de Raw, filas por archivo Parquet y los conteos de Staging, Silver y Gold; termina con error si cambian. Repetir las mismas fuentes debe dejar igual el estado analítico final. Los JSON de cada corrida y el resultado legible se guardan en [la evidencia de idempotencia](docs/evidencias/003-idempotencia-flujo-completo.md). La segunda publicación Kafka puede consumirse como duplicado técnico por `_event_id` sin añadir filas a Bronze.
+
+Si falla la segunda ejecución después de guardarse `003-corrida-1.json`, corrige la causa y usa `python orchestration/flows/fase1_pipeline.py --resume-second` para repetir únicamente esa corrida y compararla con la primera.
+
+Si `.env` utiliza otro puerto local de PostgreSQL, `docker compose` lo respeta con `POSTGRES_PORT`. El broker Kafka se configura opcionalmente con `KAFKA_BOOTSTRAP_SERVERS` (predeterminado `localhost:9092`). Prefect arranca su servidor temporal local automáticamente; no hay que levantar manualmente Prefect Server ni usar Prefect Cloud.
+
+Para repetir únicamente las pruebas dbt en un Docker con poca memoria compartida, usa `python scripts/run_dbt.py test --threads 1`.
