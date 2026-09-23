@@ -1,15 +1,32 @@
-# Reporte de Calidad de Datos y Cuarentena - Capa Silver
+# Calidad y cuarentena de Silver
 
-## 1. Resumen de Cuarentena por Regla
-| Fuente | Motivo de Rechazo | Registros Aislados | % dentro de Fuente | Criterio Técnico |
-| :--- | :--- | :---: | :---: | :--- |
-| **MetroRiel** | `VIAJE_SIN_EXIT` | 3,589 | 100.00% | Viajes abiertos sin marcaje de torniquete de salida. |
-| **Transmetro** | `DUPLICADO_TORNIQUETE` | 1,115 | 100.00% | Doble marcaje en misma tarjeta, estación y timestamp. |
-| **Transurbano** | `COD_PARADA_NULO` | 4,189 | 83.68% | Transacciones sin identificador de parada en catálogo. |
-| **Transurbano** | `FECHA_FUTURA` | 817 | 16.32% | Registros con estampas temporales posteriores a 2026-10-01. |
-| **Total Aislado** | — | **9,710** | — | Registros no propagados a la capa Silver analítica. |
+## Conteos por regla
 
-## 2. Historización SCD Tipo 2 (Padrón Transmetro)
-- **Tabla:** `silver.snap_padron_transmetro`
-- **Registros procesados:** 17,432 tarjetas únicas.
-- **Estrategia:** `check` (`estado_tarjeta`, `perfil_usuario`, `zona_residencia`).
+| Fuente | Regla | Violaciones |
+|---|---|---:|
+| MetroRiel | `VIAJE_SIN_EXIT` | 3,589 |
+| Transmetro | `DUPLICADO_TORNIQUETE` | 1,115 |
+| Transurbano | `COD_PARADA_NULO` | 4,189 |
+| Transurbano | `FECHA_FUTURA` | 817 |
+| **Total** | | **9,710** |
+
+Las **9,710** filas son violaciones de reglas (`UNION ALL`), no 9,710 registros distintos. Tres transacciones de Transurbano infringen a la vez `COD_PARADA_NULO` y `FECHA_FUTURA`. Por tanto hay **9,707 registros únicos** en cuarentena: 1,115 de Transmetro, 5,003 de Transurbano y 3,589 de MetroRiel. La intersección se comprobó sobre el Parquet Bronze y con `count(DISTINCT (fuente, id_registro_crudo))` en PostgreSQL tras ejecutar dbt.
+
+`silver.silver_cuarentena.id_registro_crudo` usa el identificador técnico estable del registro Bronze. Una misma fila puede aparecer varias veces con motivos distintos. Para verificar en PostgreSQL:
+
+```sql
+SELECT count(*) AS violaciones,
+       count(DISTINCT (fuente, id_registro_crudo)) AS registros_unicos
+FROM silver.silver_cuarentena;
+
+SELECT fuente, count(*) AS violaciones,
+       count(DISTINCT id_registro_crudo) AS registros_unicos
+FROM silver.silver_cuarentena
+GROUP BY fuente;
+```
+
+Las reglas de calidad se aplican en Silver. Staging conserva duplicados, paradas vacías, fechas futuras y viajes sin salida.
+
+## Padrón Transmetro
+
+`silver.silver_padron_transmetro_scd2` genera una versión por evento CDC de llave Transmetro y ordena por `seq`. Incluye vigencia por secuencia y fecha de commit, operación, estado, perfil y zona. El estado vigente debe reconciliar con `staging.padron_transmetro_actual`: **17,432 tarjetas totales, 15,096 activas y 2,336 inactivas**. Un snapshot ejecutado solo contra ese estado vigente no reproduce las versiones previas del CDC.

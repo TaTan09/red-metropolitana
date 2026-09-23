@@ -12,8 +12,8 @@ with am_base as (
         coalesce(b.fare::numeric, 3.00) as tarifa_quetzales,
         b.ingesta_timestamp,
         e.district as zona_cruda
-    from {{ source('bronze', 'aerometro_boardings') }} b
-    left join {{ source('bronze', 'am_estaciones') }} e on b.station_code = e.station_code
+    from {{ source('staging', 'aerometro_boardings') }} b
+    left join {{ source('staging', 'am_estaciones') }} e on b.station_code = e.station_code
 )
 
 select

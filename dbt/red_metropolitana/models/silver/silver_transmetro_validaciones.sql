@@ -10,9 +10,9 @@ with ranked as (
         ingesta_timestamp,
         row_number() over(
             partition by tarjeta, estacion_id, fecha_hora 
-            order by ingesta_timestamp
+            order by ingesta_timestamp, bronze_record_id
         ) as rn
-    from {{ source('bronze', 'transmetro_validaciones') }}
+    from {{ source('staging', 'transmetro_validaciones') }}
 )
 
 select

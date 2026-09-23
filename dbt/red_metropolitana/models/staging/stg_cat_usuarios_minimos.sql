@@ -4,23 +4,23 @@ with tu_keys as (
     select distinct 
         num_tarjeta::text as llave_origen,
         'Transurbano' as sistema_origen
-    from {{ source('bronze', 'transurbano_transacciones') }}
+    from {{ source('staging', 'usuarios_transurbano_min') }}
     where num_tarjeta is not null and trim(num_tarjeta::text) != ''
 ),
 
 mr_keys as (
     select distinct 
-        tarjeta_mr::text as llave_origen,
+        card::text as llave_origen,
         'MetroRiel' as sistema_origen
-    from {{ source('bronze', 'metroriel_viajes') }}
-    where tarjeta_mr is not null and trim(tarjeta_mr::text) != ''
+    from {{ source('staging', 'usuarios_metroriel_min') }}
+    where card is not null and trim(card::text) != ''
 ),
 
 am_keys as (
     select distinct 
         user_hash::text as llave_origen,
         'Aerometro' as sistema_origen
-    from {{ source('bronze', 'aerometro_boardings') }}
+    from {{ source('staging', 'usuarios_aerometro_min') }}
     where user_hash is not null and trim(user_hash::text) != ''
 )
 

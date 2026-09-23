@@ -15,8 +15,8 @@ with parsed_dates as (
         (t.monto_centavos::numeric / 100.0) as tarifa_quetzales,
         t.ingesta_timestamp,
         p.sector as zona_cruda
-    from {{ source('bronze', 'transurbano_transacciones') }} t
-    left join {{ source('bronze', 'tu_paradas') }} p on t.cod_parada = p.cod_parada
+    from {{ source('staging', 'transurbano_transacciones') }} t
+    left join {{ source('staging', 'tu_paradas') }} p on t.cod_parada = p.cod_parada
 ),
 
 transurbano_base as (

@@ -35,4 +35,4 @@ El CDC completo se conserva como `staging.cdc_registro_ambiguo`.
 El padrón solicitado de Transmetro se deriva en `staging.padron_transmetro_actual` usando únicamente llaves `TC-########`.
 Los DELETE no eliminan físicamente tarjetas; las dejan `INACTIVA`.
 
-Las tablas de Staging se reconstruyen desde la fuente en cada corrida, por lo que repetir el proceso produce el mismo estado final.
+Las tablas de Staging se reconstruyen desde el Parquet Bronze en cada corrida, por lo que repetir el proceso produce el mismo estado final.

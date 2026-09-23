@@ -125,6 +125,24 @@ data/bronze/
   - `silver_transurbano_transacciones`: 827,788 registros
   - `silver_metroriel_viajes`: 295,511 registros
   - `silver_aerometro_boardings`: 203,554 registros
-- **Cuarentena:** 9,710 registros anómalos segregados en `silver.silver_cuarentena`.
+- **Cuarentena:** 9,710 violaciones de reglas correspondientes a 9,707 registros únicos; tres registros infringen dos reglas.
 - **Identidades Únicas en Bridge:** 117,203 llaves resueltas en `silver.bridge_identidad_usuario`.
-- **Snapshot SCD Tipo 2:** 17,432 tarjetas activas en `silver.snap_padron_transmetro`.
+- **Padrón Transmetro:** 17,432 tarjetas totales; 15,096 activas y 2,336 inactivas. `silver.silver_padron_transmetro_scd2` conserva una versión por evento CDC.
+
+## Reconstrucción de Fase 1
+
+Desde la raíz del repositorio, con el entorno virtual activo y `.env` configurado:
+
+```powershell
+pip install -r requirements.txt
+docker compose up -d postgres
+python ingestion/batch/ingest_batch_to_bronze.py
+python ingestion/cdc/process_cdc.py
+# Consumir antes los topics Transmetro y Aerómetro hasta completar Bronze.
+python scripts/cargar_tablas_base_pg.py
+python scripts/run_dbt.py build --select path:models/silver path:models/staging
+```
+
+La carga de Staging lee únicamente Parquet de `data/bronze`, reconstruye las 13 tablas del contrato en una transacción y verifica los conteos. Para reproducir los conteos publicados se necesitan los Parquet completos de las nueve fuentes, incluidos los dos consumidores Kafka. El script de CDC también carga sus dos tablas Staging desde su Parquet Bronze. Repetir la carga con los mismos Parquet produce los mismos registros y conteos.
+
+Silver lee exclusivamente `source('staging')`. `scripts/run_dbt.py` carga las variables de `.env` para el perfil dbt sin guardar credenciales en Git. Las pruebas dbt comprueban que el último estado SCD2 coincide con el padrón actual y que las vigencias por secuencia no se solapan. Gold y Prefect quedan para su fase correspondiente.
