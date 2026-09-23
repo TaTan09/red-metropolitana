@@ -56,11 +56,6 @@ def make_event_id(file_hash: str, record_number: int) -> str:
     return hashlib.sha256(raw).hexdigest()
 
 
-def delivery_report(err, msg):
-    if err is not None:
-        print(f"[ERROR ENTREGA] {err}")
-
-
 def build_event(
     row: dict[str, str],
     *,
@@ -119,6 +114,13 @@ def main() -> int:
         })
 
     sent = 0
+    delivery_failures = 0
+
+    def delivery_report(err, msg):
+        nonlocal delivery_failures
+        if err is not None:
+            delivery_failures += 1
+            print(f"[ERROR ENTREGA] {err}")
 
     print("=" * 78)
     print("PRODUCTOR KAFKA - TRANSMETRO")
@@ -154,15 +156,20 @@ def main() -> int:
             else:
                 # poll(0) permite atender callbacks sin bloquear.
                 producer.poll(0)
-                producer.produce(
-                    args.topic,
-                    key=key,
-                    value=payload,
-                    on_delivery=delivery_report,
-                )
+                retry_started = time.monotonic()
+                while True:
+                    try:
+                        producer.produce(
+                            args.topic, key=key, value=payload,
+                            on_delivery=delivery_report,
+                        )
+                        break
+                    except BufferError:
+                        if time.monotonic() - retry_started > 60:
+                            raise RuntimeError("Cola Kafka llena durante más de 60 segundos")
+                        producer.poll(1)
 
-                # Backpressure básica si la cola local se llena.
-                if len(producer) > 100_000:
+                if len(producer) >= 80_000:
                     producer.flush(5)
 
             sent += 1
@@ -177,6 +184,9 @@ def main() -> int:
         remaining = producer.flush(30)
         if remaining != 0:
             print(f"[ERROR] Quedaron {remaining} mensajes sin confirmar.")
+            return 2
+        if delivery_failures:
+            print(f"[ERROR] Fallaron {delivery_failures} entregas Kafka.")
             return 2
 
     print("-" * 78)

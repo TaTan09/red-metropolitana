@@ -244,6 +244,7 @@ def main() -> int:
     parquet_paths: list[str] = []
 
     last_message_at = time.monotonic()
+    assigned_once = False
 
     print("=" * 78)
     print("CONSUMIDOR KAFKA - TRANSMETRO -> BRONZE")
@@ -258,9 +259,12 @@ def main() -> int:
     try:
         while True:
             msg = consumer.poll(1.0)
+            if consumer.assignment() and not assigned_once:
+                assigned_once = True
+                last_message_at = time.monotonic()
 
             if msg is None:
-                if time.monotonic() - last_message_at >= args.idle_seconds:
+                if assigned_once and time.monotonic() - last_message_at >= args.idle_seconds:
                     break
                 continue
 
