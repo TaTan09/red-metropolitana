@@ -1,12 +1,26 @@
 # Contexto compartido — Proyecto 1 de Ciencia de Datos
 ## Agencia Metropolitana de Transporte
 
-**Versión:** 1.0  
-**Estado:** Sprint 0 completado  
-**Fecha de actualización:** 12 de septiembre de 2026
+**Versión:** 1.1  
+**Estado:** Fase 1 implementada y validada  
+**Fecha de actualización:** 22 de septiembre de 2026
 
 > Este documento debe compartirse entre Hector, Alejandro y Jonatán, y puede enviarse a las herramientas de IA que cada integrante utilice.  
 > Su propósito es mantener un contexto común, evitar soluciones incompatibles y dejar por escrito las decisiones ya tomadas por el grupo.
+
+## Estado actual de implementación
+
+La **Fase 1 (49 puntos)** se encuentra implementada y validada de extremo a extremo:
+
+- Raw → Bronze Parquet mediante Batch, Kafka y CDC según la fuente;
+- Bronze → Staging PostgreSQL con 13 tablas reconstruibles;
+- Silver en dbt con normalización, calidad, cuarentena, identidad y SCD Tipo 2;
+- Gold en dbt con seis dimensiones conformadas y dos tablas de hechos;
+- orquestación local con Prefect;
+- dos corridas completas con los mismos archivos Raw y conteos idénticos en Bronze, Staging, Silver y Gold;
+- `dbt build` validado sin errores.
+
+La evidencia de idempotencia del flujo completo se conserva en `docs/evidencias/003-idempotencia-flujo-completo.md`. Las decisiones de Sprint 0 siguen siendo la base conceptual del diseño; este documento las mantiene como referencia histórica aunque algunas secciones estén redactadas en futuro.
 
 ---
 
