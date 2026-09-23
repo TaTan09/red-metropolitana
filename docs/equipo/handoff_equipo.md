@@ -15,7 +15,13 @@ La base compartida del proyecto ya incluye:
 - streaming Aerómetro a Bronze;
 - CDC Raw → Bronze → Staging;
 - pruebas de idempotencia de las cargas implementadas;
-- contrato de tablas Staging.
+- contrato de tablas Staging;
+- reconstrucción Bronze → Staging validada;
+- modelos Silver y reglas de calidad en dbt;
+- SCD Tipo 2 e identidad documentada;
+- modelo dimensional Gold con seis dimensiones y dos hechos;
+- Prefect para el flujo completo;
+- evidencia de dos corridas idempotentes de extremo a extremo.
 
 ## Reparto de trabajo
 
@@ -45,7 +51,8 @@ Criterios:
 - No eliminar datos malos en Staging.
 - Mantener conteos y evidencia de idempotencia.
 - Documentar los usuarios únicos de TU, MR y AM.
-- Prefect/orquestación del flujo completo queda para la siguiente etapa.
+- Prefect/orquestación del flujo completo está implementada y validada en `orchestration/flows/fase1_pipeline.py`.
+- La evidencia de dos corridas idénticas está en `docs/evidencias/003-idempotencia-flujo-completo.md`.
 
 ### Alejandro — dbt, Silver, Calidad y SCD2
 
