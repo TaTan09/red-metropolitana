@@ -26,6 +26,7 @@ data/quarantine/*
 dbt/**/target/
 dbt/**/logs/
 dbt/**/dbt_packages/
+dbt/**/.user.yml
 
 # Tableau local/temp
 *.hyper

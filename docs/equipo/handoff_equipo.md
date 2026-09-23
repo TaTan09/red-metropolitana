@@ -15,13 +15,19 @@ La base compartida del proyecto ya incluye:
 - streaming Aerómetro a Bronze;
 - CDC Raw → Bronze → Staging;
 - pruebas de idempotencia de las cargas implementadas;
-- contrato de tablas Staging.
+- contrato de tablas Staging;
+- reconstrucción Bronze → Staging validada;
+- modelos Silver y reglas de calidad en dbt;
+- SCD Tipo 2 e identidad documentada;
+- modelo dimensional Gold con seis dimensiones y dos hechos;
+- Prefect para el flujo completo;
+- evidencia de dos corridas idempotentes de extremo a extremo.
 
 ## Reparto de trabajo
 
 ### Hector — Ingesta, Staging y Orquestación
 
-Siguiente objetivo inmediato: completar `Bronze → Staging`.
+La rama de integración implementa `Bronze Parquet → Staging` y permite reconstruir las 13 tablas del contrato mediante `python scripts/cargar_tablas_base_pg.py`.
 
 Debe crear/reconstruir:
 - `staging.tm_estaciones`
@@ -36,7 +42,7 @@ Debe crear/reconstruir:
 - `staging.usuarios_metroriel_min`
 - `staging.usuarios_aerometro_min`
 
-Ya existen:
+También se reconstruyen:
 - `staging.cdc_registro_ambiguo`
 - `staging.padron_transmetro_actual`
 
@@ -45,11 +51,12 @@ Criterios:
 - No eliminar datos malos en Staging.
 - Mantener conteos y evidencia de idempotencia.
 - Documentar los usuarios únicos de TU, MR y AM.
-- Después de cerrar Staging, avanzar con Prefect/orquestación del flujo completo.
+- Prefect/orquestación del flujo completo está implementada y validada en `orchestration/flows/fase1_pipeline.py`.
+- La evidencia de dos corridas idénticas está en `docs/evidencias/003-idempotencia-flujo-completo.md`.
 
 ### Alejandro — dbt, Silver, Calidad y SCD2
 
-Puede comenzar de inmediato configurando dbt y declarando `sources` sobre las tablas definidas en el contrato de Staging.
+Silver consume `sources` del contrato de Staging. El historial SCD Tipo 2 se deriva de cada evento CDC, ordenado por `seq`.
 
 Responsabilidades:
 - fechas normalizadas;
@@ -69,7 +76,7 @@ No debe cambiar la interfaz Staging sin coordinarlo.
 
 ### Jonatán — Diseño dimensional, Gold y Tableau
 
-Puede comenzar con el diseño mientras Silver se desarrolla.
+La rama `feature/gold-dimensional` implementa las seis dimensiones y los dos hechos acordados. El diseño, DDL y métricas están en `docs/arquitectura/modelo_dimensional_gold.md`, `sql/ddl/gold_model.sql` y `docs/metricas/gold_metricas.md`. Tableau sigue pendiente.
 
 Responsabilidades:
 - declarar granos;

@@ -1,0 +1,295 @@
+{
+  "fecha_fin": "2026-09-22T23:00:40-06:00",
+  "duracion_total_segundos": 726.59,
+  "etapas": {
+    "validar_servicios": {
+      "segundos": 0.26,
+      "postgres": "OK",
+      "kafka": "OK"
+    },
+    "batch_to_bronze": {
+      "segundos": 1.12,
+      "codigo_salida": 0
+    },
+    "cdc_to_bronze": {
+      "segundos": 8.02,
+      "codigo_salida": 0
+    },
+    "streaming_transmetro": {
+      "producer": {
+        "segundos": 9.05,
+        "codigo_salida": 0,
+        "eventos_procesados": 363221
+      },
+      "consumer": {
+        "segundos": 227.74,
+        "codigo_salida": 0
+      },
+      "mensajes_consumidos": 918636,
+      "eventos_nuevos": 0,
+      "duplicados_tecnicos": 918636,
+      "mensajes_invalidos": 0,
+      "parquet_creados": 0,
+      "fuente": "transmetro_validaciones"
+    },
+    "streaming_aerometro": {
+      "producer": {
+        "segundos": 4.71,
+        "codigo_salida": 0,
+        "eventos_procesados": 203554
+      },
+      "consumer": {
+        "segundos": 64.39,
+        "codigo_salida": 0
+      },
+      "mensajes_consumidos": 203554,
+      "eventos_nuevos": 0,
+      "duplicados_tecnicos": 203554,
+      "mensajes_invalidos": 0,
+      "parquet_creados": 0,
+      "fuente": "aerometro_boardings"
+    },
+    "rebuild_staging": {
+      "segundos": 222.78,
+      "codigo_salida": 0
+    },
+    "dbt_build": {
+      "segundos": 186.22,
+      "codigo_salida": 0
+    },
+    "collect_metrics": {
+      "segundos": 1.82
+    }
+  },
+  "metricas": {
+    "raw_sha256": {
+      "aerometro_boardings.csv": "898b871c6b3457b6b63a522d5dd8966e3a75bcaf215156a65c4a9d211af4cdc7",
+      "am_estaciones.csv": "e3acbeed8608fb9a6b9a8df87646bf5294e644aa64bd95484f1424b92ae21723",
+      "cdc_padron_usuarios.csv": "68e4d9dd258809dd4a45a0c5f9023ad6f3b5d32912e4447b9d20b9a7258de5c4",
+      "metroriel_viajes.jsonl": "23feb4a3a55ce506bf34de5faf7834f9c390b7ca70499cc9fb3ec1c3650ebede",
+      "mr_estaciones.csv": "c302ffbc6f0bdcf926c8eaaf9a5427ec5d38d482cc44431e3aeb20a8febb8e8c",
+      "tm_estaciones.csv": "4d53a95abb4f115b7da7f69db2c392e1748d6704807d81408a5e510f791624d0",
+      "transmetro_validaciones.csv": "5f88356e427d0ec19b193f6aaafedc288d9bf3fbad1881f011a7d9ea912730d2",
+      "transurbano_transacciones.csv": "8ce5028499b7b6c7274fd838430e87d373065d377e5ec1f062a4fa6497083fad",
+      "tu_paradas.csv": "a888a09c45189cfeac0a0577377d1b4c662923ee55f798d961f418aa2ac93b90"
+    },
+    "bronze": {
+      "tm_estaciones": {
+        "filas": 104,
+        "archivos": 1,
+        "filas_por_parquet": {
+          "data/bronze/tm_estaciones/fecha_ingesta=2026-09-12/part-4d53a95abb4f.parquet": 104
+        }
+      },
+      "tu_paradas": {
+        "filas": 328,
+        "archivos": 1,
+        "filas_por_parquet": {
+          "data/bronze/tu_paradas/fecha_ingesta=2026-09-12/part-a888a09c4518.parquet": 328
+        }
+      },
+      "mr_estaciones": {
+        "filas": 22,
+        "archivos": 1,
+        "filas_por_parquet": {
+          "data/bronze/mr_estaciones/fecha_ingesta=2026-09-12/part-c302ffbc6f0b.parquet": 22
+        }
+      },
+      "am_estaciones": {
+        "filas": 14,
+        "archivos": 1,
+        "filas_por_parquet": {
+          "data/bronze/am_estaciones/fecha_ingesta=2026-09-12/part-e3acbeed8608.parquet": 14
+        }
+      },
+      "transurbano_transacciones": {
+        "filas": 832791,
+        "archivos": 1,
+        "filas_por_parquet": {
+          "data/bronze/transurbano_transacciones/fecha_ingesta=2026-09-12/part-8ce5028499b7.parquet": 832791
+        }
+      },
+      "metroriel_viajes": {
+        "filas": 299100,
+        "archivos": 1,
+        "filas_por_parquet": {
+          "data/bronze/metroriel_viajes/fecha_ingesta=2026-09-12/part-23feb4a3a55c.parquet": 299100
+        }
+      },
+      "cdc_padron_usuarios": {
+        "filas": 31050,
+        "archivos": 1,
+        "filas_por_parquet": {
+          "data/bronze/cdc_padron_usuarios/fecha_ingesta=2026-09-12/part-68e4d9dd2588.parquet": 31050
+        }
+      },
+      "transmetro_validaciones": {
+        "filas": 363221,
+        "archivos": 74,
+        "filas_por_parquet": {
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000000000-000000000009.parquet": 10,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000000030-000000005029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000005030-000000010029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000010030-000000015029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000015030-000000020029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000020030-000000025029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000025030-000000030029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000030030-000000035029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000035030-000000040029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000040030-000000045029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000045030-000000050029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000050030-000000055029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000055030-000000060029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000060030-000000065029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000065030-000000070029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000070030-000000075029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000075030-000000080029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000080030-000000085029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000085030-000000090029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000090030-000000095029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000095030-000000100029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000100030-000000105029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000105030-000000110029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000110030-000000115029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000115030-000000120029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000120030-000000125029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000125030-000000130029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000130030-000000135029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000135030-000000140029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000140030-000000145029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000145030-000000150029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000150030-000000155029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000155030-000000160029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000160030-000000165029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000165030-000000170029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000170030-000000175029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000175030-000000180029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000180030-000000185029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000185030-000000190029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000190030-000000195029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000195030-000000200029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000200030-000000205029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000205030-000000210029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000210030-000000215029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000215030-000000220029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000220030-000000225029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000225030-000000230029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000230030-000000235029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000235030-000000240029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000240030-000000245029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000245030-000000250029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000250030-000000255029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000255030-000000260029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000260030-000000265029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000265030-000000270029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000270030-000000275029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000275030-000000280029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000280030-000000285029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000285030-000000290029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000290030-000000295029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000295030-000000300029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000300030-000000305029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000305030-000000310029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000310030-000000315029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000315030-000000320029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000320030-000000325029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000325030-000000330029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000330030-000000335029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000335030-000000340029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000340030-000000345029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000345030-000000350029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000350030-000000355029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000355030-000000360029.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-09-12/part-p0-000000360030-000000363240.parquet": 3211
+        }
+      },
+      "aerometro_boardings": {
+        "filas": 203554,
+        "archivos": 42,
+        "filas_por_parquet": {
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-09-12/part-p0-000000000000-000000000009.parquet": 10,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-09-12/part-p0-000000000030-000000005029.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-09-12/part-p0-000000005030-000000010029.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-09-12/part-p0-000000010030-000000015029.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-09-12/part-p0-000000015030-000000020029.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-09-12/part-p0-000000020030-000000025029.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-09-12/part-p0-000000025030-000000030029.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-09-12/part-p0-000000030030-000000035029.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-09-12/part-p0-000000035030-000000040029.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-09-12/part-p0-000000040030-000000045029.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-09-12/part-p0-000000045030-000000050029.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-09-12/part-p0-000000050030-000000055029.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-09-12/part-p0-000000055030-000000060029.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-09-12/part-p0-000000060030-000000065029.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-09-12/part-p0-000000065030-000000070029.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-09-12/part-p0-000000070030-000000075029.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-09-12/part-p0-000000075030-000000080029.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-09-12/part-p0-000000080030-000000085029.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-09-12/part-p0-000000085030-000000090029.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-09-12/part-p0-000000090030-000000095029.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-09-12/part-p0-000000095030-000000100029.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-09-12/part-p0-000000100030-000000105029.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-09-12/part-p0-000000105030-000000110029.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-09-12/part-p0-000000110030-000000115029.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-09-12/part-p0-000000115030-000000120029.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-09-12/part-p0-000000120030-000000125029.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-09-12/part-p0-000000125030-000000130029.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-09-12/part-p0-000000130030-000000135029.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-09-12/part-p0-000000135030-000000140029.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-09-12/part-p0-000000140030-000000145029.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-09-12/part-p0-000000145030-000000150029.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-09-12/part-p0-000000150030-000000155029.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-09-12/part-p0-000000155030-000000160029.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-09-12/part-p0-000000160030-000000165029.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-09-12/part-p0-000000165030-000000170029.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-09-12/part-p0-000000170030-000000175029.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-09-12/part-p0-000000175030-000000180029.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-09-12/part-p0-000000180030-000000185029.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-09-12/part-p0-000000185030-000000190029.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-09-12/part-p0-000000190030-000000195029.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-09-12/part-p0-000000195030-000000200029.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-09-12/part-p0-000000200030-000000203573.parquet": 3544
+        }
+      }
+    },
+    "staging": {
+      "tm_estaciones": 104,
+      "tu_paradas": 328,
+      "mr_estaciones": 22,
+      "am_estaciones": 14,
+      "transurbano_transacciones": 832791,
+      "metroriel_viajes": 299100,
+      "cdc_registro_ambiguo": 31050,
+      "transmetro_validaciones": 363221,
+      "aerometro_boardings": 203554,
+      "padron_transmetro_actual": 17432,
+      "usuarios_transurbano_min": 36567,
+      "usuarios_metroriel_min": 22885,
+      "usuarios_aerometro_min": 14496
+    },
+    "silver": {
+      "silver_transmetro_validaciones": 362106,
+      "silver_transurbano_transacciones": 827788,
+      "silver_metroriel_viajes": 295511,
+      "silver_aerometro_boardings": 203554,
+      "silver_cuarentena": 9710,
+      "silver_padron_transmetro_scd2": 22326
+    },
+    "gold": {
+      "dim_usuario": 70380,
+      "dim_tiempo": 1379775,
+      "dim_zona": 13,
+      "dim_punto_transporte": 468,
+      "dim_modo": 4,
+      "dim_servicio": 52,
+      "fact_abordajes": 1393448,
+      "fact_viajes_metroriel": 295511
+    },
+    "gold_abordajes_por_modo": {
+      "Aerometro": 203554,
+      "Transmetro": 362106,
+      "Transurbano": 827788
+    },
+    "segundos": 1.82
+  }
+}

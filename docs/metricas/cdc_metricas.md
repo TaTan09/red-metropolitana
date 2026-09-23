@@ -1,6 +1,6 @@
 # Métricas CDC y padrón vigente de Transmetro
 
-- **Fecha:** `2026-09-12T23:56:16-06:00`
+- **Fecha:** `2026-09-22T11:25:53-06:00`
 - **Archivo:** `cdc_padron_usuarios.csv`
 - **SHA-256:** `68e4d9dd258809dd4a45a0c5f9023ad6f3b5d32912e4447b9d20b9a7258de5c4`
 - **Total CDC:** 31,050
@@ -35,4 +35,4 @@ El CDC completo se conserva como `staging.cdc_registro_ambiguo`.
 El padrón solicitado de Transmetro se deriva en `staging.padron_transmetro_actual` usando únicamente llaves `TC-########`.
 Los DELETE no eliminan físicamente tarjetas; las dejan `INACTIVA`.
 
-Las tablas de Staging se reconstruyen desde la fuente en cada corrida, por lo que repetir el proceso produce el mismo estado final.
+Las tablas de Staging se reconstruyen desde el Parquet Bronze en cada corrida, por lo que repetir el proceso produce el mismo estado final.

@@ -1,0 +1,19 @@
+version: 2
+
+sources:
+  - name: staging
+    schema: staging
+    tables:
+      - name: tm_estaciones
+      - name: tu_paradas
+      - name: mr_estaciones
+      - name: am_estaciones
+      - name: transmetro_validaciones
+      - name: transurbano_transacciones
+      - name: metroriel_viajes
+      - name: aerometro_boardings
+      - name: cdc_registro_ambiguo
+      - name: padron_transmetro_actual
+      - name: usuarios_transurbano_min
+      - name: usuarios_metroriel_min
+      - name: usuarios_aerometro_min

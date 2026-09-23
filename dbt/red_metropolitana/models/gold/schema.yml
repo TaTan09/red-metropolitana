@@ -1,0 +1,104 @@
+version: 2
+
+models:
+  - name: dim_usuario
+    columns:
+      - name: usuario_sk
+        data_tests: [not_null, unique]
+  - name: dim_tiempo
+    columns:
+      - name: tiempo_sk
+        data_tests: [not_null, unique]
+  - name: dim_zona
+    columns:
+      - name: zona_sk
+        data_tests: [not_null, unique]
+  - name: dim_punto_transporte
+    columns:
+      - name: punto_sk
+        data_tests: [not_null, unique]
+      - name: zona_sk
+        data_tests:
+          - relationships:
+              arguments: {to: "{{ ref('dim_zona') }}", field: zona_sk}
+  - name: dim_modo
+    columns:
+      - name: modo_sk
+        data_tests: [not_null, unique]
+  - name: dim_servicio
+    columns:
+      - name: servicio_sk
+        data_tests: [not_null, unique]
+      - name: modo_sk
+        data_tests:
+          - relationships:
+              arguments: {to: "{{ ref('dim_modo') }}", field: modo_sk}
+  - name: fact_abordajes
+    columns:
+      - name: abordaje_sk
+        data_tests: [not_null, unique]
+      - name: usuario_sk
+        data_tests:
+          - not_null
+          - relationships:
+              arguments: {to: "{{ ref('dim_usuario') }}", field: usuario_sk}
+      - name: tiempo_sk
+        data_tests:
+          - relationships:
+              arguments: {to: "{{ ref('dim_tiempo') }}", field: tiempo_sk}
+      - name: zona_sk
+        data_tests:
+          - relationships:
+              arguments: {to: "{{ ref('dim_zona') }}", field: zona_sk}
+      - name: punto_sk
+        data_tests:
+          - relationships:
+              arguments: {to: "{{ ref('dim_punto_transporte') }}", field: punto_sk}
+      - name: modo_sk
+        data_tests:
+          - relationships:
+              arguments: {to: "{{ ref('dim_modo') }}", field: modo_sk}
+      - name: servicio_sk
+        data_tests:
+          - relationships:
+              arguments: {to: "{{ ref('dim_servicio') }}", field: servicio_sk}
+  - name: fact_viajes_metroriel
+    columns:
+      - name: viaje_sk
+        data_tests: [not_null, unique]
+      - name: usuario_sk
+        data_tests:
+          - relationships:
+              arguments: {to: "{{ ref('dim_usuario') }}", field: usuario_sk}
+      - name: tiempo_ingreso_sk
+        data_tests:
+          - relationships:
+              arguments: {to: "{{ ref('dim_tiempo') }}", field: tiempo_sk}
+      - name: tiempo_salida_sk
+        data_tests:
+          - relationships:
+              arguments: {to: "{{ ref('dim_tiempo') }}", field: tiempo_sk}
+      - name: zona_origen_sk
+        data_tests:
+          - relationships:
+              arguments: {to: "{{ ref('dim_zona') }}", field: zona_sk}
+      - name: zona_destino_sk
+        data_tests:
+          - relationships:
+              arguments: {to: "{{ ref('dim_zona') }}", field: zona_sk}
+      - name: punto_origen_sk
+        data_tests:
+          - relationships:
+              arguments: {to: "{{ ref('dim_punto_transporte') }}", field: punto_sk}
+      - name: punto_destino_sk
+        data_tests:
+          - relationships:
+              arguments: {to: "{{ ref('dim_punto_transporte') }}", field: punto_sk}
+      - name: modo_sk
+        data_tests:
+          - relationships:
+              arguments: {to: "{{ ref('dim_modo') }}", field: modo_sk}
+      - name: servicio_sk
+        data_tests:
+          - relationships:
+              arguments: {to: "{{ ref('dim_servicio') }}", field: servicio_sk}

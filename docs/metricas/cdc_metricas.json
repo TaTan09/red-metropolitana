@@ -1,8 +1,8 @@
 {
-  "fecha": "2026-09-12T23:56:16-06:00",
+  "fecha": "2026-09-22T11:25:53-06:00",
   "source_file": "cdc_padron_usuarios.csv",
   "source_sha256": "68e4d9dd258809dd4a45a0c5f9023ad6f3b5d32912e4447b9d20b9a7258de5c4",
-  "bronze_path": "data/bronze/cdc_padron_usuarios/fecha_ingesta=2026-09-12/part-68e4d9dd2588.parquet",
+  "bronze_path": "data/bronze/cdc_padron_usuarios/fecha_ingesta=2026-09-22/part-68e4d9dd2588.parquet",
   "bronze_created_this_run": false,
   "total_cdc": 31050,
   "operaciones": {
