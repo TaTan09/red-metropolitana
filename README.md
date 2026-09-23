@@ -129,7 +129,9 @@ data/bronze/
 - **Identidades Únicas en Bridge:** 117,203 llaves resueltas en `silver.bridge_identidad_usuario`.
 - **Padrón Transmetro:** 17,432 tarjetas totales; 15,096 activas y 2,336 inactivas. `silver.silver_padron_transmetro_scd2` conserva una versión por evento CDC.
 
-## Reconstrucción de Fase 1
+## Reconstrucción manual hasta Silver (opcional)
+
+Esta ruta sirve para depurar manualmente las capas previas. Para reproducir y demostrar **toda la Fase 1**, use preferentemente el flujo Prefect de la sección **Ejecución completa de Fase 1**.
 
 Desde la raíz del repositorio, con el entorno virtual activo y `.env` configurado:
 
