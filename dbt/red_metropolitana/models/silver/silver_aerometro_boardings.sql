@@ -10,6 +10,7 @@ with am_base as (
         (b.timestamp_utc::timestamp at time zone 'UTC' at time zone 'America/Guatemala')::timestamp as fecha_hora,
         b.cabin_number,
         coalesce(b.fare::numeric, 3.00) as tarifa_quetzales,
+        b.bronze_record_id,
         b.ingesta_timestamp,
         e.district as zona_cruda
     from {{ source('staging', 'aerometro_boardings') }} b
@@ -25,5 +26,6 @@ select
     cabin_number,
     {{ normalizar_zona('zona_cruda') }} as zona_conformada,
     tarifa_quetzales,
+    bronze_record_id,
     ingesta_timestamp
 from am_base

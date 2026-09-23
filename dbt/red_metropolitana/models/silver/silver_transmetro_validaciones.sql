@@ -7,6 +7,7 @@ with ranked as (
         fecha_hora::timestamp as fecha_hora,
         linea::text as linea,
         coalesce(tarifa::numeric, 1.00) as tarifa_quetzales,
+        bronze_record_id,
         ingesta_timestamp,
         row_number() over(
             partition by tarjeta, estacion_id, fecha_hora 
@@ -21,6 +22,7 @@ select
     fecha_hora,
     linea,
     tarifa_quetzales,
+    bronze_record_id,
     ingesta_timestamp
 from ranked
 where rn = 1

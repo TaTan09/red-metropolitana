@@ -10,6 +10,7 @@ select
     exit_ts::timestamp as fecha_hora_salida,
     fare_gtq::numeric as tarifa_quetzales,
     round(duration_s::numeric / 60.0, 2) as duracion_minutos,
+    bronze_record_id,
     ingesta_timestamp
 from {{ source('staging', 'metroriel_viajes') }}
 where exit_station is not null

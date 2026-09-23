@@ -13,6 +13,7 @@ with parsed_dates as (
         t.cod_parada::text as cod_parada,
         t.ruta::text as ruta,
         (t.monto_centavos::numeric / 100.0) as tarifa_quetzales,
+        t.bronze_record_id,
         t.ingesta_timestamp,
         p.sector as zona_cruda
     from {{ source('staging', 'transurbano_transacciones') }} t
@@ -27,6 +28,7 @@ transurbano_base as (
         cod_parada,
         ruta,
         tarifa_quetzales,
+        bronze_record_id,
         ingesta_timestamp,
         zona_cruda
     from parsed_dates
@@ -41,6 +43,7 @@ select
     ruta,
     {{ normalizar_zona('zona_cruda') }} as zona_conformada,
     tarifa_quetzales,
+    bronze_record_id,
     ingesta_timestamp
 from transurbano_base
 where cod_parada is not null 
