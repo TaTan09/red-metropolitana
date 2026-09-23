@@ -227,30 +227,18 @@ def load_staging(cdc: pd.DataFrame, current_tm: pd.DataFrame) -> None:
     cdc_stg["seq"] = pd.to_numeric(cdc_stg["seq"], errors="raise")
     cdc_stg["tipo_llave"] = cdc_stg["tarjeta"].astype(str).map(classify_key)
 
-    # idempotencia en Staging: se reconstruyen ambas tablas desde la fuente.
+    # Ambas tablas se reconstruyen desde Bronze en una única transacción.
     with engine.begin() as conn:
-        conn.execute(text("DROP TABLE IF EXISTS staging.cdc_registro_ambiguo"))
-        conn.execute(text("DROP TABLE IF EXISTS staging.padron_transmetro_actual"))
-
-    cdc_stg.to_sql(
-        "cdc_registro_ambiguo",
-        engine,
-        schema="staging",
-        if_exists="replace",
-        index=False,
-        chunksize=5000,
-        method="multi",
-    )
-
-    current_tm.to_sql(
-        "padron_transmetro_actual",
-        engine,
-        schema="staging",
-        if_exists="replace",
-        index=False,
-        chunksize=5000,
-        method="multi",
-    )
+        conn.execute(text("CREATE SCHEMA IF NOT EXISTS staging"))
+        for name, frame in (
+            ("cdc_registro_ambiguo", cdc_stg),
+            ("padron_transmetro_actual", current_tm),
+        ):
+            conn.execute(text(f'DROP TABLE IF EXISTS staging."{name}"'))
+            frame.to_sql(
+                name, conn, schema="staging", if_exists="append",
+                index=False, chunksize=5000,
+            )
 
     engine.dispose()
 
@@ -348,7 +336,7 @@ def write_report(
         "`staging.padron_transmetro_actual` usando únicamente llaves `TC-########`.",
         "Los DELETE no eliminan físicamente tarjetas; las dejan `INACTIVA`.",
         "",
-        "Las tablas de Staging se reconstruyen desde la fuente en cada corrida, "
+        "Las tablas de Staging se reconstruyen desde el Parquet Bronze en cada corrida, "
         "por lo que repetir el proceso produce el mismo estado final.",
         "",
     ]
@@ -386,8 +374,10 @@ def main() -> int:
         f"({'CREATED' if bronze_created else 'SKIPPED'})"
     )
 
-    current_tm = build_current_tm(cdc)
-    load_staging(cdc, current_tm)
+    # PostgreSQL se reconstruye desde el Parquet Bronze, nunca desde Raw.
+    bronze_cdc = pq.read_table(bronze_path).to_pandas()
+    current_tm = build_current_tm(bronze_cdc)
+    load_staging(bronze_cdc, current_tm)
 
     active = int((current_tm["estado"] == "ACTIVA").sum())
     inactive = int((current_tm["estado"] == "INACTIVA").sum())

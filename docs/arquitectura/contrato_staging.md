@@ -12,6 +12,7 @@ Este documento fija la interfaz compartida entre la ingesta (Bronze/Staging), lo
 - Duplicados de torniquete, paradas nulas, fechas futuras y viajes sin salida permanecen en Staging; se resuelven en Silver y/o cuarentena.
 - Staging conserva unidades y formatos de origen cuando sea posible.
 - Se permite aplanar estructuras técnicas (por ejemplo, JSON de MetroRiel) sin cambiar el significado de los datos.
+- Las tablas operacionales agregan `bronze_record_id` e `ingesta_timestamp` como metadatos técnicos; no alteran los campos de negocio. El primero permite identificar un registro físico de Bronze en cuarentena.
 - Gold nunca debe leer Staging ni Bronze directamente; Gold consumirá Silver.
 - Si una tabla o columna de este contrato cambia, el cambio debe coordinarse con todo el equipo.
 
@@ -190,7 +191,7 @@ Fuente: `staging.metroriel_viajes`.
 
 Fuente: `staging.aerometro_boardings`.
 
-Los conteos de usuarios únicos se documentarán cuando estas tres tablas sean construidas.
+Conteos con los Parquet actuales: Transurbano **36,567**, MetroRiel **22,885** y Aerómetro **14,496**. Los catálogos preservan cada llave distinta recibida; no aplican reglas de calidad.
 
 ---
 
