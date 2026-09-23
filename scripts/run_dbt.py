@@ -14,6 +14,11 @@ PROJECT = ROOT / "dbt" / "red_metropolitana"
 
 def main() -> int:
     load_dotenv(ROOT / ".env")
+    key = os.getenv("GOLD_PSEUDONYM_KEY", "")
+    if len(key.encode("utf-8")) < 32 or key.startswith("REEMPLAZAR_"):
+        raise RuntimeError(
+            "Configure GOLD_PSEUDONYM_KEY en .env con una clave aleatoria de al menos 32 bytes"
+        )
     dbt = Path(sys.executable).with_name("dbt.exe" if os.name == "nt" else "dbt")
     if not dbt.exists():
         raise RuntimeError("Instale requirements.txt en el entorno virtual antes de ejecutar dbt")
