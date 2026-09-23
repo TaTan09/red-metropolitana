@@ -1,62 +1,62 @@
 {
-  "fecha": "2026-09-12T22:16:19-06:00",
+  "fecha": "2026-09-22T11:06:34-06:00",
   "resultados": [
     {
       "archivo": "tm_estaciones.csv",
       "fuente": "tm_estaciones",
-      "estado": "SKIPPED",
-      "detalle": "Mismo SHA-256 ya presente en Bronze",
+      "estado": "INGESTED",
+      "detalle": "Carga Batch completada",
       "sha256": "4d53a95abb4f115b7da7f69db2c392e1748d6704807d81408a5e510f791624d0",
       "registros": 104,
-      "output_path": "data/bronze/tm_estaciones/fecha_ingesta=2026-09-12/part-4d53a95abb4f.parquet"
+      "output_path": "data/bronze/tm_estaciones/fecha_ingesta=2026-09-22/part-4d53a95abb4f.parquet"
     },
     {
       "archivo": "tu_paradas.csv",
       "fuente": "tu_paradas",
-      "estado": "SKIPPED",
-      "detalle": "Mismo SHA-256 ya presente en Bronze",
+      "estado": "INGESTED",
+      "detalle": "Carga Batch completada",
       "sha256": "a888a09c45189cfeac0a0577377d1b4c662923ee55f798d961f418aa2ac93b90",
       "registros": 328,
-      "output_path": "data/bronze/tu_paradas/fecha_ingesta=2026-09-12/part-a888a09c4518.parquet"
+      "output_path": "data/bronze/tu_paradas/fecha_ingesta=2026-09-22/part-a888a09c4518.parquet"
     },
     {
       "archivo": "mr_estaciones.csv",
       "fuente": "mr_estaciones",
-      "estado": "SKIPPED",
-      "detalle": "Mismo SHA-256 ya presente en Bronze",
+      "estado": "INGESTED",
+      "detalle": "Carga Batch completada",
       "sha256": "c302ffbc6f0bdcf926c8eaaf9a5427ec5d38d482cc44431e3aeb20a8febb8e8c",
       "registros": 22,
-      "output_path": "data/bronze/mr_estaciones/fecha_ingesta=2026-09-12/part-c302ffbc6f0b.parquet"
+      "output_path": "data/bronze/mr_estaciones/fecha_ingesta=2026-09-22/part-c302ffbc6f0b.parquet"
     },
     {
       "archivo": "am_estaciones.csv",
       "fuente": "am_estaciones",
-      "estado": "SKIPPED",
-      "detalle": "Mismo SHA-256 ya presente en Bronze",
+      "estado": "INGESTED",
+      "detalle": "Carga Batch completada",
       "sha256": "e3acbeed8608fb9a6b9a8df87646bf5294e644aa64bd95484f1424b92ae21723",
       "registros": 14,
-      "output_path": "data/bronze/am_estaciones/fecha_ingesta=2026-09-12/part-e3acbeed8608.parquet"
+      "output_path": "data/bronze/am_estaciones/fecha_ingesta=2026-09-22/part-e3acbeed8608.parquet"
     },
     {
       "archivo": "transurbano_transacciones.csv",
       "fuente": "transurbano_transacciones",
-      "estado": "SKIPPED",
-      "detalle": "Mismo SHA-256 ya presente en Bronze",
+      "estado": "INGESTED",
+      "detalle": "Carga Batch completada",
       "sha256": "8ce5028499b7b6c7274fd838430e87d373065d377e5ec1f062a4fa6497083fad",
       "registros": 832791,
-      "output_path": "data/bronze/transurbano_transacciones/fecha_ingesta=2026-09-12/part-8ce5028499b7.parquet"
+      "output_path": "data/bronze/transurbano_transacciones/fecha_ingesta=2026-09-22/part-8ce5028499b7.parquet"
     },
     {
       "archivo": "metroriel_viajes.jsonl",
       "fuente": "metroriel_viajes",
-      "estado": "SKIPPED",
-      "detalle": "Mismo SHA-256 ya presente en Bronze",
+      "estado": "INGESTED",
+      "detalle": "Carga Batch completada",
       "sha256": "23feb4a3a55ce506bf34de5faf7834f9c390b7ca70499cc9fb3ec1c3650ebede",
       "registros": 299100,
-      "output_path": "data/bronze/metroriel_viajes/fecha_ingesta=2026-09-12/part-23feb4a3a55c.parquet"
+      "output_path": "data/bronze/metroriel_viajes/fecha_ingesta=2026-09-22/part-23feb4a3a55c.parquet"
     }
   ],
-  "total_ingested": 0,
-  "total_skipped": 1132359,
+  "total_ingested": 1132359,
+  "total_skipped": 0,
   "errores": 0
 }

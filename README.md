@@ -117,3 +117,14 @@ data/bronze/
 - El pipeline debe ser idempotente.
 - No subir credenciales reales.
 - Seudonimizar la identidad antes de Gold.
+
+## Métricas de la Capa Silver (Fase 1)
+
+- **Volumen Procesado en Silver:**
+  - `silver_transmetro_validaciones`: 362,106 registros
+  - `silver_transurbano_transacciones`: 827,788 registros
+  - `silver_metroriel_viajes`: 295,511 registros
+  - `silver_aerometro_boardings`: 203,554 registros
+- **Cuarentena:** 9,710 registros anómalos segregados en `silver.silver_cuarentena`.
+- **Identidades Únicas en Bridge:** 117,203 llaves resueltas en `silver.bridge_identidad_usuario`.
+- **Snapshot SCD Tipo 2:** 17,432 tarjetas activas en `silver.snap_padron_transmetro`.

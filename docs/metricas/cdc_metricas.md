@@ -1,6 +1,6 @@
 # Métricas CDC y padrón vigente de Transmetro
 
-- **Fecha:** `2026-09-12T23:56:16-06:00`
+- **Fecha:** `2026-09-22T11:25:53-06:00`
 - **Archivo:** `cdc_padron_usuarios.csv`
 - **SHA-256:** `68e4d9dd258809dd4a45a0c5f9023ad6f3b5d32912e4447b9d20b9a7258de5c4`
 - **Total CDC:** 31,050
