@@ -69,7 +69,7 @@ No debe cambiar la interfaz Staging sin coordinarlo.
 
 ### Jonatán — Diseño dimensional, Gold y Tableau
 
-Puede comenzar con el diseño mientras Silver se desarrolla.
+La rama `feature/gold-dimensional` implementa las seis dimensiones y los dos hechos acordados. El diseño, DDL y métricas están en `docs/arquitectura/modelo_dimensional_gold.md`, `sql/ddl/gold_model.sql` y `docs/metricas/gold_metricas.md`. Tableau sigue pendiente.
 
 Responsabilidades:
 - declarar granos;

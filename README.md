@@ -145,4 +145,18 @@ python scripts/run_dbt.py build --select path:models/silver path:models/staging
 
 La carga de Staging lee únicamente Parquet de `data/bronze`, reconstruye las 13 tablas del contrato en una transacción y verifica los conteos. Para reproducir los conteos publicados se necesitan los Parquet completos de las nueve fuentes, incluidos los dos consumidores Kafka. El script de CDC también carga sus dos tablas Staging desde su Parquet Bronze. Repetir la carga con los mismos Parquet produce los mismos registros y conteos.
 
-Silver lee exclusivamente `source('staging')`. `scripts/run_dbt.py` carga las variables de `.env` para el perfil dbt sin guardar credenciales en Git. Las pruebas dbt comprueban que el último estado SCD2 coincide con el padrón actual y que las vigencias por secuencia no se solapan. Gold y Prefect quedan para su fase correspondiente.
+Silver lee exclusivamente `source('staging')`. `scripts/run_dbt.py` carga las variables de `.env` para el perfil dbt sin guardar credenciales en Git. Las pruebas dbt comprueban que el último estado SCD2 coincide con el padrón actual y que las vigencias por secuencia no se solapan.
+
+## Capa Gold dimensional
+
+La rama `feature/gold-dimensional` añade seis dimensiones, `fact_abordajes` para Transmetro/Transurbano/Aerómetro y `fact_viajes_metroriel` para viajes completos. Gold consume únicamente modelos Silver. El [diseño, matriz del bus y reglas](docs/arquitectura/modelo_dimensional_gold.md) y las [métricas medidas](docs/metricas/gold_metricas.md) documentan el resultado.
+
+Configura en `.env` una `GOLD_PSEUDONYM_KEY` aleatoria de al menos 32 bytes y consérvala estable. Se usa para seudonimizar las claves de usuario mediante HMAC-SHA256; **no la subas a Git**. Puedes generar un valor hexadecimal con `python -c "import secrets; print(secrets.token_hex(32))"` y pegarlo en `.env`.
+
+Con PostgreSQL y Staging cargados:
+
+```powershell
+python scripts/run_dbt.py build
+```
+
+El build crea Silver y Gold y ejecuta pruebas de claves, relaciones y conteos. El [DDL](sql/ddl/gold_model.sql) es el entregable estructural de referencia; dbt materializa las tablas. Prefect permanece pendiente.

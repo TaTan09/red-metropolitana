@@ -228,7 +228,7 @@ Diseño previsto:
 - `fact_abordajes`
 - `fact_viajes_metroriel`
 
-El diseño definitivo se validará contra los modelos Silver antes de materializar Gold.
+El diseño dimensional se validó contra los modelos Silver y se documenta en `docs/arquitectura/modelo_dimensional_gold.md`. Gold consume exclusivamente modelos Silver mediante `ref()`.
 
 ---
 
