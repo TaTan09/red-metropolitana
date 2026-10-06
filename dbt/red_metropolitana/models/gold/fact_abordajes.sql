@@ -32,7 +32,8 @@ select
     md5(e.modo || ':' || coalesce(nullif(e.servicio_codigo, ''), 'SIN_SERVICIO')) as servicio_sk,
     e.modo as fuente_evento,
     1::integer as cantidad_abordajes,
-    e.tarifa_quetzales
+    e.tarifa_quetzales,
+    e.evento_id as bronze_record_id
 from eventos e
 join {{ ref('bridge_identidad_usuario') }} b
     on b.sistema_origen = e.modo and b.llave_origen = e.llave_origen

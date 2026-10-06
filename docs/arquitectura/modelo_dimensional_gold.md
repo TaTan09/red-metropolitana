@@ -50,6 +50,49 @@ El usuario de PostgreSQL debe poder crear `pgcrypto` o tener la extensión insta
 
 El puente Silver relaciona TM/TU/MR por patrón numérico **solo como inferencia académica**; no demuestra identidad real. Aerómetro queda aislado porque no existe correspondencia fiable. `dim_usuario.modos_observados` y las claves compartidas en hechos permiten calcular multimodalidad observable bajo esta limitación.
 
+## Trazabilidad fila a fila hasta Bronze
+
+Ambos hechos incluyen `bronze_record_id`, un **identificador técnico de linaje**. No es un identificador personal: no contiene ni permite recuperar la tarjeta o el hash del usuario. Es la huella del registro físico de Bronze que originó la fila de Gold, y se transporta sin cambios por Staging y Silver hasta el hecho. Por eso no está prohibido en `gold_sin_identificadores_crudos`, que solo vigila identificadores de usuario.
+
+Su formato depende de la vía de ingesta:
+
+| Fuentes | Vía | `bronze_record_id` | Cómo llegar a la fila cruda |
+|---|---|---|---|
+| Transmetro, Aerómetro | Streaming | `_event_id` (SHA-256 del archivo + número de fila) | Columna `_event_id` del Parquet Bronze; `_record_number` indica la fila del archivo Raw |
+| Transurbano, MetroRiel | Batch | `<sha256 del archivo>:<número de fila>` | Columnas `_source_sha256` y `_record_number` del Parquet Bronze |
+
+Las llaves de los hechos siguen derivándose de este valor (`abordaje_sk = md5(modo || ':' || bronze_record_id)`), así que la columna también permite recalcular la llave.
+
+### Ejemplo de recorrido: de una métrica del tablero al dato crudo
+
+1. Tomar un abordaje de Transurbano en Gold y buscarlo en Staging (los datos personales no se seleccionan a propósito):
+
+```sql
+select f.abordaje_sk, f.bronze_record_id,
+       s.fecha, s.hora, s.cod_parada, s.ruta, s.monto_centavos
+from gold.fact_abordajes f
+join staging.transurbano_transacciones s
+  on s.bronze_record_id = f.bronze_record_id
+where f.fuente_evento = 'Transurbano'
+limit 1;
+```
+
+2. Con ese mismo `bronze_record_id` (por ejemplo `<sha256>:48213`), localizar la fila en el Parquet de Bronze:
+
+```python
+import glob
+import pyarrow.parquet as pq
+
+sha, fila = bronze_record_id.split(":")
+parquet = glob.glob("data/bronze/transurbano_transacciones/fecha_ingesta=*/part-*.parquet")
+filas = pq.read_table(parquet[0], filters=[("_record_number", "=", int(fila))]).to_pandas()
+print(filas[["_record_number", "_source_file", "_source_sha256", "fecha", "hora", "cod_parada"]])
+```
+
+3. `_source_file` y `_record_number` identifican el archivo Raw y la fila (sin contar el encabezado), y `_source_sha256` permite verificar que ese archivo es el mismo que se ingirió. Para Transmetro y Aerómetro el filtro del paso 2 se hace por `_event_id = bronze_record_id`.
+
+Este recorrido solo lo debe poder ejecutar quien tenga acceso a Staging y Bronze (por ejemplo un auditor de datos). El tablero y los analistas solo ven Gold y no pueden ir hacia atrás con tarjetas.
+
 ## Medidas
 
 | Medida | Clase | Interpretación |

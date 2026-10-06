@@ -66,7 +66,8 @@ CREATE TABLE gold.fact_abordajes (
     servicio_sk text NOT NULL REFERENCES gold.dim_servicio(servicio_sk),
     fuente_evento text NOT NULL,
     cantidad_abordajes integer NOT NULL CHECK (cantidad_abordajes = 1),
-    tarifa_quetzales numeric NOT NULL
+    tarifa_quetzales numeric NOT NULL,
+    bronze_record_id text NOT NULL UNIQUE
 );
 
 CREATE TABLE gold.fact_viajes_metroriel (
@@ -83,7 +84,8 @@ CREATE TABLE gold.fact_viajes_metroriel (
     fuente_evento text NOT NULL,
     cantidad_viajes integer NOT NULL CHECK (cantidad_viajes = 1),
     tarifa_quetzales numeric NOT NULL,
-    duracion_minutos numeric
+    duracion_minutos numeric,
+    bronze_record_id text NOT NULL UNIQUE
 );
 
 CREATE INDEX fact_abordajes_tiempo_idx ON gold.fact_abordajes(tiempo_sk);

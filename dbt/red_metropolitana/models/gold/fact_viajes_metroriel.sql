@@ -15,7 +15,8 @@ select
     'MetroRiel'::text as fuente_evento,
     1::integer as cantidad_viajes,
     v.tarifa_quetzales,
-    v.duracion_minutos
+    v.duracion_minutos,
+    v.bronze_record_id
 from {{ ref('silver_metroriel_viajes') }} v
 join {{ ref('bridge_identidad_usuario') }} b
     on b.sistema_origen = 'MetroRiel' and b.llave_origen = v.tarjeta_mr
