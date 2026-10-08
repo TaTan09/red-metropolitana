@@ -106,3 +106,15 @@ models:
               arguments: {to: "{{ ref('dim_servicio') }}", field: servicio_sk}
       - name: bronze_record_id
         data_tests: [not_null, unique]
+  - name: mart_demanda_hora
+    columns:
+      - name: fecha
+        data_tests: [not_null]
+      - name: hora
+        data_tests: [not_null]
+      - name: modo
+        data_tests: [not_null]
+      - name: zona
+        data_tests: [not_null]
+      - name: cantidad_eventos
+        data_tests: [not_null]
