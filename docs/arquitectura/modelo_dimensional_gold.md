@@ -65,33 +65,34 @@ Las llaves de los hechos siguen derivándose de este valor (`abordaje_sk = md5(m
 
 ### Ejemplo de recorrido: de una métrica del tablero al dato crudo
 
-1. Tomar un abordaje de Transurbano en Gold y buscarlo en Staging (los datos personales no se seleccionan a propósito):
+Los comandos se ejecutan desde la raíz del repositorio, en PowerShell, con el entorno virtual activo y PostgreSQL levantado.
 
-```sql
-select f.abordaje_sk, f.bronze_record_id,
-       s.fecha, s.hora, s.cod_parada, s.ruta, s.monto_centavos
-from gold.fact_abordajes f
-join staging.transurbano_transacciones s
-  on s.bronze_record_id = f.bronze_record_id
-where f.fuente_evento = 'Transurbano'
-limit 1;
+**1. Elegir una fila de cada fuente en Gold.**
+
+```powershell
+Get-Content sql/utilities/linaje_ids.sql | docker exec -i red_metropolitana_postgres psql -U red_user -d red_metropolitana
 ```
 
-2. Con ese mismo `bronze_record_id` (por ejemplo `<sha256>:48213`), localizar la fila en el Parquet de Bronze:
+**2. Buscarla en Staging** (ejemplo Transurbano; no se selecciona la tarjeta a propósito).
 
-```python
-import glob
-import pyarrow.parquet as pq
-
-sha, fila = bronze_record_id.split(":")
-parquet = glob.glob("data/bronze/transurbano_transacciones/fecha_ingesta=*/part-*.parquet")
-filas = pq.read_table(parquet[0], filters=[("_record_number", "=", int(fila))]).to_pandas()
-print(filas[["_record_number", "_source_file", "_source_sha256", "fecha", "hora", "cod_parada"]])
+```powershell
+Get-Content sql/utilities/linaje_gold_staging.sql | docker exec -i red_metropolitana_postgres psql -U red_user -d red_metropolitana
 ```
 
-3. `_source_file` y `_record_number` identifican el archivo Raw y la fila (sin contar el encabezado), y `_source_sha256` permite verificar que ese archivo es el mismo que se ingirió. Para Transmetro y Aerómetro el filtro del paso 2 se hace por `_event_id = bronze_record_id`.
+El mismo `join` por `bronze_record_id` aplica a `staging.transmetro_validaciones`, `staging.aerometro_boardings` y `staging.metroriel_viajes`.
 
-Este recorrido solo lo debe poder ejecutar quien tenga acceso a Staging y Bronze (por ejemplo un auditor de datos). El tablero y los analistas solo ven Gold y no pueden ir hacia atrás con tarjetas.
+**3. Llegar al Parquet de Bronze** con el id del paso 1.
+
+```powershell
+python scripts/trazar_linaje.py Transurbano <bronze_record_id>
+python scripts/trazar_linaje.py Transmetro <bronze_record_id>
+```
+
+- Batch (Transurbano, MetroRiel): el script filtra por `_source_sha256` y `_record_number`.
+- Streaming (Transmetro, Aerómetro): filtra por `_event_id`, y el dato de negocio está dentro de `raw_json`.
+- `_source_file` y `_record_number` identifican el archivo Raw y la fila (sin contar el encabezado).
+
+Este recorrido solo lo debe ejecutar quien tenga acceso a Staging y Bronze (por ejemplo un auditor de datos): la fila de Bronze contiene la tarjeta. El tablero y los analistas solo ven Gold.
 
 ## Medidas
 
