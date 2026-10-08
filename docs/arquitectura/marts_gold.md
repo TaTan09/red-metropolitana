@@ -1,6 +1,6 @@
 ## mart_demanda_hora
 
-**Pregunta que responde:** demanda por modo, zona y hora (enunciado 1.5, tablero).
+**Pregunta que responde:** demanda por modo, zona y hora (enunciado 2.1, tablero).
 
 **Grano:** una fila por fecha × hora × modo × zona.
 
