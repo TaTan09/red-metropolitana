@@ -123,3 +123,7 @@ En este entorno conviene usar un hilo para repetir solo las pruebas.
 
 Los archivos `003-corrida-1.json` y `003-corrida-2.json` contienen los SHA-256
 Raw y las filas de cada archivo Parquet, además de estos conteos y duraciones.
+
+## Nota posterior (Fase 2)
+
+La fila `dim_zona` de las tablas de Gold (13) refleja el modelo vigente el 22-sep-2026. Desde entonces `dim_zona` se construye desde `silver_universo_zonas` y tiene 16 filas; ver `004-correccion-zonas.md`. Los conteos de `fact_abordajes` (1,393,448) y `fact_viajes_metroriel` (295,511) no cambiaron: suman 1,688,959, que es lo que reconcilia `mart_demanda_hora`. Los `003-corrida-*.json` se conservan sin modificar como evidencia de esa fecha.

@@ -24,14 +24,14 @@ Ambos hechos conservan `fuente_evento`. Los hechos no contienen identificadores 
 |---|---|
 | `dim_usuario` | Una fila por identidad canónica Silver seudonimizada; incluye cantidad de modos observados y método de vinculación, sin llaves operacionales. |
 | `dim_tiempo` | Un instante local observado con precisión de segundo, compartido por ambos hechos; clave `YYYYMMDDHHMMSS`, fecha, año, mes, día, día ISO (lunes=1), hora, minuto y segundo. |
-| `dim_zona` | Zonas conformadas de los catálogos Silver, incluida `Desconocida` cuando falta zona. |
+| `dim_zona` | Universo de 16 áreas (12 zonas y 4 municipios) definido por el generador (`silver_universo_zonas`). Incluye `tiene_servicio`, `modos_con_servicio` y `puntos_transporte`, calculados desde los catálogos. |
 | `dim_punto_transporte` | Un punto por `(modo, código natural)`; nombre, zona, servicio del catálogo y latitud/longitud cuando existen. |
 | `dim_modo` | Transmetro, Transurbano, MetroRiel y Aerómetro. |
 | `dim_servicio` | Línea TM, ruta TU, eje AM y `SERVICIO_GENERAL` para MR. El origen no entrega un número de línea MetroRiel; no se inventa. |
 
 La zona de Transmetro se obtiene de `tm_estaciones`; las dos zonas de MetroRiel se obtienen de `mr_estaciones`. La conformación ocurre en Silver. Se comprobó que los eventos válidos actuales tienen correspondencia en los cuatro catálogos y en el puente de identidad. Si un lote futuro no la tuviera, la prueba de conteos Gold fallaría en lugar de aceptar silenciosamente una pérdida de hechos.
 
-La dimensión de zona contiene las zonas observadas en catálogos. No se puede declarar que otra zona esté "sin servicio" sin un universo geográfico externo de zonas; las fuentes entregadas no lo incluyen.
+La dimensión de zona incluye áreas sin servicio (hoy Santa Catarina Pinula). El universo de 16 áreas proviene del generador entregado por el docente, no de un catálogo geográfico oficial externo, y esa es una limitación declarada. `tiene_servicio` sale de los catálogos de los operadores, no de la actividad observada.
 
 **Día hábil:** lunes a viernes, sin calendario de feriados porque las fuentes no lo incluyen. **Hora pico:** en día hábil, desde las 06:00 hasta antes de las 09:00, o desde las 17:00 hasta antes de las 20:00, hora local de Guatemala. Es una regla analítica explícita, no una clasificación oficial del operador.
 
@@ -129,3 +129,5 @@ flowchart LR
 
 `models/gold/schema.yml` comprueba claves primarias lógicas y relaciones. `gold_conteos_hechos` exige que los hechos tengan exactamente el volumen de Silver; `gold_sin_identificadores_crudos` vigila columnas de identidad prohibidas. El [DDL de referencia](../../sql/ddl/gold_model.sql) describe tipos, claves e índices para el entregable. dbt materializa tablas sin imponer físicamente esas restricciones; las pruebas dbt hacen la validación de los datos.
 Se validó la sintaxis del DDL creando todas las tablas e índices en un esquema temporal dentro de una transacción PostgreSQL que terminó en `ROLLBACK`.
+
+Las tablas derivadas para el tablero (`mart_demanda_hora`, `mart_cobertura`) están en [marts_gold.md](marts_gold.md).

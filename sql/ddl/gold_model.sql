@@ -26,7 +26,11 @@ CREATE TABLE gold.dim_tiempo (
 
 CREATE TABLE gold.dim_zona (
     zona_sk text PRIMARY KEY,
-    nombre_zona text NOT NULL
+    nombre_zona text NOT NULL,
+    tipo_area text NOT NULL,
+    modos_con_servicio integer NOT NULL,
+    puntos_transporte integer NOT NULL,
+    tiene_servicio boolean NOT NULL
 );
 
 CREATE TABLE gold.dim_modo (
