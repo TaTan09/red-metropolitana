@@ -118,3 +118,11 @@ models:
         data_tests: [not_null]
       - name: cantidad_eventos
         data_tests: [not_null]
+  - name: mart_cobertura
+    columns:
+      - name: zona_sk
+        data_tests: [not_null, unique]
+      - name: nombre_zona
+        data_tests: [not_null, unique]
+      - name: eventos_totales
+        data_tests: [not_null]

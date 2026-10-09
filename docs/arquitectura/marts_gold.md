@@ -28,3 +28,44 @@ duplicaría personas).
 
 **Reconciliación:** `sum(cantidad_eventos)` = filas de `fact_abordajes` +
 filas de `fact_viajes_metroriel` (1,688,959 hoy).
+
+
+## mart_cobertura
+
+**Pregunta que responde:** dónde hay servicio y cuánta demanda se observa en
+cada zona (enunciado 2.1, cobertura).
+
+**Grano:** una fila por zona del universo de `dim_zona` (16 hoy), con o sin servicio.
+
+**Fuentes:** `dim_zona` (oferta: puntos y modos con servicio) y
+`mart_demanda_hora` (uso observado), unidos por nombre de zona.
+
+| Columna | Descripción |
+|---|---|
+| zona_sk, nombre_zona, tipo_area | Desde `dim_zona` |
+| tiene_servicio, modos_con_servicio, puntos_transporte | Oferta según los catálogos de los operadores |
+| eventos_totales | Suma de `cantidad_eventos` de la zona |
+| eventos_transmetro, eventos_transurbano, eventos_metroriel, eventos_aerometro | Desglose por modo; la suma de los cuatro es `eventos_totales` |
+| eventos_por_punto | `eventos_totales` / `puntos_transporte`; NULL si la zona no tiene puntos |
+| pct_demanda_red | Participación de la zona en el total de eventos de la red |
+| ranking_demanda | Posición por `eventos_totales` (empates comparten posición) |
+| inconsistencia_cobertura | true si la zona tiene servicio y cero eventos, o no tiene servicio y tiene eventos |
+
+**Reglas heredadas:** MetroRiel cuenta una vez por viaje, en el ingreso y en
+la zona de origen. La zona destino no se cuenta aquí.
+
+**Advertencias:**
+- `eventos_totales` mezcla abordajes (TM/TU/AM) con viajes (MR). No es una
+  cantidad de personas ni de viajes. `pct_demanda_red` hereda la misma mezcla.
+- `tiene_servicio` sale de los catálogos, no de la actividad. Una zona sin
+  servicio tiene cero eventos por construcción, así que el mart muestra dónde
+  NO hay servicio, pero no mide demanda potencial ni dónde hace falta
+  servicio. Esa pregunta no se puede responder con estas fuentes.
+- El universo de 16 zonas viene del generador entregado (`silver_universo_zonas`),
+  no de un catálogo oficial externo.
+
+**Reconciliación:** `sum(eventos_totales)` = `sum(cantidad_eventos)` de
+`mart_demanda_hora` (1,688,959 hoy), en total y por modo.
+
+**Pruebas:** `mart_cobertura_grano`, `mart_cobertura_reconciliacion`,
+`mart_cobertura_consistencia` y pruebas de unicidad y no nulos en `schema.yml`.
