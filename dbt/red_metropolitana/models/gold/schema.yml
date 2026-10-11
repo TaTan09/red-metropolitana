@@ -13,6 +13,14 @@ models:
     columns:
       - name: zona_sk
         data_tests: [not_null, unique]
+      - name: puntos_transmetro
+        data_tests: [not_null]
+      - name: puntos_transurbano
+        data_tests: [not_null]
+      - name: puntos_metroriel
+        data_tests: [not_null]
+      - name: puntos_aerometro
+        data_tests: [not_null]
   - name: dim_punto_transporte
     columns:
       - name: punto_sk

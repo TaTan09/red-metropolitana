@@ -22,6 +22,10 @@ base as (
         z.tiene_servicio,
         z.modos_con_servicio,
         z.puntos_transporte,
+        z.puntos_transmetro,
+        z.puntos_transurbano,
+        z.puntos_metroriel,
+        z.puntos_aerometro,
         coalesce(u.eventos_totales, 0)     as eventos_totales,
         coalesce(u.eventos_transmetro, 0)  as eventos_transmetro,
         coalesce(u.eventos_transurbano, 0) as eventos_transurbano,
@@ -33,6 +37,10 @@ base as (
 select
     b.*,
     round(b.eventos_totales::numeric / nullif(b.puntos_transporte, 0), 1) as eventos_por_punto,
+    round(b.eventos_transmetro::numeric  / nullif(b.puntos_transmetro, 0), 1)  as eventos_por_punto_transmetro,
+    round(b.eventos_transurbano::numeric / nullif(b.puntos_transurbano, 0), 1) as eventos_por_punto_transurbano,
+    round(b.eventos_metroriel::numeric   / nullif(b.puntos_metroriel, 0), 1)   as viajes_por_estacion_metroriel,
+    round(b.eventos_aerometro::numeric   / nullif(b.puntos_aerometro, 0), 1)   as eventos_por_punto_aerometro,
     round(100.0 * b.eventos_totales / nullif(sum(b.eventos_totales) over (), 0), 2) as pct_demanda_red,
     rank() over (order by b.eventos_totales desc) as ranking_demanda,
     (b.tiene_servicio and b.eventos_totales = 0)

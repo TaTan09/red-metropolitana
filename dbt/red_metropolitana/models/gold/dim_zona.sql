@@ -6,5 +6,9 @@ select
     tipo_area,
     modos_con_servicio,
     puntos_transporte,
+    puntos_transmetro,
+    puntos_transurbano,
+    puntos_metroriel,
+    puntos_aerometro,
     tiene_servicio
 from {{ ref('silver_universo_zonas') }}

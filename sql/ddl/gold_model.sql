@@ -30,6 +30,10 @@ CREATE TABLE gold.dim_zona (
     tipo_area text NOT NULL,
     modos_con_servicio integer NOT NULL,
     puntos_transporte integer NOT NULL,
+    puntos_transmetro integer NOT NULL,
+    puntos_transurbano integer NOT NULL,
+    puntos_metroriel integer NOT NULL,
+    puntos_aerometro integer NOT NULL,
     tiene_servicio boolean NOT NULL
 );
 

@@ -26,7 +26,11 @@ cobertura as (
     select
         zona_conformada as nombre_zona,
         count(distinct modo)::integer as modos_con_servicio,
-        count(*)::integer as puntos_transporte
+        count(*)::integer as puntos_transporte,
+        count(*) filter (where modo = 'Transmetro')::integer  as puntos_transmetro,
+        count(*) filter (where modo = 'Transurbano')::integer as puntos_transurbano,
+        count(*) filter (where modo = 'MetroRiel')::integer   as puntos_metroriel,
+        count(*) filter (where modo = 'Aerometro')::integer   as puntos_aerometro
     from {{ ref('silver_catalogo_puntos') }}
     group by zona_conformada
 )
@@ -35,6 +39,10 @@ select
     u.tipo_area,
     coalesce(c.modos_con_servicio, 0) as modos_con_servicio,
     coalesce(c.puntos_transporte, 0) as puntos_transporte,
+    coalesce(c.puntos_transmetro, 0)  as puntos_transmetro,
+    coalesce(c.puntos_transurbano, 0) as puntos_transurbano,
+    coalesce(c.puntos_metroriel, 0)   as puntos_metroriel,
+    coalesce(c.puntos_aerometro, 0)   as puntos_aerometro,
     (coalesce(c.modos_con_servicio, 0) > 0) as tiene_servicio
 from universo u
 left join cobertura c using (nombre_zona)
