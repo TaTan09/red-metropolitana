@@ -134,3 +134,66 @@ models:
         data_tests: [not_null, unique]
       - name: eventos_totales
         data_tests: [not_null]
+  - name: mart_metroriel_zonas
+    description: >-
+      Una fila por zona con estaciones MetroRiel. La demanda observada corresponde
+      solo a abordajes TM/TU/AM; ranking y participación se calculan sobre todo dim_zona
+      antes de seleccionar el trazado. Los viajes MetroRiel se cuentan por origen.
+    columns:
+      - name: zona_sk
+        data_tests:
+          - not_null
+          - unique
+          - relationships:
+              arguments: {to: "{{ ref('dim_zona') }}", field: zona_sk}
+      - name: nombre_zona
+        data_tests:
+          - not_null
+          - unique
+          - accepted_values:
+              arguments:
+                values: ['Zona 12', 'Zona 8', 'Zona 1', 'Zona 6', 'Zona 17']
+      - name: estaciones_metroriel
+        description: Cantidad de estaciones del catálogo MetroRiel en la zona.
+        data_tests: [not_null]
+      - name: abordajes_otros_modos
+        description: Suma de abordajes Transmetro, Transurbano y Aerómetro; excluye MetroRiel.
+        data_tests: [not_null]
+      - name: abordajes_transmetro
+        data_tests: [not_null]
+      - name: abordajes_transurbano
+        data_tests: [not_null]
+      - name: abordajes_aerometro
+        data_tests: [not_null]
+      - name: viajes_metroriel_iniciados
+        description: Viajes válidos contados una vez en la zona de origen.
+        data_tests: [not_null]
+      - name: pct_abordajes_otros_modos_red
+        description: Porcentaje de abordajes TM/TU/AM de la zona sobre esos abordajes en toda la red.
+        data_tests: [not_null]
+      - name: ranking_demanda_otros_modos
+        description: RANK descendente entre todas las áreas; empates comparten puesto y dejan saltos.
+        data_tests: [not_null]
+      - name: total_abordajes_otros_modos_red
+        description: Denominador de toda la red, repetido por zona; no se debe sumar en Tableau.
+        data_tests: [not_null]
+      - name: areas_en_ranking_red
+        description: Tamaño del universo usado para el ranking, no solo las zonas MetroRiel.
+        data_tests: [not_null]
+  - name: v_tableau_metroriel
+    description: >-
+      Vista para el caso MetroRiel en Tableau. Separa abordajes de otros modos de
+      viajes MetroRiel iniciados y conserva el ranking frente a todas las áreas.
+    columns:
+      - name: nombre_zona
+        data_tests: [not_null, unique]
+      - name: estaciones_metroriel
+        data_tests: [not_null]
+      - name: abordajes_otros_modos
+        data_tests: [not_null]
+      - name: viajes_metroriel_iniciados
+        data_tests: [not_null]
+      - name: pct_abordajes_otros_modos_red
+        data_tests: [not_null]
+      - name: ranking_demanda_otros_modos
+        data_tests: [not_null]

@@ -156,3 +156,152 @@ actividad. La vista muestra dónde no hay servicio, pero no mide dónde hace fal
 `v_tableau_reconciliacion`: `sum(cantidad_abordajes)` debe dar las filas de
 `fact_abordajes` (1,393,448), y `sum(viajes_iniciados)` las de `fact_viajes_metroriel`
 (295,511), tanto en las vistas de demanda como en la de cobertura.
+
+## mart_metroriel_zonas
+
+**Pregunta que apoya (enunciado 2.1):** «Dada la demanda observada en las zonas
+12, 8, 1, 6 y 17, ¿el trazado propuesto atiende donde más se necesita?».
+El mart aporta demanda observada de los otros modos y posición frente a toda la
+red para analizar esa pregunta; no produce una recomendación sobre el trazado.
+
+**Grano:** una fila por zona con al menos una estación MetroRiel, para todo el
+período disponible en los hechos Gold. El trazado se deriva de
+`dim_punto_transporte` con `modo = 'MetroRiel'`, agrupado por `zona_sk`; las
+cinco zonas no están hardcodeadas en el modelo. Hoy son Zona 12, Zona 8, Zona 1,
+Zona 6 y Zona 17, con 22 estaciones en total.
+
+**Fuentes:** exclusivamente modelos Gold: `dim_zona` (universo de 16 áreas),
+`dim_punto_transporte` (estaciones), `dim_modo` (clasificación de los abordajes),
+`fact_abordajes` y `fact_viajes_metroriel`. Los hechos y las dimensiones siguen
+construyéndose desde Silver; este mart no lee Silver, Staging, Bronze ni Raw.
+Las agregaciones se realizan antes de unirlas por zona para evitar multiplicar
+abordajes o viajes al enlazarlos con varias estaciones.
+
+| Columna | Definición |
+|---|---|
+| zona_sk, nombre_zona | Clave y nombre de la zona en `dim_zona` |
+| estaciones_metroriel | Número de estaciones del catálogo MetroRiel en la zona; mide oferta, no capacidad |
+| abordajes_otros_modos | Suma de `cantidad_abordajes` de Transmetro, Transurbano y Aerómetro en la zona. Excluye los viajes MetroRiel |
+| abordajes_transmetro, abordajes_transurbano, abordajes_aerometro | Desglose de la medida anterior por modo; su suma debe ser `abordajes_otros_modos` |
+| viajes_metroriel_iniciados | Suma de `cantidad_viajes` por `zona_origen_sk`. Cada viaje se cuenta una vez en el origen, sin contar el destino |
+| pct_abordajes_otros_modos_red | `100 × abordajes_otros_modos / total_abordajes_otros_modos_red`, redondeado a dos decimales; 0 si no existen abordajes en toda la red |
+| ranking_demanda_otros_modos | `rank()` descendente por abordajes de otros modos, calculado sobre todas las áreas de `dim_zona`; los empates comparten puesto y dejan saltos |
+| total_abordajes_otros_modos_red | Suma de abordajes TM/TU/AM en las 16 áreas; denominador de la participación, repetido en cada fila y no aditivo |
+| areas_en_ranking_red | Tamaño del universo usado para calcular el ranking: 16 actualmente; no es el número de zonas MetroRiel y no es aditivo |
+
+**Orden del cálculo:** primero se agregan abordajes por zona; después se incorporan
+las 16 áreas con `left join`, incluyendo áreas con cero abordajes. Sobre ese
+universo se calculan el total de red y el ranking. Solo al final se seleccionan
+las zonas con estaciones MetroRiel. Así, por ejemplo, un puesto 9 sigue siendo
+el puesto 9 de la red y no se convierte en el puesto 5 del trazado.
+
+**Denominador:** «total de la red» significa aquí todos los abordajes de los
+otros tres modos en el universo completo, no abordajes más viajes MetroRiel.
+La participación de estas cinco zonas puede sumar menos de 100 % porque no
+abarcan todas las áreas.
+
+**Limitaciones:**
+
+- La demanda observada **no equivale a demanda potencial**, necesidad insatisfecha
+  ni cantidad de personas. Solo incluye eventos válidos que llegaron a Gold.
+- «Demanda previa» se usa como aproximación mediante actividad de otros modos;
+  los datos no demuestran que esos abordajes ocurrieran antes de la apertura de
+  MetroRiel ni permiten atribuir efectos al trazado.
+- MetroRiel mide **viajes iniciados** y los otros tres modos miden **abordajes**.
+  No deben sumarse ni compararse como si fueran la misma unidad.
+- El universo de 16 áreas proviene del generador del docente; las áreas sin
+  servicio quedan con cero actividad observada, sin demostrar ausencia de demanda.
+- Contar estaciones no mide frecuencias, capacidad, accesibilidad ni necesidades
+  futuras. Un mayor número de abordajes tampoco demuestra por sí solo que el
+  trazado sea óptimo.
+- El mart resume todo el período: un filtro en Tableau sobre las cinco zonas no
+  recalcula el ranking ni el denominador. Para analizar otro período sería
+  necesario volver a calcular ambos sobre todo el universo de áreas.
+- El linaje `bronze_record_id` permanece en los hechos Gold. El mart es agregado
+  y su trazabilidad se reconstruye consultando esos hechos por zona y modo.
+
+**Pruebas:** `mart_metroriel_zonas_grano` contrasta zonas y estaciones con el
+catálogo y comprueba las cinco zonas actuales y el universo de 16 áreas;
+`mart_metroriel_zonas_reconciliacion` reconcilia cada modo y los viajes por origen
+con los hechos, verifica la suma de los tres modos y excluye MetroRiel de los
+abordajes; `mart_metroriel_zonas_ranking` calcula independientemente el puesto
+como 1 más la cantidad de áreas con más abordajes y verifica denominador y
+porcentaje. `schema.yml` añade unicidad, no nulos, relación con `dim_zona` y el
+conjunto esperado de cinco nombres. Las expectativas del dataset se hardcodean
+solo en pruebas, no en el mart.
+
+## v_tableau_metroriel
+
+**Destino de conexión de Tableau para este caso:** `gold.v_tableau_metroriel`.
+Es una vista dbt sobre `mart_metroriel_zonas` con el mismo grano. Proyecta
+explícitamente las métricas anteriores, salvo la clave técnica `zona_sk`;
+no expone identificadores de usuario ni una columna que mezcle abordajes y viajes.
+
+Permite construir:
+
+- barras de `abordajes_otros_modos` por `nombre_zona`, con el desglose TM/TU/AM;
+- el puesto global `ranking_demanda_otros_modos`, contextualizado con
+  `areas_en_ranking_red` y `pct_abordajes_otros_modos_red`;
+- una comparación de `estaciones_metroriel` con `abordajes_otros_modos`;
+- una visualización separada de `viajes_metroriel_iniciados` por zona de origen.
+
+En Tableau, usar `MIN`, `MAX` o atributo para el total repetido de red, el
+número de áreas y el ranking; no sumar esos campos. El porcentaje conserva el
+denominador de toda la red aunque la vista exponga solo las zonas del trazado.
+
+**Pruebas:** `v_tableau_metroriel_reconciliacion` compara todas las columnas con
+el mart, fila a fila y en ambos sentidos; se añaden unicidad y no nulos en
+`schema.yml`.
+
+**Build limitado a los modelos nuevos y sus pruebas**, con hechos y dimensiones
+Gold ya materializados:
+
+```powershell
+python scripts/run_dbt.py build --select mart_metroriel_zonas v_tableau_metroriel --threads 1
+```
+
+Después, con los modelos Gold existentes materializados, ejecutar las pruebas
+Gold relevantes:
+
+```powershell
+python scripts/run_dbt.py test --select path:models/gold --threads 1
+```
+
+### Resultados medidos del caso MetroRiel — 10 de octubre de 2026
+
+Consulta de `gold.v_tableau_metroriel`, ordenada por ranking global. El
+denominador es **1,393,448 abordajes TM/TU/AM** y el universo es de **16 áreas**.
+
+| Zona | Estaciones MR | Abordajes otros modos | Transmetro | Transurbano | Aerómetro | Viajes MR iniciados | % abordajes red | Puesto global |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| Zona 17 | 4 | 97,608 | 27,870 | 55,426 | 14,312 | 53,755 | 7.00 | 3 |
+| Zona 12 | 4 | 96,792 | 24,277 | 57,916 | 14,599 | 53,970 | 6.95 | 5 |
+| Zona 1 | 4 | 85,862 | 20,835 | 50,517 | 14,510 | 53,803 | 6.16 | 9 |
+| Zona 8 | 5 | 82,922 | 27,891 | 55,031 | 0 | 66,924 | 5.95 | 11 |
+| Zona 6 | 5 | 74,487 | 21,181 | 53,306 | 0 | 67,059 | 5.35 | 15 |
+
+Las cinco zonas suman 22 estaciones, 437,671 abordajes de otros modos (31.41 %
+de los abordajes de la red, calculado antes de redondear) y, por separado,
+295,511 viajes MetroRiel iniciados. Estos valores describen la actividad del
+dataset; no constituyen una recomendación sobre el trazado.
+
+**Incidencias del entorno local:** Docker estaba apagado y las tablas del volumen
+PostgreSQL estaban desactualizadas frente a `main`: `dim_zona` tenía 16 filas
+pero no las columnas `puntos_*`, y los hechos no proyectaban aún
+`bronze_record_id`. Para completar la regresión se rematerializaron
+`silver_universo_zonas`, `dim_zona`, los dos hechos y los marts/vistas anteriores
+desde sus SQL actuales, sin modificar sus archivos ni reglas. No fue necesario
+cambiar los modelos de Hector.
+
+**Resultados de validación:**
+
+| Ejecución | Resultado | Duración reportada por dbt |
+|---|---|---:|
+| Build limitado a `mart_metroriel_zonas` y `v_tableau_metroriel` | Dos modelos y 27 pruebas correctos; `PASS=30`, `WARN=0`, `ERROR=0`, contando el hook | 10.33 s |
+| Pruebas Gold después de actualizar las materializaciones locales | 89 pruebas correctas; `PASS=90`, `WARN=0`, `ERROR=0`, contando el hook | 16.64 s |
+
+Antes de actualizar la base, el build del mart de cobertura existente falló
+por `puntos_transmetro` ausente y la primera regresión Gold tuvo cuatro errores
+por `bronze_record_id` ausente en los hechos. Tras reconstruir desde los modelos
+versionados, esas pruebas pasaron. Los hechos conservaron 1,393,448 abordajes y
+295,511 viajes; los resultados del nuevo mart reconcilian con ellos.
