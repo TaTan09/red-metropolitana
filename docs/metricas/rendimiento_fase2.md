@@ -37,8 +37,11 @@ SQLite de deduplicación y manifiestos). Las filas por tabla son estimaciones de
 ### Lectura
 
 - Gold pesa 2.4 veces más que Silver. La causa principal es `fact_abordajes`: cada
-  fila lleva siete claves `md5` en texto y `bronze_record_id`. Es una explicación
-  probable, no medida. Claves enteras reducirían el tamaño; se deja como mejora futura.
+  fila ocupa en promedio 359 bytes (`pg_column_size`), así que 1.39 millones de filas
+  son unos 500 MB, casi todo el tamaño de la tabla. Por el tipo de las columnas, las
+  siete claves `md5` en texto (33 bytes cada una) y `bronze_record_id` (65 a 72 bytes)
+  suman alrededor de 300 de esos 359 bytes; ese reparto es un cálculo, no una medición
+  por columna. Claves enteras reducirían el tamaño; se deja como mejora futura.
 - Bronze pesa 2.6 veces más que Raw. En streaming cada mensaje se guarda completo
   como JSON con metadatos técnicos. Tampoco se midió por separado.
 - `mart_demanda_hora` es unas 160 veces más pequeño que `fact_abordajes`.
@@ -79,3 +82,5 @@ docker exec -i red_metropolitana_postgres psql -U red_user -d red_metropolitana 
 Get-Content sql/utilities/metricas_tamano.sql | docker exec -i red_metropolitana_postgres psql -U red_user -d red_metropolitana
 .\scripts\medir_consultas.ps1
 ```
+
+docker exec -i red_metropolitana_postgres psql -U red_user -d red_metropolitana -c "select avg(pg_column_size(f.*)) as bytes_por_fila from gold.fact_abordajes f"

@@ -117,6 +117,7 @@ data/bronze/
 - El pipeline debe ser idempotente.
 - No subir credenciales reales.
 - Seudonimizar la identidad antes de Gold.
+- Tableau se conecta a las vistas `v_tableau_*` de Gold, no a los marts ni a otras capas.
 
 ## Métricas de la Capa Silver (Fase 1)
 
@@ -162,6 +163,24 @@ python scripts/run_dbt.py build
 ```
 
 El build crea Silver y Gold y ejecuta pruebas de claves, relaciones y conteos. El [DDL](sql/ddl/gold_model.sql) es el entregable estructural de referencia; dbt materializa las tablas.
+
+### Marts y vistas para Tableau
+
+Sobre los hechos y dimensiones hay dos marts y tres vistas:
+
+- `gold.mart_demanda_hora`: demanda por fecha × hora × modo × zona.
+- `gold.mart_cobertura`: una fila por zona de `dim_zona` (16), con la oferta (puntos totales y por modo) y la actividad observada.
+- `gold.v_tableau_demanda_abordajes`, `gold.v_tableau_demanda_viajes_mr` y `gold.v_tableau_cobertura`: las vistas que consume Tableau.
+
+**Tableau se conecta a las vistas, no a los marts.** `mart_demanda_hora` mezcla abordajes (Transmetro, Transurbano, Aerómetro) y viajes (MetroRiel) en `cantidad_eventos`; las vistas los separan para que no se sumen por error. MetroRiel cuenta una vez por viaje, en la zona de origen, y las vistas lo nombran así (`zona_origen`, `viajes_iniciados`).
+
+Para reconstruirlos:
+
+```powershell
+python scripts/run_dbt.py build --select mart_demanda_hora mart_cobertura v_tableau_demanda_abordajes v_tableau_demanda_viajes_mr v_tableau_cobertura --threads 1
+```
+
+Documentación: [marts y vistas](docs/arquitectura/marts_gold.md), [decisiones de Fase 2](docs/decisiones/002-fase2-marts.md), [corrección de zonas](docs/evidencias/004-correccion-zonas.md) y [métricas de rendimiento](docs/metricas/rendimiento_fase2.md).
 
 ## Ejecución completa de Fase 1
 
