@@ -24,7 +24,7 @@ Ambos hechos conservan `fuente_evento`. Los hechos no contienen identificadores 
 |---|---|
 | `dim_usuario` | Una fila por identidad canónica Silver seudonimizada; incluye cantidad de modos observados y método de vinculación, sin llaves operacionales. |
 | `dim_tiempo` | Un instante local observado con precisión de segundo, compartido por ambos hechos; clave `YYYYMMDDHHMMSS`, fecha, año, mes, día, día ISO (lunes=1), hora, minuto y segundo. |
-| `dim_zona` | Universo de 16 áreas (12 zonas y 4 municipios) definido por el generador (`silver_universo_zonas`). Incluye `tiene_servicio`, `modos_con_servicio` y `puntos_transporte`, calculados desde los catálogos. |
+| `dim_zona` | Universo de 16 áreas (12 zonas y 4 municipios) definido por el generador (`silver_universo_zonas`). Incluye `tiene_servicio`, `modos_con_servicio`, `puntos_transporte` y `puntos_*` por modo, calculados desde los catálogos. |
 | `dim_punto_transporte` | Un punto por `(modo, código natural)`; nombre, zona, servicio del catálogo y latitud/longitud cuando existen. |
 | `dim_modo` | Transmetro, Transurbano, MetroRiel y Aerómetro. |
 | `dim_servicio` | Línea TM, ruta TU, eje AM y `SERVICIO_GENERAL` para MR. El origen no entrega un número de línea MetroRiel; no se inventa. |
