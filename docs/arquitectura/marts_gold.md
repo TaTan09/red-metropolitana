@@ -81,3 +81,78 @@ desde `silver_catalogo_puntos` (oferta, no actividad).
 `mart_cobertura_consistencia`, `mart_cobertura_puntos_por_modo` (los puntos por
 modo suman el total de cada zona y cuadran con `dim_punto_transporte`: 104, 328,
 22 y 14) y pruebas de unicidad y no nulos en `schema.yml`.
+
+## Vistas para Tableau (`v_tableau_*`)
+
+Tableau se conecta a estas vistas, no a los `mart_*`. Las vistas separan abordajes
+y viajes para que ninguna visualización pueda sumar unidades distintas sin querer.
+
+Son vistas dbt (`materialized='view'`) en el esquema `gold`, sin lógica propia más
+allá de filtrar, renombrar y calcular rankings. No contienen identificadores de usuario.
+
+### v_tableau_demanda_abordajes
+
+**Pregunta que responde:** demanda por modo, zona y hora de Transmetro, Transurbano y Aerómetro.
+
+**Grano:** fecha × hora × modo × zona (el de `mart_demanda_hora`, filtrado a `tipo_evento = 'abordaje'`).
+
+| Columna | Descripción |
+|---|---|
+| fecha, hora, es_dia_habil, es_hora_pico | Desde `dim_tiempo` |
+| franja | `Hora pico` o `Fuera de pico`. Como la hora pico solo existe en días hábiles, `Fuera de pico` incluye fines de semana |
+| modo, zona | Modo y zona de acceso |
+| cantidad_abordajes | Aditiva. Accesos válidos |
+| tarifa_total_gtq | Aditiva. Suma de importes registrados |
+
+### v_tableau_demanda_viajes_mr
+
+**Pregunta que responde:** cuándo y dónde empiezan los viajes de MetroRiel.
+
+**Grano:** fecha × hora × zona de origen (`mart_demanda_hora` filtrado a `tipo_evento = 'viaje'`).
+
+| Columna | Descripción |
+|---|---|
+| fecha, hora, es_dia_habil, es_hora_pico, franja | Igual que la vista de abordajes |
+| modo | Siempre `MetroRiel` |
+| zona_origen | Zona de la estación de ingreso |
+| viajes_iniciados | Aditiva. Un viaje cuenta una vez, en su ingreso |
+| tarifa_total_gtq | Aditiva. Suma de importes registrados |
+
+**Regla:** la zona es la de origen. La columna se llama `zona_origen` para que no se
+lea como demanda en la zona. Un viaje que termina en otra zona no se cuenta en ella.
+
+### v_tableau_cobertura
+
+**Pregunta que responde:** dónde hay servicio, qué modos lo dan y cuánta actividad se
+observa por zona, sin mezclar unidades.
+
+**Grano:** una fila por zona de `dim_zona` (16 hoy).
+
+| Columna | Descripción |
+|---|---|
+| nombre_zona, tipo_area, tiene_servicio, modos_con_servicio | Oferta, desde `dim_zona` |
+| puntos_transporte, puntos_transmetro, puntos_transurbano, puntos_metroriel, puntos_aerometro | Puntos de la zona, total y por modo |
+| abordajes, abordajes_transmetro, abordajes_transurbano, abordajes_aerometro | Abordajes TM/TU/AM; `abordajes` es la suma de los tres |
+| viajes_mr_iniciados | Viajes MetroRiel iniciados en la zona (origen) |
+| eventos_por_punto_transmetro, eventos_por_punto_transurbano, eventos_por_punto_aerometro | Abordajes por punto del mismo modo |
+| viajes_por_estacion_metroriel | Viajes iniciados por estación MetroRiel |
+| pct_abordajes_red | Participación de la zona en los abordajes de la red |
+| ranking_abordajes | Posición por `abordajes` (empates comparten posición) |
+| ranking_viajes_mr_origen | Posición por `viajes_mr_iniciados` (empates comparten posición) |
+
+**Qué no expone:** `eventos_totales`, `eventos_por_punto` ni `pct_demanda_red`,
+porque mezclan abordajes con viajes.
+
+**Caso MetroRiel (zonas 17, 12, 8, 6 y 1):** estas zonas encabezan
+`ranking_viajes_mr_origen` en parte porque los viajes se cuentan en la zona de
+origen, y las 22 estaciones están todas en esas cinco zonas. El ranking mide dónde
+empiezan los viajes, no una demanda comparable con la de los otros modos.
+
+**Limitación:** `tiene_servicio` sale de los catálogos de los operadores, no de la
+actividad. La vista muestra dónde no hay servicio, pero no mide dónde hace falta.
+
+### Reconciliación y pruebas
+
+`v_tableau_reconciliacion`: `sum(cantidad_abordajes)` debe dar las filas de
+`fact_abordajes` (1,393,448), y `sum(viajes_iniciados)` las de `fact_viajes_metroriel`
+(295,511), tanto en las vistas de demanda como en la de cobertura.
