@@ -70,15 +70,17 @@ Según los catálogos, las 22 estaciones MetroRiel están en las zonas 17, 12, 8
 (verificado en `v_tableau_cobertura`: solo esas cinco zonas tienen estaciones o viajes
 iniciados). Por eso encabezan `ranking_viajes_mr_origen`.
 
-### 5. Rol de solo lectura `tableau_ro` (pendiente)
+### 5. Rol de solo lectura `tableau_ro`
 
-Hoy Tableau se conectaría con `red_user`, que también puede leer Staging y Silver,
+El workbook local usa `red_user`, que también puede leer Staging y Silver,
 donde están las tarjetas originales. Eso contradice el principio de que el tablero
-solo ve Gold. Está previsto crear `tableau_ro` con acceso solo al esquema `gold`,
+solo ve Gold. La revisión de Fase 2 provisiona `tableau_ro` con acceso solo al esquema `gold`,
 usando `ALTER DEFAULT PRIVILEGES` para que conserve el acceso cuando dbt recree las
 tablas y vistas, con la contraseña fuera del repositorio.
 
-Mientras no exista, se declara como limitación.
+Se creó sin LOGIN para no inventar ni guardar contraseñas. La habilitación mediante
+`TABLEAU_RO_PASSWORD` y el cambio manual de conexión en Tableau siguen pendientes.
+Ver `docs/seguridad/seguridad_y_datos_personales.md` y la evidencia de permisos.
 
 ## Evidencia
 

@@ -5,8 +5,8 @@
 Entregable de documentación y linaje del bloque Gold de Jonatán para el punto
 3.1. El DAG generado por dbt muestra dependencias reales declaradas mediante
 `ref()` y `source()`. El [diccionario Gold](diccionario_gold.md) complementa el
-grafo con significado, fuente y transformación de cada una de las 162 columnas
-de los 15 modelos Gold actuales.
+grafo con significado, fuente y transformación de cada una de las 197 columnas
+de los 18 modelos Gold actuales.
 
 El DAG muestra linaje **entre modelos y fuentes**; no demuestra por sí solo
 linaje por columna, correspondencia de filas, causalidad, calidad de todas las
@@ -90,6 +90,9 @@ hechos hasta los modelos Silver y las fuentes `staging`.
 | `v_tableau_demanda_abordajes`, `v_tableau_demanda_viajes_mr` | `mart_demanda_hora` | Separan por tipo de evento y explicitan unidad |
 | `v_tableau_cobertura` | `mart_cobertura` | Separa abordajes y viajes; recalcula participación/rankings específicos |
 | `v_tableau_metroriel` | `mart_metroriel_zonas` | Proyección de métricas y ranking global; no suma abordajes con viajes |
+| `mart_multimodalidad` | Ambos hechos, `dim_tiempo`, `dim_zona`, `dim_modo` | Pares consecutivos de identidad inferida, >0 y <=90 minutos; conserva ambos IDs Bronze |
+| `v_tableau_transbordos` | `mart_multimodalidad` | Agregados de pares inferidos; no usuarios multimodales |
+| `v_tableau_multimodalidad` | `dim_usuario` | Cuenta identidades por número de modos y método; dimensión → puente → operaciones Silver → Staging → Bronze → Raw |
 
 Las dimensiones y hechos de base consumen solo Silver. Los marts consumen Gold,
 y las vistas consumen sus marts. Las claves foráneas lógicas se documentan y
@@ -166,8 +169,8 @@ antes de atribuir la fila a un archivo que pudo haber cambiado.
 
 Se verificaron dos registros reales de PostgreSQL mediante consultas de solo
 lectura, `scripts/trazar_linaje.py` y lectura de los archivos locales Raw.
-Tableau todavía no tiene workbook: el punto de entrada comprobado es la vista
-Gold que consumirá. Los ejemplos son **una contribución** a cada agregado, no
+La verificación histórica usó la vista Gold como punto de entrada; el workbook
+local actual se conserva sin modificar. Los ejemplos son **una contribución** a cada agregado, no
 la totalidad de sus registros.
 
 | Comprobación | Abordaje Transmetro (streaming) | Viaje MetroRiel (batch) |
@@ -217,7 +220,9 @@ no una auditoría exhaustiva de Raw.
   atributos por fuente/código natural, pero no asegurar un enlace físico único
   persistido por fila de dimensión. Usuario y tiempo derivan de conjuntos; no
   representan una única fila Raw. HMAC no demuestra identidad real.
-- Marts/vistas son agregados: el DAG y diccionario describen la derivación; los
+- Los marts/vistas de demanda, cobertura y MetroRiel son agregados; el nuevo
+  mart_multimodalidad conserva pares y sus dos IDs Bronze. El DAG y diccionario
+  describen la derivación; los
   hechos contribuyentes permiten el recorrido físico cuando existe
   `bronze_record_id`. No se afirma auditoría exhaustiva de todas las filas Raw.
 - `gold_conteos_hechos` y `gold_conteos_modo` reconcilian Gold con Silver;
@@ -234,5 +239,34 @@ no una auditoría exhaustiva de Raw.
   **89 pruebas correctas**, `PASS=90`, `WARN=0`, `ERROR=0`, `SKIP=0`, contando
   el hook de proyecto; duración de la validación final dbt **16.21 s**.
 
-No se ejecuta build ni se modifican modelos SQL, métricas o materializaciones.
+Esta validación corresponde al bloque histórico de documentación aprobado.
+La revisión posterior incorpora tres modelos Gold y features Silver; sus builds,
+pruebas y cifras están en `docs/metricas/validacion_fase2.json` y `.md`.
 La documentación es reproducible; generar de nuevo al cambiar modelos o datos.
+
+## Multimodalidad y transbordos: linaje adicional
+
+`Tableau → v_tableau_multimodalidad → dim_usuario → bridge_identidad_usuario →
+cuatro operaciones Silver → Staging → Parquet Bronze → Raw`. La vista no expone
+`usuario_sk`. Cada identidad se cuenta una vez; los totales globales repetidos se
+usan con MIN/MAX y el contador por grupo con SUM. Aerómetro está aislado por
+`AM-<hash>`, frente a `USR-<número inferido>` de TM/TU/MR. Su multimodalidad
+persona-a-persona con otros sistemas no es medible; cero no prueba ausencia de
+transferencias reales.
+
+`Tableau → v_tableau_transbordos → mart_multimodalidad → hechos Gold → Silver →
+Staging → Bronze → Raw`. El mart infiere pares; el generador no confirma cadenas
+puerta-a-puerta. La vista agrega fecha, hora, modos, zonas y bandera. Para un
+grupo se recuperan sus pares del mart; para cada par se sigue
+`bronze_record_id_origen` según `modo_origen` y `bronze_record_id_destino` según
+`modo_destino`. Ambos llegan al hecho correspondiente y al mismo ID en
+Silver/Staging. Luego `scripts/trazar_linaje.py MODO ID` recupera Parquet y sus
+metadatos `_source_file`, `_source_sha256`, `_record_number`. Verificar el hash
+del archivo Raw antes de consultar el registro, sin encabezado para CSV.
+
+La prueba `mart_multimodalidad_secuencia` reconcilia todos los pares con los
+hechos Gold y `v_tableau_transbordos_reconciliacion` compara todos los campos de
+todos los grupos en ambos sentidos. `scripts/verificar_fase2.py --report`
+verifica además un par real contra Bronze y los dos registros Raw (hash y
+payload), sin publicar llaves personales. Esto no equivale a auditar todos los
+registros Raw.

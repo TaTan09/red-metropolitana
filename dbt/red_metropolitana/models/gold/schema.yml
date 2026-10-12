@@ -1065,3 +1065,184 @@ models:
         description: >-
           Medida de tamaño del universo global; unidad: áreas (16 hoy), no zonas MR. No aditiva entre filas. Fuente
           inmediata: gold.mart_metroriel_zonas.areas_en_ranking_red. Transformación: Proyección sin cambio de valor.
+  - name: mart_multimodalidad
+    description: 'Grano: un par consecutivo de eventos de la misma identidad inferida
+      en modos distintos, >0 y <=90 minutos. Orden fecha_hora, modo, bronze_record_id.
+      Transbordo inferido; el generador no entrega una cadena puerta-a-puerta confirmada.
+      Aerometro usa AM-<hash> y no puede enlazarse persona-a-persona con TM/TU/MR; cero
+      enlaces observables no demuestra cero transferencias fisicas.'
+    columns:
+    - name: transbordo_sk
+      description: Clave MD5 de usuario_sk:bronze_record_id_origen:bronze_record_id_destino;
+        estable para el mismo par y clave HMAC.
+      data_tests:
+      - not_null
+      - unique
+    - name: usuario_sk
+      description: Identidad inferida seudonimizada de los hechos Gold mediante HMAC-SHA256,
+        no persona comprobada.
+      data_tests:
+      - not_null
+      - relationships:
+          arguments:
+            to: ref('dim_usuario')
+            field: usuario_sk
+    - name: bronze_record_id_origen
+      description: Identificador Bronze conservado por el hecho del evento previo; permite
+        continuar a Staging, Parquet y Raw.
+      data_tests:
+      - not_null
+    - name: bronze_record_id_destino
+      description: Identificador Bronze conservado por el hecho del evento siguiente;
+        permite continuar a Staging, Parquet y Raw.
+      data_tests:
+      - not_null
+    - name: fecha_transbordo
+      description: Fecha local del evento origen, momento_inicio_transbordo::date.
+      data_tests:
+      - not_null
+    - name: hora_transbordo
+      description: Hora local 0-23 del evento origen, EXTRACT(hour).
+      data_tests:
+      - not_null
+    - name: momento_inicio_transbordo
+      description: Timestamp local del evento previo desde dim_tiempo; MR usa ingreso
+        del viaje completo.
+      data_tests:
+      - not_null
+    - name: momento_fin_transbordo
+      description: Timestamp local del evento siguiente desde dim_tiempo; no es salida
+        fisica del primer modo.
+      data_tests:
+      - not_null
+    - name: modo_origen
+      description: Modo del evento previo desde dim_modo (MR literal MetroRiel).
+      data_tests:
+      - not_null
+    - name: modo_destino
+      description: Modo del evento siguiente, distinto del origen.
+      data_tests:
+      - not_null
+    - name: combinacion_modos
+      description: Concatenacion direccional modo_origen -> modo_destino.
+      data_tests:
+      - not_null
+    - name: zona_origen
+      description: Zona del evento previo desde dim_zona; MR toma zona_origen_sk.
+      data_tests:
+      - not_null
+    - name: zona_destino
+      description: Zona del evento siguiente desde dim_zona; no necesariamente destino
+        del viaje completo.
+      data_tests:
+      - not_null
+    - name: tiempo_transferencia_minutos
+      description: Diferencia entre timestamps de eventos / 60, redondeada a 2 decimales;
+        >0 y <=90. Proximidad no prueba transferencia fisica.
+      data_tests:
+      - not_null
+    - name: tarifa_acumulada_gtq
+      description: Suma de tarifas registradas de ambos eventos desde los hechos; no
+        cobro integrado ni recaudo confirmado.
+    - name: incluye_aerometro
+      description: Origen o destino es Aerometro. Aerometro usa AM-<hash> y no puede
+        enlazarse persona-a-persona con TM/TU/MR; cero enlaces observables no demuestra
+        cero transferencias fisicas.
+      data_tests:
+      - not_null
+    - name: cantidad_transbordos
+      description: Literal 1 por par consecutivo inferido; medida aditiva de pares,
+        no usuarios.
+      data_tests:
+      - not_null
+  - name: v_tableau_transbordos
+    description: 'Grano: fecha x hora x modos x zonas x incluye_aerometro. Agrega transbordos
+      inferidos; no mide el total de usuarios multimodales. Aerometro usa AM-<hash>
+      y no puede enlazarse persona-a-persona con TM/TU/MR; cero enlaces observables
+      no demuestra cero transferencias fisicas.'
+    columns:
+    - name: fecha
+      description: Proyeccion de mart_multimodalidad.fecha_transbordo.
+      data_tests:
+      - not_null
+    - name: hora
+      description: Proyeccion de mart_multimodalidad.hora_transbordo.
+      data_tests:
+      - not_null
+    - name: modo_origen
+      description: Modo previo del mart, parte del grano agregado.
+      data_tests:
+      - not_null
+    - name: modo_destino
+      description: Modo siguiente del mart, parte del grano agregado.
+      data_tests:
+      - not_null
+    - name: combinacion_modos
+      description: Combinacion direccional heredada del mart.
+      data_tests:
+      - not_null
+    - name: zona_origen
+      description: Zona del evento previo heredada del mart.
+      data_tests:
+      - not_null
+    - name: zona_destino
+      description: Zona del evento siguiente heredada del mart.
+      data_tests:
+      - not_null
+    - name: incluye_aerometro
+      description: Bandera heredada del mart. Aerometro usa AM-<hash> y no puede enlazarse
+        persona-a-persona con TM/TU/MR; cero enlaces observables no demuestra cero transferencias
+        fisicas.
+      data_tests:
+      - not_null
+    - name: total_transbordos
+      description: COUNT(*) de pares inferidos por fecha, hora, modos, zonas y bandera;
+        aditivo, no usuarios distintos.
+      data_tests:
+      - not_null
+    - name: tiempo_promedio_transferencia_minutos
+      description: ROUND(AVG(tiempo_transferencia_minutos),2); no aditivo. Para reagregar,
+        ponderar por total_transbordos; el redondeo puede perder precision.
+      data_tests:
+      - not_null
+    - name: tarifa_total_gtq
+      description: ROUND(SUM(tarifa_acumulada_gtq),2) de pares; puede contar un evento
+        en dos pares, no equivale a ingreso de la red.
+  - name: v_tableau_multimodalidad
+    description: 'Grano: modos_observados x metodo_identidad. Solo Gold (dim_usuario).
+      Multimodal: modos_observados >1; identidades observadas, no personas verificadas.
+      Aerometro usa AM-<hash> y no puede enlazarse persona-a-persona con TM/TU/MR; cero
+      enlaces observables no demuestra cero transferencias fisicas.'
+    columns:
+    - name: modos_observados
+      description: Cantidad de sistemas de dim_usuario, clave del grupo, no una lista
+        de modos.
+      data_tests:
+      - not_null
+    - name: metodo_identidad
+      description: 'Metodo de dim_usuario: HASH_AISLADO o PATRON_NUMERICO_INFERIDO.'
+      data_tests:
+      - not_null
+    - name: usuarios
+      description: COUNT(*) de identidades Gold por modos_observados y metodo_identidad;
+        aditivo entre grupos.
+      data_tests:
+      - not_null
+    - name: total_usuarios_observados
+      description: SUM(usuarios) OVER () en toda dim_usuario; total global repetido,
+        usar MIN/MAX en Tableau.
+      data_tests:
+      - not_null
+    - name: usuarios_multimodales_total
+      description: SUM de usuarios con modos_observados >1 en toda la dimension; repetido,
+        usar MIN/MAX.
+      data_tests:
+      - not_null
+    - name: usuarios_unimodales_total
+      description: SUM de usuarios con modos_observados =1 en toda la dimension; repetido,
+        usar MIN/MAX.
+      data_tests:
+      - not_null
+    - name: pct_usuarios_multimodales
+      description: ROUND(100.0 * multimodales / total,2). Porcentaje global repetido;
+        MIN/MAX, nunca SUM. No se recalcula al filtrar grupos.

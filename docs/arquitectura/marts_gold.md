@@ -1,3 +1,5 @@
+# Marts y vistas Gold
+
 ## mart_demanda_hora
 
 **Pregunta que responde:** demanda por modo, zona y hora (enunciado 2.1, tablero).
@@ -305,3 +307,29 @@ por `puntos_transmetro` ausente y la primera regresión Gold tuvo cuatro errores
 por `bronze_record_id` ausente en los hechos. Tras reconstruir desde los modelos
 versionados, esas pruebas pasaron. Los hechos conservaron 1,393,448 abordajes y
 295,511 viajes; los resultados del nuevo mart reconcilian con ellos.
+
+
+## mart_multimodalidad y v_tableau_transbordos
+
+Grano del mart: un par consecutivo de eventos de una identidad inferida, en modos distintos, separado por >0 y <=90 minutos. Orden estable: fecha_hora, modo, bronze_record_id. MR aporta el ingreso de su viaje completo. El generador no entrega una cadena puerta-a-puerta confirmada; son **transbordos inferidos**, y proximidad temporal no demuestra transferencia fisica.
+
+Fuentes: ambos hechos Gold y dimensiones tiempo, zona y modo. Se conserva usuario_sk y bronze_record_id_origen/destino para llegar a los dos registros Bronze/Raw. transbordo_sk = MD5(usuario_sk + ':' + ID origen + ':' + ID destino), con clave HMAC de usuario estable.
+
+La vista agrega fecha x hora x modo origen/destino x combinacion x zona origen/destino x incluye_aerometro. total_transbordos cuenta pares, no usuarios; tiempo promedio no es aditivo. tarifa_total_gtq suma tarifas de pares y puede contar un evento en dos pares: no equivale a recaudo. Pruebas: claves presentes/unicas, modos distintos, diferencia >0 y <=90, secuencia completa contra hechos y reconciliacion de todos los campos/grupos de la vista.
+
+Aerometro tiene identidad AM-<hash>, aislada de USR- de TM/TU/MR. Su multimodalidad persona-a-persona con otros sistemas no es medible; incluye_aerometro=false no prueba ausencia de transferencias reales. No se inventa enlace de identidad.
+
+## v_tableau_multimodalidad (requisito 2.1)
+
+Grano: modos_observados x metodo_identidad. Consume exclusivamente gold.dim_usuario y no expone usuario_sk. Usuario multimodal = modos_observados >1; se cuenta cada identidad una vez en todo el periodo observado. No requiere proximidad temporal ni un transbordo inferido.
+
+- SUM(usuarios): distribucion por cantidad de modos, con desglose opcional del metodo.
+- MAX(usuarios_multimodales_total): KPI global de usuarios multimodales.
+- MAX(pct_usuarios_multimodales): porcentaje global, en escala 0-100.
+- MAX(total_usuarios_observados) y MAX(usuarios_unimodales_total): universo y complemento.
+
+Los totales globales se repiten por grupo: usar MIN/MAX, nunca SUM. Los filtros de modos/metodo no recalculan el denominador global. Para un porcentaje del subconjunto, usar SUM de usuarios de grupos multimodales / SUM(usuarios) del subconjunto y etiquetarlo como tal. No ofrece filtros temporales/zonales de personas, porque dim_usuario resume todo el periodo sin esos campos.
+
+Incluye identidades Aerometro aisladas en el denominador, por lo que el porcentaje representa multimodalidad **observable con las llaves disponibles**, no prevalencia real persona-a-persona de toda la red. No sumar identidades para afirmar poblacion civil unica. Ver diccionario Gold (197 campos, 18 modelos) y reconciliacion completa contra dim_usuario.
+
+El workbook existente se conserva sin cambios. La vista queda lista para incorporarla manualmente en Tableau; esta revision no demuestra que esa hoja ya este integrada.

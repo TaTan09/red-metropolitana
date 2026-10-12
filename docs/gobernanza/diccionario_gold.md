@@ -2,7 +2,7 @@
 
 ## Alcance y convenciones
 
-Documento del bloque Gold de Jonatán para el requisito 3.1. Describe los 15 modelos actuales, campo por campo, siguiendo el SQL versionado. No modifica las reglas Silver ni sustituye los entregables de definiciones oficiales, dueños de dominio o calidad de Alejandro.
+Documento del bloque Gold de Jonatán para el requisito 3.1. Describe los 18 modelos actuales, campo por campo, siguiendo el SQL versionado. No modifica las reglas Silver ni sustituye los entregables de definiciones oficiales, dueños de dominio o calidad de Alejandro.
 
 **Unidades:** un abordaje es un acceso válido TM/TU/AM; un viaje MetroRiel es un registro con salida presente, contado una vez en origen para los marts. Un usuario es la identidad inferida del puente seudonimizada en Gold, no una persona comprobada ni una tarjeta activa. Un punto es una estación/parada; un servicio es línea/ruta/eje/servicio general; una zona es un área del universo, incluidos municipios.
 
@@ -41,7 +41,10 @@ Los nombres de archivo de este documento son los que existen actualmente en `dat
 | `v_tableau_demanda_viajes_mr` | 9 |
 | `v_tableau_cobertura` | 21 |
 | `v_tableau_metroriel` | 11 |
-| **Total: 15 modelos** | **162** |
+| `mart_multimodalidad` | 17 |
+| `v_tableau_transbordos` | 11 |
+| `v_tableau_multimodalidad` | 7 |
+| **Total: 18 modelos** | **197** |
 
 ## dim_usuario
 
@@ -319,4 +322,60 @@ Grano: una fila por zona con estaciones MetroRiel (cinco hoy), para todo el per�
 - Marts y vistas agregadas no conservan bronze_record_id. Para auditar una métrica hay que reconstruir el conjunto contribuyente en los hechos (zona/modo/fecha/hora y origen MR) y seguir cada identificador hacia Staging y Bronze; un ranking además requiere todo el universo de la red.
 - En hechos, bronze_record_id enlaza el registro físico Bronze. El script trazar_linaje.py llega a Bronze, no abre ni verifica el archivo Raw: los metadatos _source_file, _source_sha256 y _record_number permiten continuar si Raw está conservado y su hash coincide. No se afirma una auditoría exhaustiva de todas las filas Raw en esta tarea.
 
-Consulte [linaje_dbt.md](linaje_dbt.md) para generar y abrir el DAG y para distinguir linaje entre modelos de trazabilidad física. Los modelos SQL y pruebas existentes se mantienen sin cambios.
+Consulte [linaje_dbt.md](linaje_dbt.md) para generar y abrir el DAG y para distinguir linaje entre modelos de trazabilidad física. Las reglas aprobadas de dimensiones, hechos y marts previos se conservan; se agregan los modelos y pruebas de este bloque.
+
+## mart_multimodalidad
+
+Grano: un par consecutivo de eventos de la misma identidad inferida en modos distintos, >0 y <=90 minutos. Orden fecha_hora, modo, bronze_record_id. Transbordo inferido; el generador no entrega una cadena puerta-a-puerta confirmada. Aerometro usa AM-<hash> y no puede enlazarse persona-a-persona con TM/TU/MR; cero enlaces observables no demuestra cero transferencias fisicas.
+
+| Campo | Significado y transformacion | Fuente inmediata | Fuente cruda |
+|---|---|---|---|
+| `transbordo_sk` | Clave MD5 de usuario_sk:bronze_record_id_origen:bronze_record_id_destino; estable para el mismo par y clave HMAC. | Gold: fact_abordajes / fact_viajes_metroriel; dim_modo / dim_zona / dim_tiempo | transmetro_validaciones.csv; transurbano_transacciones.csv; aerometro_boardings.csv; metroriel_viajes.jsonl |
+| `usuario_sk` | Identidad inferida seudonimizada de los hechos Gold mediante HMAC-SHA256, no persona comprobada. | Gold: fact_abordajes / fact_viajes_metroriel; dim_modo / dim_zona / dim_tiempo | transmetro_validaciones.csv; transurbano_transacciones.csv; aerometro_boardings.csv; metroriel_viajes.jsonl |
+| `bronze_record_id_origen` | Identificador Bronze conservado por el hecho del evento previo; permite continuar a Staging, Parquet y Raw. | Gold: fact_abordajes / fact_viajes_metroriel; dim_modo / dim_zona / dim_tiempo | transmetro_validaciones.csv; transurbano_transacciones.csv; aerometro_boardings.csv; metroriel_viajes.jsonl |
+| `bronze_record_id_destino` | Identificador Bronze conservado por el hecho del evento siguiente; permite continuar a Staging, Parquet y Raw. | Gold: fact_abordajes / fact_viajes_metroriel; dim_modo / dim_zona / dim_tiempo | transmetro_validaciones.csv; transurbano_transacciones.csv; aerometro_boardings.csv; metroriel_viajes.jsonl |
+| `fecha_transbordo` | Fecha local del evento origen, momento_inicio_transbordo::date. | Gold: fact_abordajes / fact_viajes_metroriel; dim_modo / dim_zona / dim_tiempo | transmetro_validaciones.csv; transurbano_transacciones.csv; aerometro_boardings.csv; metroriel_viajes.jsonl |
+| `hora_transbordo` | Hora local 0-23 del evento origen, EXTRACT(hour). | Gold: fact_abordajes / fact_viajes_metroriel; dim_modo / dim_zona / dim_tiempo | transmetro_validaciones.csv; transurbano_transacciones.csv; aerometro_boardings.csv; metroriel_viajes.jsonl |
+| `momento_inicio_transbordo` | Timestamp local del evento previo desde dim_tiempo; MR usa ingreso del viaje completo. | Gold: fact_abordajes / fact_viajes_metroriel; dim_modo / dim_zona / dim_tiempo | transmetro_validaciones.csv; transurbano_transacciones.csv; aerometro_boardings.csv; metroriel_viajes.jsonl |
+| `momento_fin_transbordo` | Timestamp local del evento siguiente desde dim_tiempo; no es salida fisica del primer modo. | Gold: fact_abordajes / fact_viajes_metroriel; dim_modo / dim_zona / dim_tiempo | transmetro_validaciones.csv; transurbano_transacciones.csv; aerometro_boardings.csv; metroriel_viajes.jsonl |
+| `modo_origen` | Modo del evento previo desde dim_modo (MR literal MetroRiel). | Gold: fact_abordajes / fact_viajes_metroriel; dim_modo / dim_zona / dim_tiempo | transmetro_validaciones.csv; transurbano_transacciones.csv; aerometro_boardings.csv; metroriel_viajes.jsonl |
+| `modo_destino` | Modo del evento siguiente, distinto del origen. | Gold: fact_abordajes / fact_viajes_metroriel; dim_modo / dim_zona / dim_tiempo | transmetro_validaciones.csv; transurbano_transacciones.csv; aerometro_boardings.csv; metroriel_viajes.jsonl |
+| `combinacion_modos` | Concatenacion direccional modo_origen -> modo_destino. | Gold: fact_abordajes / fact_viajes_metroriel; dim_modo / dim_zona / dim_tiempo | transmetro_validaciones.csv; transurbano_transacciones.csv; aerometro_boardings.csv; metroriel_viajes.jsonl |
+| `zona_origen` | Zona del evento previo desde dim_zona; MR toma zona_origen_sk. | Gold: fact_abordajes / fact_viajes_metroriel; dim_modo / dim_zona / dim_tiempo | transmetro_validaciones.csv; transurbano_transacciones.csv; aerometro_boardings.csv; metroriel_viajes.jsonl; catalogos de puntos para zonas |
+| `zona_destino` | Zona del evento siguiente desde dim_zona; no necesariamente destino del viaje completo. | Gold: fact_abordajes / fact_viajes_metroriel; dim_modo / dim_zona / dim_tiempo | transmetro_validaciones.csv; transurbano_transacciones.csv; aerometro_boardings.csv; metroriel_viajes.jsonl; catalogos de puntos para zonas |
+| `tiempo_transferencia_minutos` | Diferencia entre timestamps de eventos / 60, redondeada a 2 decimales; >0 y <=90. Proximidad no prueba transferencia fisica. | Gold: fact_abordajes / fact_viajes_metroriel; dim_modo / dim_zona / dim_tiempo | transmetro_validaciones.csv; transurbano_transacciones.csv; aerometro_boardings.csv; metroriel_viajes.jsonl |
+| `tarifa_acumulada_gtq` | Suma de tarifas registradas de ambos eventos desde los hechos; no cobro integrado ni recaudo confirmado. | Gold: fact_abordajes / fact_viajes_metroriel; dim_modo / dim_zona / dim_tiempo | transmetro_validaciones.csv; transurbano_transacciones.csv; aerometro_boardings.csv; metroriel_viajes.jsonl |
+| `incluye_aerometro` | Origen o destino es Aerometro. Aerometro usa AM-<hash> y no puede enlazarse persona-a-persona con TM/TU/MR; cero enlaces observables no demuestra cero transferencias fisicas. | Gold: fact_abordajes / fact_viajes_metroriel; dim_modo / dim_zona / dim_tiempo | transmetro_validaciones.csv; transurbano_transacciones.csv; aerometro_boardings.csv; metroriel_viajes.jsonl |
+| `cantidad_transbordos` | Literal 1 por par consecutivo inferido; medida aditiva de pares, no usuarios. | Gold: fact_abordajes / fact_viajes_metroriel; dim_modo / dim_zona / dim_tiempo | transmetro_validaciones.csv; transurbano_transacciones.csv; aerometro_boardings.csv; metroriel_viajes.jsonl |
+
+## v_tableau_transbordos
+
+Grano: fecha x hora x modos x zonas x incluye_aerometro. Agrega transbordos inferidos; no mide el total de usuarios multimodales. Aerometro usa AM-<hash> y no puede enlazarse persona-a-persona con TM/TU/MR; cero enlaces observables no demuestra cero transferencias fisicas.
+
+| Campo | Significado y transformacion | Fuente inmediata | Fuente cruda |
+|---|---|---|---|
+| `fecha` | Proyeccion de mart_multimodalidad.fecha_transbordo. | Gold: mart_multimodalidad | transmetro_validaciones.csv; transurbano_transacciones.csv; aerometro_boardings.csv; metroriel_viajes.jsonl |
+| `hora` | Proyeccion de mart_multimodalidad.hora_transbordo. | Gold: mart_multimodalidad | transmetro_validaciones.csv; transurbano_transacciones.csv; aerometro_boardings.csv; metroriel_viajes.jsonl |
+| `modo_origen` | Modo previo del mart, parte del grano agregado. | Gold: mart_multimodalidad | transmetro_validaciones.csv; transurbano_transacciones.csv; aerometro_boardings.csv; metroriel_viajes.jsonl |
+| `modo_destino` | Modo siguiente del mart, parte del grano agregado. | Gold: mart_multimodalidad | transmetro_validaciones.csv; transurbano_transacciones.csv; aerometro_boardings.csv; metroriel_viajes.jsonl |
+| `combinacion_modos` | Combinacion direccional heredada del mart. | Gold: mart_multimodalidad | transmetro_validaciones.csv; transurbano_transacciones.csv; aerometro_boardings.csv; metroriel_viajes.jsonl |
+| `zona_origen` | Zona del evento previo heredada del mart. | Gold: mart_multimodalidad | transmetro_validaciones.csv; transurbano_transacciones.csv; aerometro_boardings.csv; metroriel_viajes.jsonl; catalogos de puntos para zonas |
+| `zona_destino` | Zona del evento siguiente heredada del mart. | Gold: mart_multimodalidad | transmetro_validaciones.csv; transurbano_transacciones.csv; aerometro_boardings.csv; metroriel_viajes.jsonl; catalogos de puntos para zonas |
+| `incluye_aerometro` | Bandera heredada del mart. Aerometro usa AM-<hash> y no puede enlazarse persona-a-persona con TM/TU/MR; cero enlaces observables no demuestra cero transferencias fisicas. | Gold: mart_multimodalidad | transmetro_validaciones.csv; transurbano_transacciones.csv; aerometro_boardings.csv; metroriel_viajes.jsonl |
+| `total_transbordos` | COUNT(*) de pares inferidos por fecha, hora, modos, zonas y bandera; aditivo, no usuarios distintos. | Gold: mart_multimodalidad | transmetro_validaciones.csv; transurbano_transacciones.csv; aerometro_boardings.csv; metroriel_viajes.jsonl |
+| `tiempo_promedio_transferencia_minutos` | ROUND(AVG(tiempo_transferencia_minutos),2); no aditivo. Para reagregar, ponderar por total_transbordos; el redondeo puede perder precision. | Gold: mart_multimodalidad | transmetro_validaciones.csv; transurbano_transacciones.csv; aerometro_boardings.csv; metroriel_viajes.jsonl |
+| `tarifa_total_gtq` | ROUND(SUM(tarifa_acumulada_gtq),2) de pares; puede contar un evento en dos pares, no equivale a ingreso de la red. | Gold: mart_multimodalidad | transmetro_validaciones.csv; transurbano_transacciones.csv; aerometro_boardings.csv; metroriel_viajes.jsonl |
+
+## v_tableau_multimodalidad
+
+Grano: modos_observados x metodo_identidad. Solo Gold (dim_usuario). Multimodal: modos_observados >1; identidades observadas, no personas verificadas. Aerometro usa AM-<hash> y no puede enlazarse persona-a-persona con TM/TU/MR; cero enlaces observables no demuestra cero transferencias fisicas.
+
+| Campo | Significado y transformacion | Fuente inmediata | Fuente cruda |
+|---|---|---|---|
+| `modos_observados` | Cantidad de sistemas de dim_usuario, clave del grupo, no una lista de modos. | Gold: dim_usuario | transmetro_validaciones.csv; transurbano_transacciones.csv; aerometro_boardings.csv; metroriel_viajes.jsonl |
+| `metodo_identidad` | Metodo de dim_usuario: HASH_AISLADO o PATRON_NUMERICO_INFERIDO. | Gold: dim_usuario | transmetro_validaciones.csv; transurbano_transacciones.csv; aerometro_boardings.csv; metroriel_viajes.jsonl |
+| `usuarios` | COUNT(*) de identidades Gold por modos_observados y metodo_identidad; aditivo entre grupos. | Gold: dim_usuario | transmetro_validaciones.csv; transurbano_transacciones.csv; aerometro_boardings.csv; metroriel_viajes.jsonl |
+| `total_usuarios_observados` | SUM(usuarios) OVER () en toda dim_usuario; total global repetido, usar MIN/MAX en Tableau. | Gold: dim_usuario | transmetro_validaciones.csv; transurbano_transacciones.csv; aerometro_boardings.csv; metroriel_viajes.jsonl |
+| `usuarios_multimodales_total` | SUM de usuarios con modos_observados >1 en toda la dimension; repetido, usar MIN/MAX. | Gold: dim_usuario | transmetro_validaciones.csv; transurbano_transacciones.csv; aerometro_boardings.csv; metroriel_viajes.jsonl |
+| `usuarios_unimodales_total` | SUM de usuarios con modos_observados =1 en toda la dimension; repetido, usar MIN/MAX. | Gold: dim_usuario | transmetro_validaciones.csv; transurbano_transacciones.csv; aerometro_boardings.csv; metroriel_viajes.jsonl |
+| `pct_usuarios_multimodales` | ROUND(100.0 * multimodales / total,2). Porcentaje global repetido; MIN/MAX, nunca SUM. No se recalcula al filtrar grupos. | Gold: dim_usuario | transmetro_validaciones.csv; transurbano_transacciones.csv; aerometro_boardings.csv; metroriel_viajes.jsonl |

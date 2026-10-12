@@ -81,6 +81,5 @@ en la corrida final de idempotencia.
 docker exec -i red_metropolitana_postgres psql -U red_user -d red_metropolitana -c "analyze"
 Get-Content sql/utilities/metricas_tamano.sql | docker exec -i red_metropolitana_postgres psql -U red_user -d red_metropolitana
 .\scripts\medir_consultas.ps1
-```
-
 docker exec -i red_metropolitana_postgres psql -U red_user -d red_metropolitana -c "select avg(pg_column_size(f.*)) as bytes_por_fila from gold.fact_abordajes f"
+```

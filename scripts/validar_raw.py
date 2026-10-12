@@ -16,6 +16,7 @@ Uso:
 from __future__ import annotations
 
 import csv
+import argparse
 import hashlib
 import json
 from datetime import datetime
@@ -112,6 +113,7 @@ def validate_jsonl(path: Path, expected_keys: list[str]) -> tuple[int, int, list
     row_count = 0
     invalid_json = 0
     first_keys: list[str] = []
+    keys_ok = True
 
     with path.open("r", encoding="utf-8") as f:
         for line_no, line in enumerate(f, start=1):
@@ -125,10 +127,14 @@ def validate_jsonl(path: Path, expected_keys: list[str]) -> tuple[int, int, list
                 invalid_json += 1
                 continue
 
+            if not isinstance(obj, dict):
+                keys_ok = False
+                continue
+            keys_ok = keys_ok and set(expected_keys).issubset(obj)
             if not first_keys:
                 first_keys = list(obj.keys())
 
-    keys_ok = set(expected_keys).issubset(set(first_keys))
+    keys_ok = keys_ok and row_count > 0 and bool(first_keys)
     return row_count, invalid_json, first_keys, keys_ok
 
 
@@ -137,24 +143,26 @@ def human_mb(size_bytes: int) -> float:
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--raw-dir', type=Path, default=RAW_DIR)
+    args = parser.parse_args()
+    raw_dir = args.raw_dir.resolve()
     REPORT_DIR.mkdir(parents=True, exist_ok=True)
 
     print("=" * 72)
     print("VALIDACIÓN RAW - RED METROPOLITANA")
     print("=" * 72)
     print(f"Proyecto : {PROJECT_ROOT}")
-    print(f"Raw      : {RAW_DIR}")
+    print(f"Raw      : {raw_dir.name}")
     print()
 
-    if not RAW_DIR.exists():
-        print(f"[ERROR] No existe la carpeta: {RAW_DIR}")
-        return 1
+    # Incluso si falta el directorio, generar un resultado ERROR por archivo.
 
     results: list[dict[str, Any]] = []
     all_ok = True
 
     for filename, spec in EXPECTED.items():
-        path = RAW_DIR / filename
+        path = raw_dir / filename
         print(f"Validando {filename} ...")
 
         result: dict[str, Any] = {
@@ -200,6 +208,7 @@ def main() -> int:
             file_ok = file_ok and result["json_invalidos"] == 0
 
         result["estado"] = "OK" if file_ok else "REVISAR"
+        results.append(result)
 
         if not file_ok:
             all_ok = False
@@ -212,7 +221,7 @@ def main() -> int:
 
     # Detectar extras en data/raw, ignorando .gitkeep
     actual_files = {
-        p.name for p in RAW_DIR.iterdir()
+        p.name for p in (raw_dir.iterdir() if raw_dir.is_dir() else [])
         if p.is_file() and p.name != ".gitkeep"
     }
     expected_files = set(EXPECTED)
@@ -223,8 +232,7 @@ def main() -> int:
 
     report = {
         "fecha_validacion": generated_at,
-        "raw_dir": str(RAW_DIR),
-        "estado_general": "OK" if all_ok and not extras and not missing else "REVISAR",
+        "estado_general": "OK" if all_ok and len(results) == len(EXPECTED) and results and not extras and not missing else "REVISAR",
         "archivos_esperados": len(EXPECTED),
         "archivos_encontrados": len(actual_files),
         "faltantes": missing,
