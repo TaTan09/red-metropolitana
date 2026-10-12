@@ -127,3 +127,7 @@ Raw y las filas de cada archivo Parquet, además de estos conteos y duraciones.
 ## Nota posterior (Fase 2)
 
 La fila `dim_zona` de las tablas de Gold (13) refleja el modelo vigente el 22-sep-2026. Desde entonces `dim_zona` se construye desde `silver_universo_zonas` y tiene 16 filas; ver `004-correccion-zonas.md`. Los conteos de `fact_abordajes` (1,393,448) y `fact_viajes_metroriel` (295,511) no cambiaron: suman 1,688,959, que es lo que reconcilia `mart_demanda_hora`. Los `003-corrida-*.json` se conservan sin modificar como evidencia de esa fecha.
+
+## Alcance de igualdad y auditoria de ejecucion
+
+La evidencia historica anterior demuestra hashes Raw/Parquet y conteos SQL iguales; no compara byte a byte el contenido de todas las tablas SQL. bridge_identidad_usuario.fecha_proceso (current_date) y silver_cuarentena.fecha_deteccion (current_timestamp) pueden cambiar sin variar los registros de negocio. Para la revision posterior de Fase 2 se comparan conteos y fingerprints del contenido relevante, excluyendo exclusivamente esos dos campos de auditoria en sus tablas, y se verifican las claves mediante dbt. Ver docs/metricas/validacion_fase2.json. Esta evidencia adicional no modifica las corridas historicas ni sustituye una repeticion del flujo Prefect completo el dia de la defensa.

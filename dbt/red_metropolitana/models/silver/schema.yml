@@ -1,0 +1,118 @@
+version: 2
+models:
+- name: silver_features_usuario
+  description: Features exclusivamente Silver, una fila por identidad; eventos e ingreso/salida
+    MR filtrados al cutoff real. Aerometro usa AM-<hash> y no puede enlazarse persona-a-persona
+    con TM/TU/MR; cero enlaces observables no demuestra cero transferencias fisicas.
+  columns:
+  - name: usuario_canonico_id
+    description: Identidad Silver USR- o AM- del puente; una fila por identidad con
+      eventos disponibles al corte, no persona confirmada.
+    data_tests:
+    - not_null
+    - unique
+  - name: metodo_match
+    description: MIN del metodo del puente para eventos incluidos; AM HASH_AISLADO;
+      TM/TU/MR PATRON_NUMERICO_INFERIDO.
+    data_tests:
+    - not_null
+  - name: nivel_confianza
+    description: MIN de la etiqueta del puente; ALTO_LOCAL o INFERENCIA_ACADEMICA_MEDIA,
+      no probabilidad calibrada.
+    data_tests:
+    - not_null
+  - name: fecha_corte
+    description: Maximo timestamp local real de las cuatro fuentes Silver, incluyendo
+      salida MR; override features_cutoff opcional.
+    data_tests:
+    - not_null
+  - name: total_eventos
+    description: COUNT(*) de abordajes TM/TU/AM y viajes completos MR disponibles
+      al corte.
+    data_tests:
+    - not_null
+  - name: modos_utilizados
+    description: COUNT(DISTINCT modo) de eventos incluidos.
+    data_tests:
+    - not_null
+  - name: es_multimodal
+    description: modos_utilizados >1; AM permanece aislado.
+    data_tests:
+    - not_null
+  - name: dias_activos
+    description: COUNT(DISTINCT fecha_hora::date) de eventos incluidos.
+    data_tests:
+    - not_null
+  - name: primer_evento
+    description: MIN(fecha_hora); MR usa ingreso.
+    data_tests:
+    - not_null
+  - name: ultimo_evento
+    description: MAX(fecha_hora); MR usa ingreso.
+    data_tests:
+    - not_null
+  - name: span_dias_uso
+    description: FLOOR de segundos entre ultimo y primer evento /86400; dias completos
+      transcurridos.
+    data_tests:
+    - not_null
+  - name: eventos_ultimos_7_dias
+    description: COUNT de eventos en (fecha_corte -7 dias, fecha_corte].
+    data_tests:
+    - not_null
+  - name: eventos_ultimos_30_dias
+    description: COUNT de eventos en (fecha_corte -30 dias, fecha_corte].
+    data_tests:
+    - not_null
+  - name: eventos_ultimos_90_dias
+    description: COUNT de eventos en (fecha_corte -90 dias, fecha_corte].
+    data_tests:
+    - not_null
+  - name: modo_mas_usado
+    description: Modo con mayor COUNT; desempate por nombre ASC.
+    data_tests:
+    - not_null
+  - name: dias_desde_ultimo_evento
+    description: FLOOR de segundos entre fecha_corte y ultimo_evento /86400; dias
+      completos.
+    data_tests:
+    - not_null
+  - name: proporcion_eventos_hora_pico
+    description: Eventos lunes-viernes en horas 06,07,08,17,18,19 /total; proporcion
+      [0,1] sin redondeo.
+    data_tests:
+    - not_null
+  - name: zona_origen_frecuente
+    description: 'Zona del punto Silver TM/TU/AM o estacion origen MR mas frecuente;
+      COUNT DESC, zona ASC. Ausencia de catalogo: ZONA_DESCONOCIDA.'
+    data_tests:
+    - not_null
+  - name: gasto_total_gtq
+    description: ROUND(SUM(tarifa_quetzales),2) de eventos disponibles.
+    data_tests:
+    - not_null
+  - name: tarifa_promedio_gtq
+    description: ROUND(AVG(tarifa_quetzales),2) por evento; no tarifa integrada.
+    data_tests:
+    - not_null
+  - name: eventos_transmetro
+    description: COUNT filtrado a Transmetro; abordajes.
+    data_tests:
+    - not_null
+  - name: eventos_transurbano
+    description: COUNT filtrado a Transurbano; abordajes.
+    data_tests:
+    - not_null
+  - name: eventos_aerometro
+    description: COUNT filtrado a Aerometro; abordajes.
+    data_tests:
+    - not_null
+  - name: eventos_metroriel
+    description: COUNT filtrado a MetroRiel; viajes completos disponibles, fechados
+      en ingreso.
+    data_tests:
+    - not_null
+  - name: usa_aerometro
+    description: eventos_aerometro >0; no demuestra adopcion por usuarios de TM/TU/MR.
+    data_tests:
+    - not_null

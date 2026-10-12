@@ -15,6 +15,7 @@ venv/
 .idea/
 
 # Data: keep folders, not generated/heavy files
+datos_red/
 data/raw/*
 !data/raw/.gitkeep
 data/bronze/*

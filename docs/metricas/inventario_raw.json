@@ -1,10 +1,206 @@
 {
-  "fecha_validacion": "2026-09-12T21:58:19-06:00",
-  "raw_dir": "C:\\Users\\Confi\\Desktop\\Universidad\\Ingeniería en Sistemas\\Octavo Semestre\\Ciencia de Datos\\Proyecto1\\red-metropolitana-starter\\data\\raw",
+  "fecha_validacion": "2026-10-12T11:16:00-06:00",
   "estado_general": "OK",
   "archivos_esperados": 9,
   "archivos_encontrados": 9,
   "faltantes": [],
   "extras": [],
-  "resultados": []
+  "resultados": [
+    {
+      "archivo": "tm_estaciones.csv",
+      "existe": true,
+      "tipo": "csv",
+      "esperado_registros": 104,
+      "bytes": 7387,
+      "mb": 0.01,
+      "sha256": "4d53a95abb4f115b7da7f69db2c392e1748d6704807d81408a5e510f791624d0",
+      "registros": 104,
+      "columnas": [
+        "estacion_id",
+        "nombre",
+        "linea",
+        "zona",
+        "lat",
+        "lon"
+      ],
+      "esquema_ok": true,
+      "json_invalidos": null,
+      "conteo_ok": true,
+      "estado": "OK"
+    },
+    {
+      "archivo": "tu_paradas.csv",
+      "existe": true,
+      "tipo": "csv",
+      "esperado_registros": 328,
+      "bytes": 13189,
+      "mb": 0.01,
+      "sha256": "a888a09c45189cfeac0a0577377d1b4c662923ee55f798d961f418aa2ac93b90",
+      "registros": 328,
+      "columnas": [
+        "cod_parada",
+        "descripcion",
+        "ruta",
+        "sector"
+      ],
+      "esquema_ok": true,
+      "json_invalidos": null,
+      "conteo_ok": true,
+      "estado": "OK"
+    },
+    {
+      "archivo": "mr_estaciones.csv",
+      "existe": true,
+      "tipo": "csv",
+      "esperado_registros": 22,
+      "bytes": 537,
+      "mb": 0.0,
+      "sha256": "c302ffbc6f0bdcf926c8eaaf9a5427ec5d38d482cc44431e3aeb20a8febb8e8c",
+      "registros": 22,
+      "columnas": [
+        "id_estacion",
+        "nombre_estacion",
+        "zona_nombre",
+        "km"
+      ],
+      "esquema_ok": true,
+      "json_invalidos": null,
+      "conteo_ok": true,
+      "estado": "OK"
+    },
+    {
+      "archivo": "am_estaciones.csv",
+      "existe": true,
+      "tipo": "csv",
+      "esperado_registros": 14,
+      "bytes": 687,
+      "mb": 0.0,
+      "sha256": "e3acbeed8608fb9a6b9a8df87646bf5294e644aa64bd95484f1424b92ae21723",
+      "registros": 14,
+      "columnas": [
+        "station_code",
+        "station_name",
+        "axis",
+        "district"
+      ],
+      "esquema_ok": true,
+      "json_invalidos": null,
+      "conteo_ok": true,
+      "estado": "OK"
+    },
+    {
+      "archivo": "transmetro_validaciones.csv",
+      "existe": true,
+      "tipo": "csv",
+      "esperado_registros": 363221,
+      "bytes": 24042454,
+      "mb": 22.93,
+      "sha256": "5f88356e427d0ec19b193f6aaafedc288d9bf3fbad1881f011a7d9ea912730d2",
+      "registros": 363221,
+      "columnas": [
+        "validacion_id",
+        "tarjeta",
+        "estacion_id",
+        "linea",
+        "fecha_hora",
+        "tarifa",
+        "tipo"
+      ],
+      "esquema_ok": true,
+      "json_invalidos": null,
+      "conteo_ok": true,
+      "estado": "OK"
+    },
+    {
+      "archivo": "transurbano_transacciones.csv",
+      "existe": true,
+      "tipo": "csv",
+      "esperado_registros": 832791,
+      "bytes": 43125718,
+      "mb": 41.13,
+      "sha256": "8ce5028499b7b6c7274fd838430e87d373065d377e5ec1f062a4fa6497083fad",
+      "registros": 832791,
+      "columnas": [
+        "fecha",
+        "hora",
+        "num_tarjeta",
+        "cod_parada",
+        "ruta",
+        "monto_centavos",
+        "cod_estado"
+      ],
+      "esquema_ok": true,
+      "json_invalidos": null,
+      "conteo_ok": true,
+      "estado": "OK"
+    },
+    {
+      "archivo": "metroriel_viajes.jsonl",
+      "existe": true,
+      "tipo": "jsonl",
+      "esperado_registros": 299100,
+      "bytes": 55311001,
+      "mb": 52.75,
+      "sha256": "23feb4a3a55ce506bf34de5faf7834f9c390b7ca70499cc9fb3ec1c3650ebede",
+      "registros": 299100,
+      "columnas": [
+        "trip_id",
+        "card",
+        "entry",
+        "exit",
+        "fare_gtq",
+        "duration_s"
+      ],
+      "esquema_ok": true,
+      "json_invalidos": 0,
+      "conteo_ok": true,
+      "estado": "OK"
+    },
+    {
+      "archivo": "aerometro_boardings.csv",
+      "existe": true,
+      "tipo": "csv",
+      "esperado_registros": 203554,
+      "bytes": 12122578,
+      "mb": 11.56,
+      "sha256": "898b871c6b3457b6b63a522d5dd8966e3a75bcaf215156a65c4a9d211af4cdc7",
+      "registros": 203554,
+      "columnas": [
+        "boarding_id",
+        "user_hash",
+        "station_code",
+        "axis",
+        "timestamp_utc",
+        "cabin_number",
+        "fare"
+      ],
+      "esquema_ok": true,
+      "json_invalidos": null,
+      "conteo_ok": true,
+      "estado": "OK"
+    },
+    {
+      "archivo": "cdc_padron_usuarios.csv",
+      "existe": true,
+      "tipo": "csv",
+      "esperado_registros": 31050,
+      "bytes": 2149136,
+      "mb": 2.05,
+      "sha256": "68e4d9dd258809dd4a45a0c5f9023ad6f3b5d32912e4447b9d20b9a7258de5c4",
+      "registros": 31050,
+      "columnas": [
+        "seq",
+        "commit_ts",
+        "op",
+        "tarjeta",
+        "perfil",
+        "zona_residencia",
+        "estado"
+      ],
+      "esquema_ok": true,
+      "json_invalidos": null,
+      "conteo_ok": true,
+      "estado": "OK"
+    }
+  ]
 }

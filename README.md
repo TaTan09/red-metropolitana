@@ -201,3 +201,24 @@ Si falla la segunda ejecución después de guardarse `003-corrida-1.json`, corri
 Si `.env` utiliza otro puerto local de PostgreSQL, `docker compose` lo respeta con `POSTGRES_PORT`. El broker Kafka se configura opcionalmente con `KAFKA_BOOTSTRAP_SERVERS` (predeterminado `localhost:9092`). Prefect arranca su servidor temporal local automáticamente; no hay que levantar manualmente Prefect Server ni usar Prefect Cloud.
 
 Para repetir únicamente las pruebas dbt en un Docker con poca memoria compartida, usa `python scripts/run_dbt.py test --threads 1`.
+
+
+### Multimodalidad y features (revision Fase 2)
+
+- `gold.v_tableau_multimodalidad`: usuarios observados por cantidad de modos y metodo; KPI multimodal = modos_observados >1. Totales globales repetidos: MIN/MAX en Tableau.
+- `gold.mart_multimodalidad` y `gold.v_tableau_transbordos`: pares consecutivos inferidos >0 y <=90 minutos; trazabilidad de ambos registros Bronze.
+- `silver.silver_features_usuario`: features exclusivamente Silver, cutoff maximo real guardado en cada fila, ventanas 7/30/90 dias, recencia, modo/zona frecuentes, hora pico y tarifas. Ver [diccionario y fecha de corte](docs/features_usuario.md).
+
+Aerometro permanece aislado: sus enlaces persona-a-persona con los otros modos no son medibles. Las cifras de multimodalidad son observables con la identidad disponible. El workbook local no fue modificado.
+
+```powershell
+python scripts/run_dbt.py parse
+python scripts/run_dbt.py build --select +silver_features_usuario +mart_multimodalidad v_tableau_transbordos +v_tableau_multimodalidad --threads 1
+python scripts/run_dbt.py test --select path:models/silver --threads 1
+python scripts/run_dbt.py test --select path:models/gold --threads 1
+python scripts/run_dbt.py docs generate
+python scripts/validar_raw.py --raw-dir datos_red
+python scripts/configurar_tableau_ro.py
+```
+
+`datos_red/` esta ignorado y se conserva localmente; las ingestas existentes usan `data/raw/`. La provision de `tableau_ro` no guarda contrasenas y crea NOLOGIN por defecto; requiere una variable privada `TABLEAU_RO_PASSWORD` para habilitarlo y cambiar la conexion Tableau manualmente. Ver [seguridad y estado RBAC](docs/seguridad/seguridad_y_datos_personales.md) y [validacion final](docs/metricas/validacion_fase2.md).
