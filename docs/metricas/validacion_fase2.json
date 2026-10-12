@@ -239,7 +239,7 @@
     ],
     "alcance": "Un par real, no auditoría exhaustiva de todos los pares"
   },
-  "fecha_verificacion": "2026-10-12T11:30:24-06:00",
+  "fecha_verificacion": "2026-10-12T14:57:54-06:00",
   "dbt": {
     "build_inicial_cancelado": {
       "elapsed_time": 445.73300790786743,
@@ -2148,7 +2148,6 @@
       }
     }
   },
-  "idempotencia_igual": true,
   "comandos": {
     "parse": {
       "comando": "python scripts/run_dbt.py parse",
@@ -2160,5 +2159,6 @@
       "codigo": 0,
       "duracion_segundos": 9.808
     }
-  }
+  },
+  "idempotencia_igual": true
 }
