@@ -20,7 +20,7 @@ Gold produce `usuario_sk` con **HMAC-SHA256** y la variable privada estable `GOL
 | Auditoría / Seguridad | Bronze/Silver/puente: investigación con trazabilidad |
 | Pipeline / dbt | Escritura de capas con `red_user`: operación local |
 
-Estado real: `tableau_ro` tiene CONNECT, USAGE Gold, SELECT actual y default privileges del propietario dbt; se verificó la denegación Staging/Silver. Se creó **NOLOGIN**, sin inventar contraseña. Habilitarlo requiere `TABLEAU_RO_PASSWORD` externo y cambiar Tableau manualmente. El workbook sigue usando `red_user`, con acceso más amplio, y se conservó intacto. Los permisos del rol cubren todo Gold, incluidos hechos seudonimizados; usar vistas es la política BI. Los demás perfiles son política objetivo, no roles implementados. La [guía técnica](tableau_ro.md) detalla el provisionamiento reproducible y sus límites.
+Estado actualizado el 12 de octubre de 2026: `tableau_ro` tiene **LOGIN**, CONNECT, USAGE Gold y SELECT actual; se comprobaron una consulta Gold y la denegación de lectura Staging/Silver. El cleanup anterior verificó ausencia de escritura Gold y default privileges del propietario dbt para tablas/vistas futuras. El usuario completó y validó la migración manual en Tableau, guardó y reabrió el TWBX. Su XML confirma cinco conexiones `tableau_ro`, sin contraseñas ni tokens guardados. La contraseña se administra externamente mediante `TABLEAU_RO_PASSWORD` (la plantilla se rechaza). No se editó binariamente el paquete durante esta revisión. Los permisos cubren todo Gold, incluidos hechos seudonimizados; el workbook usa vistas. Los demás perfiles son política objetivo, no roles implementados. La [guía técnica](tableau_ro.md) conserva el procedimiento para otros entornos.
 
 ## 4. Retención
 

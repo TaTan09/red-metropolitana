@@ -1,6 +1,6 @@
 # ADR 002 — Decisiones de Fase 2: marts, vistas para Tableau y cobertura
 
-Estado: Aceptado, salvo la decisión 5 (pendiente)
+Estado: Aceptado; decisión 5 completada y validada el 12 de octubre de 2026
 Fecha: 2026-10-10
 
 ## Contexto
@@ -70,17 +70,25 @@ Según los catálogos, las 22 estaciones MetroRiel están en las zonas 17, 12, 8
 (verificado en `v_tableau_cobertura`: solo esas cinco zonas tienen estaciones o viajes
 iniciados). Por eso encabezan `ranking_viajes_mr_origen`.
 
-### 5. Rol de solo lectura `tableau_ro`
+### 5. Rol de solo lectura `tableau_ro`: completada
 
-El workbook local usa `red_user`, que también puede leer Staging y Silver,
-donde están las tarjetas originales. Eso contradice el principio de que el tablero
-solo ve Gold. La revisión de Fase 2 provisiona `tableau_ro` con acceso solo al esquema `gold`,
-usando `ALTER DEFAULT PRIVILEGES` para que conserve el acceso cuando dbt recree las
-tablas y vistas, con la contraseña fuera del repositorio.
+**Estado confirmado el 12 de octubre de 2026:** la migración manual del workbook
+a `tableau_ro` está completada. El usuario validó la conexión en Tableau,
+guardó el TWBX y lo reabrió correctamente. La inspección automática, de sólo
+lectura, confirma que sus cinco conexiones PostgreSQL usan `tableau_ro` y que
+el XML no contiene contraseñas ni tokens guardados.
 
-Se creó sin LOGIN para no inventar ni guardar contraseñas. La habilitación mediante
-`TABLEAU_RO_PASSWORD` y el cambio manual de conexión en Tableau siguen pendientes.
-Ver `docs/seguridad/seguridad_y_datos_personales.md` y la evidencia de permisos.
+PostgreSQL confirma LOGIN habilitado, sin privilegios elevados, CONNECT a la base,
+USAGE Gold y SELECT sobre las relaciones Gold actuales. Se comprobó una consulta
+Gold con SET ROLE y la denegación efectiva de lectura en Staging y Silver.
+`ALTER DEFAULT PRIVILEGES` del propietario dbt conserva SELECT para futuras
+relaciones Gold; esa herencia se verificó en el cleanup anterior. Los permisos
+cubren todo Gold, incluidos hechos seudonimizados; el workbook consume vistas.
+
+La contraseña se administra fuera de Git mediante `TABLEAU_RO_PASSWORD`.
+No se modificó binariamente el workbook durante esta comprobación. Ver
+`docs/seguridad/tableau_ro.md` para el estado verificado y el procedimiento
+reproducible en otros entornos.
 
 ## Evidencia
 

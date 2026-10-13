@@ -21,7 +21,10 @@ La base compartida del proyecto ya incluye:
 - SCD Tipo 2 e identidad documentada;
 - modelo dimensional Gold con seis dimensiones y dos hechos;
 - Prefect para el flujo completo;
-- evidencia de dos corridas idempotentes de extremo a extremo.
+- evidencia de dos corridas finales idempotentes de extremo a extremo en [005](../evidencias/005-idempotencia-final-fase2.md), con 003 histórica conservada;
+- cuatro marts y seis vistas Gold, features por identidad y documentación de gobernanza/seguridad;
+- workbook final versionado en `tableau/workbook/Red_Metropolitana_Fase2.twbx`;
+- 70,380 usuarios observados, 36,827 multimodales (52.33 %); 1,393,448 abordajes TM/TU/AM y 295,511 viajes MR; Santa Catarina Pinula sin cobertura catalogada.
 
 ## Reparto de trabajo
 
@@ -52,7 +55,8 @@ Criterios:
 - Mantener conteos y evidencia de idempotencia.
 - Documentar los usuarios únicos de TU, MR y AM.
 - Prefect/orquestación del flujo completo está implementada y validada en `orchestration/flows/fase1_pipeline.py`.
-- La evidencia de dos corridas idénticas está en `docs/evidencias/003-idempotencia-flujo-completo.md`.
+- 003 es evidencia histórica de Fase 1; la validación completa final está en `docs/evidencias/005-idempotencia-final-fase2.md`.
+- Nuevas demostraciones requieren `--evidence-prefix`, por ejemplo `006-defensa`; no sobrescribir evidencia existente. Resume usa el mismo prefijo y conserva la primera corrida.
 
 ### Alejandro — dbt, Silver, Calidad y SCD2
 
@@ -76,7 +80,7 @@ No debe cambiar la interfaz Staging sin coordinarlo.
 
 ### Jonatán — Diseño dimensional, Gold y Tableau
 
-La rama `feature/gold-dimensional` implementa las seis dimensiones y los dos hechos acordados. El diseño, DDL y métricas están en `docs/arquitectura/modelo_dimensional_gold.md`, `sql/ddl/gold_model.sql` y `docs/metricas/gold_metricas.md`. Tableau sigue pendiente.
+La rama `feature/gold-dimensional` implementa las seis dimensiones y los dos hechos acordados. El diseño, DDL y métricas están en `docs/arquitectura/modelo_dimensional_gold.md`, `sql/ddl/gold_model.sql` y `docs/metricas/gold_metricas.md`. Tableau está implementado y versionado en `tableau/workbook/Red_Metropolitana_Fase2.twbx`, con cuatro marts y seis vistas Gold disponibles; el TWBX referencia cinco, dejando v_tableau_transbordos como análisis adicional.
 
 Responsabilidades:
 - declarar granos;
@@ -88,8 +92,8 @@ Responsabilidades:
 - `fact_viajes_metroriel`;
 - clasificación de medidas;
 - dimensión tiempo con día hábil y hora pico;
-- luego materializar Gold exclusivamente desde Silver;
-- preparar las vistas/tablas que consumirá Tableau.
+- materializaciones dimensionales Gold exclusivamente desde Silver;
+- mantener las seis vistas Gold disponibles para Tableau y separar abordajes de viajes MR.
 
 ## Dependencias
 
@@ -112,3 +116,10 @@ Antes de hacer merge:
 - no subir archivos Raw/Bronze;
 - mantener commits pequeños y descriptivos;
 - comunicar cualquier cambio al contrato de datos.
+
+
+## Cierre y pendientes manuales
+
+TM/TU/MR comparten una identidad numérica inferida académicamente; Aerómetro permanece aislado y no permite medir enlaces persona-a-persona con otros modos. No presentar el 52.33 % como prevalencia real de personas de toda la red.
+
+La migración manual a tableau_ro está completada: el usuario validó la conexión, guardó y reabrió el workbook. El XML confirma cinco conexiones PostgreSQL tableau_ro, sin contraseñas/token guardados, y la base confirma LOGIN y lectura Gold con denegación Staging/Silver. Revalidar permisos al cambiar de entorno; el procedimiento está en `docs/seguridad/tableau_ro.md`. No se editó binariamente el ZIP durante la comprobación. La defensa oral y su ensayo completo siguen pendientes. La nueva definición Docker asigna 1 GB de shared memory; aplicarla después conservando el volumen.

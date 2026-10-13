@@ -1,20 +1,20 @@
-﻿# Idempotencia final del proyecto — Fase 2
+# Idempotencia final del proyecto — Fase 2
 
-Se ejecutÃ³ dos veces el mismo flujo Prefect con los mismos archivos Raw,
-sin borrar Bronze, el estado SQLite de deduplicaciÃ³n ni los volÃºmenes Docker.
-Idempotencia significa que reprocesar las mismas fuentes no cambia el estado analÃ­tico final.
+Se ejecutó dos veces el mismo flujo Prefect con los mismos archivos Raw,
+sin borrar Bronze, el estado SQLite de deduplicación ni los volúmenes Docker.
+Idempotencia significa que reprocesar las mismas fuentes no cambia el estado analítico final.
 
-- Corrida 1: 780.23 s; terminÃ³ 2026-10-12T13:56:34-06:00.
-- Corrida 2: 785.70 s; terminÃ³ 2026-10-12T14:09:40-06:00.
-- ComparaciÃ³n completa de SHA-256 Raw, Parquet Bronze y conteos SQL: **IGUALES**.
+- Corrida 1: 780.23 s; terminó 2026-10-12T13:56:34-06:00.
+- Corrida 2: 785.70 s; terminó 2026-10-12T14:09:40-06:00.
+- Comparación completa de SHA-256 Raw, Parquet Bronze y conteos SQL: **IGUALES**.
 - Referencia Gold medida en PostgreSQL: **OK**.
-- Cada corrida ejecutÃ³ `python scripts/run_dbt.py build` con sus pruebas.
+- Cada corrida ejecutó `python scripts/run_dbt.py build` con sus pruebas.
 
 ## Conteos de ambas corridas
 
 ### Bronze (filas por fuente)
 
-| Tabla/fuente | Corrida 1 | Corrida 2 | ComparaciÃ³n |
+| Tabla/fuente | Corrida 1 | Corrida 2 | Comparación |
 |---|---:|---:|---|
 | `tm_estaciones` | 104 | 104 | IGUALES |
 | `tu_paradas` | 328 | 328 | IGUALES |
@@ -28,7 +28,7 @@ Idempotencia significa que reprocesar las mismas fuentes no cambia el estado ana
 
 ### Staging PostgreSQL
 
-| Tabla/fuente | Corrida 1 | Corrida 2 | ComparaciÃ³n |
+| Tabla/fuente | Corrida 1 | Corrida 2 | Comparación |
 |---|---:|---:|---|
 | `tm_estaciones` | 104 | 104 | IGUALES |
 | `tu_paradas` | 328 | 328 | IGUALES |
@@ -46,7 +46,7 @@ Idempotencia significa que reprocesar las mismas fuentes no cambia el estado ana
 
 ### Silver dbt
 
-| Tabla/fuente | Corrida 1 | Corrida 2 | ComparaciÃ³n |
+| Tabla/fuente | Corrida 1 | Corrida 2 | Comparación |
 |---|---:|---:|---|
 | `silver_transmetro_validaciones` | 362,106 | 362,106 | IGUALES |
 | `silver_transurbano_transacciones` | 827,788 | 827,788 | IGUALES |
@@ -57,7 +57,7 @@ Idempotencia significa que reprocesar las mismas fuentes no cambia el estado ana
 
 ### Gold dbt
 
-| Tabla/fuente | Corrida 1 | Corrida 2 | ComparaciÃ³n |
+| Tabla/fuente | Corrida 1 | Corrida 2 | Comparación |
 |---|---:|---:|---|
 | `dim_usuario` | 70,380 | 70,380 | IGUALES |
 | `dim_tiempo` | 1,379,775 | 1,379,775 | IGUALES |
@@ -70,13 +70,13 @@ Idempotencia significa que reprocesar las mismas fuentes no cambia el estado ana
 
 ### Gold abordajes por modo
 
-| Tabla/fuente | Corrida 1 | Corrida 2 | ComparaciÃ³n |
+| Tabla/fuente | Corrida 1 | Corrida 2 | Comparación |
 |---|---:|---:|---|
 | `Aerometro` | 203,554 | 203,554 | IGUALES |
 | `Transmetro` | 362,106 | 362,106 | IGUALES |
 | `Transurbano` | 827,788 | 827,788 | IGUALES |
 
-## Streaming y deduplicaciÃ³n
+## Streaming y deduplicación
 
 | Fuente | Corrida | Mensajes consumidos | Nuevos Bronze | Omitidos por `_event_id` |
 |---|---:|---:|---:|---:|
@@ -85,7 +85,7 @@ Idempotencia significa que reprocesar las mismas fuentes no cambia el estado ana
 | transmetro | 2 | 363,221 | 0 | 363,221 |
 | aerometro | 2 | 203,554 | 0 | 203,554 |
 
-## DuraciÃ³n de etapas
+## Duración de etapas
 
 | Etapa | Corrida 1 (s) | Corrida 2 (s) |
 |---|---:|---:|
@@ -98,31 +98,34 @@ Idempotencia significa que reprocesar las mismas fuentes no cambia el estado ana
 | `dbt_build` | 358.13 | 396.73 |
 | `collect_metrics` | 12.84 | 2.25 |
 
-## Hallazgo y correcciÃ³n
+## Hallazgo y corrección
 
-Antes de la orquestaciÃ³n, los productores podÃ­an informar entregas Kafka fallidas
-en el callback y aun asÃ­ terminar con cÃ³digo cero. Ahora contabilizan esas fallas
-y devuelven cÃ³digo distinto de cero para detener Prefect.
+Antes de la orquestación, los productores podían informar entregas Kafka fallidas
+en el callback y aun así terminar con código cero. Ahora contabilizan esas fallas
+y devuelven código distinto de cero para detener Prefect.
 
-Los consumidores esperan la asignaciÃ³n de particiÃ³n antes de medir inactividad.
-Los productores aplican espera acotada ante presiÃ³n de la cola Kafka.
+Los consumidores esperan la asignación de partición antes de medir inactividad.
+Los productores aplican espera acotada ante presión de la cola Kafka.
 La cantidad consumida puede superar las filas Raw si existen publicaciones
-anteriores; la deduplicaciÃ³n por `_event_id` impide agregar copias a Bronze.
+anteriores; la deduplicación por `_event_id` impide agregar copias a Bronze.
 
-En este Docker, `dbt test` con cuatro hilos llegÃ³ a agotar `/dev/shm`.
-`python scripts/run_dbt.py test --threads 1` completÃ³ las 39 pruebas
-y el hook con `PASS=40`, `WARN=0`, `ERROR=0`.
+En este Docker, `dbt test` con cuatro hilos llegó a agotar `/dev/shm`.
+La limitación histórica de memoria compartida se documenta en 003; ese resultado no corresponde a esta validación final.
 
-Los archivos `003-corrida-1.json` y `003-corrida-2.json` contienen los SHA-256
-Raw y las filas de cada archivo Parquet, ademÃ¡s de estos conteos y duraciones.
+Los archivos `005-corrida-final-1.json` y `005-corrida-final-2.json` contienen los SHA-256
+Raw y las filas de cada archivo Parquet, además de estos conteos y duraciones.
 
+## Validación final de dbt y alcance de la evidencia
 
-## Validación final de dbt
+La consola de la ejecución final registró **PASS=189, WARN=0, ERROR=0**. Ese total combina modelos, pruebas y hook; no significa 189 pruebas.
 
-La corrida final del proyecto ejecutó el build completo de dbt y terminó correctamente:
+Durante el cleanup se recuperó el `target/run_results.json` local del segundo build, generado el **2026-10-12T20:09:36.953054Z**, invocación **1fa98fbe-5711-426e-aa0a-6cfde5e94aca**. Precede en unos segundos el cierre de la segunda corrida y corresponde a `build`; su duración dbt es **389.05 s**, dentro de los 396.73 s de proceso registrados. El resumen sin SQL compilado se añadió a `005-corrida-final-2.json` como `etapas.dbt_build.resumen_dbt_recuperado`, indicando su procedencia posterior:
 
-- PASS: 189
-- WARN: 0
-- ERROR: 0
-- Comparación entre corridas: IGUALES
-- Referencia Gold: OK
+- **158 pruebas PASS**.
+- **30 modelos success y 1 hook success**.
+- **0 warnings, 0 errores y 0 skips**.
+- **189 resultados totales**.
+
+No se conserva un `run_results.json` separado de la primera corrida; su JSON original registra código de salida 0 y duración del build, pero no la distribución de estados dbt. No se atribuyen retrospectivamente los 189 resultados a ambos JSON. `005-corrida-final-1.json` se mantiene intacto y ningún conteo histórico de las dos corridas cambió.
+
+La igualdad de 005 cubre hashes Raw, filas por archivo Parquet, los 13 conteos Staging, seis relaciones Silver, ocho dimensiones/hechos Gold y abordajes por modo que capturaba el flow anterior. No demuestra fingerprints de todo Silver/Gold ni de marts/vistas. La nueva CLI amplía esa cobertura para evidencias futuras con prefijo propio; no se rellenaron métricas históricas ausentes. `003` permanece como evidencia histórica de Fase 1.
