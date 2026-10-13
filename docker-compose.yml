@@ -2,6 +2,7 @@ services:
   postgres:
     image: postgres:16-alpine
     container_name: red_metropolitana_postgres
+    shm_size: "1gb"
     restart: unless-stopped
     env_file:
       - .env

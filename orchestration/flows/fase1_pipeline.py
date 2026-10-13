@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Ejecuta dos veces Raw → Bronze → Staging → Silver → Gold y compara conteos."""
+"""Ejecuta dos veces el flujo completo del proyecto y guarda evidencia protegida."""
 
 from __future__ import annotations
 
@@ -43,10 +43,26 @@ SILVER = (
     "silver_transmetro_validaciones", "silver_transurbano_transacciones",
     "silver_metroriel_viajes", "silver_aerometro_boardings",
     "silver_cuarentena", "silver_padron_transmetro_scd2",
+    "bridge_identidad_usuario", "silver_features_usuario",
+    "silver_catalogo_puntos", "silver_universo_zonas",
 )
 GOLD = (
     "dim_usuario", "dim_tiempo", "dim_zona", "dim_punto_transporte",
     "dim_modo", "dim_servicio", "fact_abordajes", "fact_viajes_metroriel",
+    "mart_demanda_hora", "mart_cobertura", "mart_metroriel_zonas", "mart_multimodalidad",
+)
+TABLEAU = (
+    "v_tableau_demanda_abordajes", "v_tableau_demanda_viajes_mr",
+    "v_tableau_cobertura", "v_tableau_metroriel",
+    "v_tableau_multimodalidad", "v_tableau_transbordos",
+)
+AUDIT_FIELDS = {
+    "silver.bridge_identidad_usuario": ["fecha_proceso"],
+    "silver.silver_cuarentena": ["fecha_deteccion"],
+}
+COMPARISON_KEYS = (
+    "raw_sha256", "bronze", "staging", "silver", "gold",
+    "tableau", "fingerprints_negocio", "gold_abordajes_por_modo",
 )
 STREAMS = (
     ("transmetro", "transmetro_validaciones", "streaming_transmetro_consumer.json"),
@@ -135,7 +151,55 @@ def rebuild_staging() -> dict:
 
 @task(name="dbt_build", log_prints=True)
 def dbt_build() -> dict:
-    return run_script("dbt_build", "scripts/run_dbt.py", "build")
+    artifact = ROOT / "dbt" / "red_metropolitana" / "target" / "run_results.json"
+    previous_invocation = None
+    if artifact.exists():
+        previous_invocation = json.loads(artifact.read_text(encoding="utf-8"))["metadata"].get("invocation_id")
+    outcome = run_script("dbt_build", "scripts/run_dbt.py", "build")
+    summary = summarize_dbt_results(json.loads(artifact.read_text(encoding="utf-8")))
+    if summary["comando"] != "build" or summary["invocation_id"] == previous_invocation:
+        raise RuntimeError("run_results.json no corresponde al nuevo dbt build")
+    if summary["errores"] or summary["skips"] or summary["otros_estados"]:
+        raise RuntimeError("El artefacto dbt final contiene errores, skips o estados no reconocidos")
+    outcome["resumen_dbt"] = summary
+    return outcome
+
+
+def summarize_dbt_results(artifact: dict) -> dict:
+    """Extrae evidencia real sin copiar SQL compilado ni la clave HMAC."""
+    counts = {"pruebas_pass": 0, "modelos_success": 0, "hooks_success": 0,
+              "warnings": 0, "errores": 0, "skips": 0}
+    states, other, results = {}, {}, []
+    for item in artifact["results"]:
+        status = item["status"]
+        node = item["unique_id"]
+        kind = node.split(".", 1)[0]
+        states[status] = states.get(status, 0) + 1
+        results.append({"unique_id": node, "tipo": kind, "status": status})
+        if status == "pass" and kind == "test":
+            counts["pruebas_pass"] += 1
+        elif status == "success" and kind == "model":
+            counts["modelos_success"] += 1
+        elif status == "success" and kind == "operation":
+            counts["hooks_success"] += 1
+        elif status == "warn":
+            counts["warnings"] += 1
+        elif status in ("error", "fail"):
+            counts["errores"] += 1
+        elif status == "skipped":
+            counts["skips"] += 1
+        else:
+            other[status] = other.get(status, 0) + 1
+    metadata = artifact["metadata"]
+    return {**counts,
+            "modelos_hooks_success": counts["modelos_success"] + counts["hooks_success"],
+            "total_resultados": len(results), "estados": states, "otros_estados": other,
+            "comando": artifact["args"]["which"],
+            "generated_at": metadata["generated_at"],
+            "invocation_id": metadata["invocation_id"],
+            "duracion_dbt_segundos": artifact["elapsed_time"],
+            "fuente": "dbt/red_metropolitana/target/run_results.json",
+            "resultados": results}
 
 
 def sha256_file(path: Path) -> str:
@@ -149,6 +213,22 @@ def sha256_file(path: Path) -> str:
 def table_counts(conn, schema: str, names: tuple[str, ...]) -> dict[str, int]:
     return {name: conn.execute(text(f'SELECT count(*) FROM "{schema}"."{name}"')).scalar_one()
             for name in names}
+
+
+def relation_fingerprints(conn, schema: str, names: tuple[str, ...]) -> dict:
+    """Multiconjunto de filas JSONB, orden independiente y auditoría excluida."""
+    fingerprints = {}
+    for name in names:
+        relation = f"{schema}.{name}"
+        excluded = AUDIT_FIELDS.get(relation, [])
+        row_hash = "md5((to_jsonb(t) - CAST(:excluded AS text[]))::text)"
+        query = text(f'''SELECT count(*) AS filas,
+            md5(coalesce(string_agg({row_hash}, '' ORDER BY {row_hash}), '')) AS contenido
+            FROM "{schema}"."{name}" t''')
+        row = conn.execute(query, {"excluded": excluded}).mappings().one()
+        fingerprints[relation] = {"filas": row["filas"], "fingerprint": row["contenido"],
+                                  "auditoria_excluida": list(excluded)}
+    return fingerprints
 
 
 @task(name="collect_metrics", log_prints=True)
@@ -168,21 +248,27 @@ def collect_metrics() -> dict:
                           "filas_por_parquet": per_file}
     engine = postgres_engine()
     try:
-        with engine.connect() as conn:
+        with engine.connect().execution_options(isolation_level="REPEATABLE READ") as conn:
+            conn.execute(text("SET TRANSACTION READ ONLY"))
+            conn.execute(text("SET LOCAL TIME ZONE 'America/Guatemala'"))
             staging = table_counts(conn, "staging", STAGING)
             silver = table_counts(conn, "silver", SILVER)
             gold = table_counts(conn, "gold", GOLD)
+            tableau = table_counts(conn, "gold", TABLEAU)
+            fingerprints = relation_fingerprints(conn, "silver", SILVER)
+            fingerprints.update(relation_fingerprints(conn, "gold", GOLD + TABLEAU))
             modes = dict(conn.execute(text(
                 'SELECT fuente_evento, count(*) FROM gold.fact_abordajes GROUP BY fuente_evento'
             )).all())
     finally:
         engine.dispose()
     return {"raw_sha256": raw, "bronze": bronze, "staging": staging,
-            "silver": silver, "gold": gold, "gold_abordajes_por_modo": modes,
+            "silver": silver, "gold": gold, "tableau": tableau,
+            "fingerprints_negocio": fingerprints, "gold_abordajes_por_modo": modes,
             "segundos": round(time.perf_counter() - started, 2)}
 
 
-@flow(name="fase1_pipeline", log_prints=True)
+@flow(name="red_metropolitana_pipeline", log_prints=True)
 def fase1_pipeline() -> dict:
     load_dotenv(ROOT / ".env")
     bootstrap = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
@@ -204,40 +290,77 @@ def fase1_pipeline() -> dict:
 
 def comparable(run: dict) -> dict:
     metrics = run["metricas"]
-    return {key: metrics[key] for key in ("raw_sha256", "bronze", "staging", "silver",
-                                          "gold", "gold_abordajes_por_modo")}
+    return {key: metrics[key] for key in COMPARISON_KEYS}
 
 
 def render_table(title: str, first: dict, second: dict) -> list[str]:
     lines = [f"### {title}", "", "| Tabla/fuente | Corrida 1 | Corrida 2 | Comparación |",
              "|---|---:|---:|---|"]
-    for name in first:
-        a = first[name]["filas"] if isinstance(first[name], dict) else first[name]
-        b = second[name]["filas"] if isinstance(second[name], dict) else second[name]
-        lines.append(f"| `{name}` | {a:,} | {b:,} | {'IGUALES' if a == b else 'DIFERENTES'} |")
+    for name in sorted(first.keys() | second.keys()):
+        a, b = first.get(name), second.get(name)
+        a = a["filas"] if isinstance(a, dict) else a
+        b = b["filas"] if isinstance(b, dict) else b
+        av, bv = f"{a:,}" if a is not None else "AUSENTE", f"{b:,}" if b is not None else "AUSENTE"
+        lines.append(f"| `{name}` | {av} | {bv} | {'IGUALES' if a == b else 'DIFERENTES'} |")
     return lines + [""]
 
 
-def write_json(name: str, content: dict) -> None:
+def write_json(name: str, content: dict, *, overwrite: bool = False) -> None:
     EVIDENCE.mkdir(parents=True, exist_ok=True)
-    (EVIDENCE / name).write_text(json.dumps(content, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    with (EVIDENCE / name).open("w" if overwrite else "x", encoding="utf-8", newline="\n") as file:
+        file.write(json.dumps(content, ensure_ascii=False, indent=2) + "\n")
 
 
-def main() -> int:
+def evidence_paths(prefix: str) -> tuple[Path, Path, Path]:
+    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]*", prefix):
+        raise ValueError("El prefijo sólo admite letras ASCII, números, guion y guion bajo")
+    return (EVIDENCE / f"{prefix}-corrida-1.json", EVIDENCE / f"{prefix}-corrida-2.json",
+            EVIDENCE / f"{prefix}-idempotencia.md")
+
+
+def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--evidence-prefix", required=True,
+                        help="Prefijo nuevo obligatorio, por ejemplo 006-defensa; no sobrescribe por defecto")
     parser.add_argument("--resume-second", action="store_true",
-                        help="Conserva la primera corrida guardada y repite solo la segunda")
-    args = parser.parse_args()
+                        help="Conserva la primera corrida del mismo prefijo y repite sólo la segunda")
+    parser.add_argument("--overwrite", action="store_true",
+                        help="Permite reemplazar explícitamente destinos existentes (resume conserva corrida 1)")
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = build_parser()
+    args = parser.parse_args(argv)
+    try:
+        first_path, second_path, report_path = evidence_paths(args.evidence_prefix)
+    except ValueError as exc:
+        parser.error(str(exc))
+    destinations = (second_path, report_path) if args.resume_second else (first_path, second_path, report_path)
+    if any(path.is_dir() for path in destinations):
+        parser.error("Un destino de evidencia es un directorio; no se ejecuta el flujo")
+    if not args.overwrite:
+        existing = [path.name for path in destinations if path.exists()]
+        if existing:
+            parser.error("Evidencia existente; use otro prefijo o --overwrite explícito: " + ", ".join(existing))
     if args.resume_second:
-        path = EVIDENCE / "003-corrida-1.json"
-        if not path.exists():
-            parser.error("No existe 003-corrida-1.json para reanudar")
-        first = json.loads(path.read_text(encoding="utf-8"))
+        if not first_path.is_file():
+            parser.error(f"No existe {first_path.name} para reanudar")
+        first = json.loads(first_path.read_text(encoding="utf-8"))
+        if first.get("evidence_prefix") != args.evidence_prefix:
+            parser.error("La corrida guardada no corresponde al prefijo solicitado")
+        try:
+            comparable(first)
+            first["etapas"]["dbt_build"]["resumen_dbt"]
+        except KeyError:
+            parser.error("La primera corrida usa un formato incompleto anterior; genere dos corridas con un prefijo nuevo")
     else:
         first = fase1_pipeline()
-        write_json("003-corrida-1.json", first)
+        first["evidence_prefix"] = args.evidence_prefix
+        write_json(first_path.name, first, overwrite=args.overwrite)
     second = fase1_pipeline()
-    write_json("003-corrida-2.json", second)
+    second["evidence_prefix"] = args.evidence_prefix
+    write_json(second_path.name, second, overwrite=args.overwrite)
     equal = comparable(first) == comparable(second)
     a, b = first["metricas"], second["metricas"]
     reference = {"fact_abordajes": 1393448, "fact_viajes_metroriel": 295511}
@@ -246,20 +369,40 @@ def main() -> int:
                    for name, count in reference.items())
     expected = expected and all(run["gold_abordajes_por_modo"] == mode_reference
                                 for run in (a, b))
-    lines = ["# Idempotencia del flujo completo de Fase 1", "",
+    lines = ["# Idempotencia del flujo completo del proyecto", "",
              "Se ejecutó dos veces el mismo flujo Prefect con los mismos archivos Raw,",
              "sin borrar Bronze, el estado SQLite de deduplicación ni los volúmenes Docker.",
              "Idempotencia significa que reprocesar las mismas fuentes no cambia el estado analítico final.", "",
              f"- Corrida 1: {first['duracion_total_segundos']:,.2f} s; terminó {first['fecha_fin']}.",
              f"- Corrida 2: {second['duracion_total_segundos']:,.2f} s; terminó {second['fecha_fin']}.",
-             f"- Comparación completa de SHA-256 Raw, Parquet Bronze y conteos SQL: **{'IGUALES' if equal else 'DIFERENTES'}**.",
+             f"- Comparación de SHA-256 Raw, filas Parquet, conteos SQL y fingerprints de negocio: **{'IGUALES' if equal else 'DIFERENTES'}**.",
              f"- Referencia Gold medida en PostgreSQL: **{'OK' if expected else 'DIFERENTE'}**.",
              "- Cada corrida ejecutó `python scripts/run_dbt.py build` con sus pruebas.", "",
              "## Conteos de ambas corridas", ""]
     for title, key in (("Bronze (filas por fuente)", "bronze"),
                        ("Staging PostgreSQL", "staging"), ("Silver dbt", "silver"),
-                       ("Gold dbt", "gold"), ("Gold abordajes por modo", "gold_abordajes_por_modo")):
+                       ("Gold dbt (granos diferentes)", "gold"), ("Vistas Tableau", "tableau"),
+                       ("Gold abordajes por modo", "gold_abordajes_por_modo")):
         lines.extend(render_table(title, a[key], b[key]))
+    lines.extend(["## Resumen dbt capturado automáticamente", "",
+                  "Los estados proceden del run_results.json del build de cada corrida; no de cifras fijas.", "",
+                  "| Corrida | Pruebas PASS | Modelos success | Hooks success | Warnings | Errores | Skips |",
+                  "|---|---:|---:|---:|---:|---:|---:|"])
+    for label, run in ((1, first), (2, second)):
+        item = run["etapas"]["dbt_build"]["resumen_dbt"]
+        lines.append(f"| {label} | {item['pruebas_pass']} | {item['modelos_success']} | "
+                     f"{item['hooks_success']} | {item['warnings']} | {item['errores']} | {item['skips']} |")
+    lines.extend(["", "## Fingerprints de contenido de negocio", "",
+                  "MD5 de concatenación ordenada de MD5 de filas JSONB: conserva multiplicidad y no depende del orden físico.",
+                  "Se comparan por separado todas las relaciones Silver, Gold y las seis vistas, sin equiparar sus granos.",
+                  "Únicamente se excluyen bridge_identidad_usuario.fecha_proceso y silver_cuarentena.fecha_deteccion,",
+                  "campos de auditoría no deterministas. No se afirma idempotencia byte a byte de esas tablas.", "",
+                  "| Relación | Fingerprint corrida 1 | Fingerprint corrida 2 | Comparación |",
+                  "|---|---|---|---|"])
+    for name in sorted(a["fingerprints_negocio"].keys() | b["fingerprints_negocio"].keys()):
+        one, two = a["fingerprints_negocio"].get(name), b["fingerprints_negocio"].get(name)
+        lines.append(f"| `{name}` | {one['fingerprint'] if one else 'AUSENTE'} | "
+                     f"{two['fingerprint'] if two else 'AUSENTE'} | {'IGUALES' if one == two else 'DIFERENTES'} |")
     lines.extend(["## Streaming y deduplicación", "",
                   "| Fuente | Corrida | Mensajes consumidos | Nuevos Bronze | Omitidos por `_event_id` |",
                   "|---|---:|---:|---:|---:|"])
@@ -284,12 +427,12 @@ def main() -> int:
                   "Los productores aplican espera acotada ante presión de la cola Kafka.",
                   "La cantidad consumida puede superar las filas Raw si existen publicaciones",
                   "anteriores; la deduplicación por `_event_id` impide agregar copias a Bronze.", "",
-                  "En este Docker, `dbt test` con cuatro hilos llegó a agotar `/dev/shm`.",
-                  "`python scripts/run_dbt.py test --threads 1` completó las 39 pruebas",
-                  "y el hook con `PASS=40`, `WARN=0`, `ERROR=0`.", "",
-                  "Los archivos `003-corrida-1.json` y `003-corrida-2.json` contienen los SHA-256",
-                  "Raw y las filas de cada archivo Parquet, además de estos conteos y duraciones.", ""])
-    (EVIDENCE / "003-idempotencia-flujo-completo.md").write_text("\n".join(lines), encoding="utf-8")
+                  "La definición Docker asigna 1 GB de /dev/shm a PostgreSQL para las consultas paralelas.",
+                  "Aplicar esa definición requiere recrear el contenedor conservando su volumen, fuera de este reporte.", "",
+                  f"Los archivos `{first_path.name}` y `{second_path.name}` contienen los SHA-256",
+                  "Raw, filas Parquet, conteos, fingerprints, duraciones y resumen dbt de cada corrida.", ""])
+    with report_path.open("w" if args.overwrite else "x", encoding="utf-8", newline="\n") as file:
+        file.write("\n".join(lines))
     print(f"Comparación: {'IGUALES' if equal else 'DIFERENTES'}; referencia Gold: {'OK' if expected else 'DIFERENTE'}")
     return 0 if equal and expected else 1
 

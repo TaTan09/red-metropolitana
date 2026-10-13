@@ -13,8 +13,8 @@ ROOT = Path(__file__).resolve().parents[1]
 def main() -> int:
     load_dotenv(ROOT / '.env')
     password = os.getenv('TABLEAU_RO_PASSWORD')
-    if password is not None and len(password) < 16:
-        raise ValueError('TABLEAU_RO_PASSWORD requiere al menos 16 caracteres')
+    if password is not None and (len(password) < 16 or password.startswith('REEMPLAZAR_')):
+        raise ValueError('TABLEAU_RO_PASSWORD requiere un valor privado real de al menos 16 caracteres; no la plantilla')
     with psycopg.connect(
         host=os.getenv('POSTGRES_HOST', 'localhost'),
         port=os.getenv('POSTGRES_PORT', '5432'),

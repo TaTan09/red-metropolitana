@@ -1,26 +1,32 @@
 # Contexto compartido — Proyecto 1 de Ciencia de Datos
 ## Agencia Metropolitana de Transporte
 
-**Versión:** 1.1  
-**Estado:** Fase 1 implementada y validada  
-**Fecha de actualización:** 22 de septiembre de 2026
+**Versión:** 1.2
+**Estado:** Fase 1 y Fase 2 implementadas; defensa pendiente
+**Fecha de actualización:** 12 de octubre de 2026
 
 > Este documento debe compartirse entre Hector, Alejandro y Jonatán, y puede enviarse a las herramientas de IA que cada integrante utilice.  
 > Su propósito es mantener un contexto común, evitar soluciones incompatibles y dejar por escrito las decisiones ya tomadas por el grupo.
 
 ## Estado actual de implementación
 
-La **Fase 1 (49 puntos)** se encuentra implementada y validada de extremo a extremo:
+La Fase 1 y la Fase 2 están implementadas e integradas en main:
 
-- Raw → Bronze Parquet mediante Batch, Kafka y CDC según la fuente;
-- Bronze → Staging PostgreSQL con 13 tablas reconstruibles;
-- Silver en dbt con normalización, calidad, cuarentena, identidad y SCD Tipo 2;
-- Gold en dbt con seis dimensiones conformadas y dos tablas de hechos;
-- orquestación local con Prefect;
-- dos corridas completas con los mismos archivos Raw y conteos idénticos en Bronze, Staging, Silver y Gold;
-- `dbt build` validado sin errores.
+- Raw → Bronze Parquet por Batch, Kafka y CDC; Bronze → 13 tablas Staging PostgreSQL;
+- Silver/dbt con normalización, cuarentena, identidad inferida, SCD2 y features por usuario;
+- Gold con seis dimensiones, dos hechos, cuatro marts y seis vistas Tableau;
+- dashboard versionado en `tableau/workbook/Red_Metropolitana_Fase2.twbx`;
+- diccionario/linaje, definiciones oficiales, dueños, calidad, seguridad y retención documentados;
+- flujo Prefect completo ejecutado dos veces en la evidencia 005: IGUALES y referencia Gold OK;
+- validación final dbt: consola PASS=189; el artefacto recuperado del segundo build respalda 158 pruebas PASS +30 modelos success +1 hook success.
 
-La evidencia de idempotencia del flujo completo se conserva en `docs/evidencias/003-idempotencia-flujo-completo.md`. Las decisiones de Sprint 0 siguen siendo la base conceptual del diseño; este documento las mantiene como referencia histórica aunque algunas secciones estén redactadas en futuro.
+Resultados aprobados: **70,380 usuarios observados**, **36,827 multimodales (52.33 %)**, **1,393,448 abordajes TM/TU/AM**, **295,511 viajes completos MetroRiel**, y **Santa Catarina Pinula sin cobertura catalogada**. No se equiparan abordajes con viajes puerta-a-puerta ni ausencia catalogada con ausencia de transporte real.
+
+TM/TU/MR se enlazan por patrón numérico como inferencia académica, no identidad personal demostrada. Aerómetro conserva `AM-<hash>` aislado: su multimodalidad persona-a-persona con otros modos no puede medirse; cero enlaces observables no prueba cero transferencias físicas.
+
+[003](docs/evidencias/003-idempotencia-flujo-completo.md) conserva la validación histórica de Fase 1; [005](docs/evidencias/005-idempotencia-final-fase2.md) es la corrida completa final del proyecto/Fase 2. La nueva CLI exige `--evidence-prefix` para futuras demostraciones y rechaza sobrescribir destinos por defecto. El [README](README.md) documenta su uso y los límites de la evidencia antigua.
+
+Seguridad técnica: HMAC-SHA256 antes de Gold y permisos `tableau_ro` provisionados; las cinco conexiones del workbook ya usan `tableau_ro`, con LOGIN verificado; el usuario validó la conexión, guardó y reabrió el archivo. La defensa no está completada. Las secciones de Sprint 0 mantienen sus decisiones como antecedentes; el estado vigente prevalece sobre redacciones históricas en futuro.
 
 ---
 
@@ -355,13 +361,13 @@ Aerómetro    hash de 12 caracteres
 
 ## Decisión
 
-En Silver se construirá una tabla puente conceptual:
+En Silver está materializado el puente de identidad:
 
 ```text
 bridge_identidad_usuario
 ```
 
-Campos previstos:
+Campos implementados:
 
 - `usuario_canonico_id`
 - `sistema_origen`
@@ -407,7 +413,7 @@ Aerómetro conserva una identidad independiente porque:
 
 ### Consecuencia
 
-La multimodalidad que involucra Aerómetro puede estar subestimada.
+La multimodalidad persona-a-persona de Aerómetro con los otros modos no puede medirse con las llaves disponibles. Un cero observable no demuestra ausencia real de transferencias.
 
 ---
 
@@ -419,7 +425,7 @@ No se debe afirmar:
 
 porque la identidad entre operadores no está demostrada.
 
-La métrica se definirá como:
+La métrica implementada se define como:
 
 > **Usuario multimodal identificable/inferido:** identidad canónica que, bajo la estrategia documentada de resolución de identidad, presenta actividad en al menos dos modos.
 
@@ -433,7 +439,7 @@ Aerómetro debe reportarse con la limitación correspondiente.
 
 ### Implicación para Tableau
 
-La pregunta obligatoria de usuarios que usan más de un sistema se responderá, pero el tablero deberá dejar claro que se trata de:
+La vista `gold.v_tableau_multimodalidad` responde la pregunta obligatoria con `modos_observados > 1`; el tablero debe comunicar que se trata de:
 
 **multimodalidad observable/inferida bajo las reglas del proyecto**.
 
@@ -650,15 +656,15 @@ Las reglas conocidas inicialmente incluyen:
 | MetroRiel | viaje sin salida | cuarentena o tratamiento explícito documentado |
 | CDC | llave fuera del dominio esperado de TM | preservar como parte del registro ambiguo y documentar |
 
-La implementación definitiva se realizará en Silver/dbt.
+Estas reglas están implementadas en Silver/dbt y documentadas en las definiciones oficiales.
 
 Nada se elimina silenciosamente.
 
 ---
 
-# 16. Dimensiones y Gold previstas
+# 16. Dimensiones y Gold implementadas
 
-Dimensiones iniciales:
+Dimensiones implementadas:
 
 ```text
 dim_usuario
@@ -689,7 +695,9 @@ El tablero debe responder al menos:
 3. multimodalidad observable/inferida;
 4. caso MetroRiel en zonas 12, 8, 1, 6 y 17.
 
-## División propuesta del tablero
+El tablero final está versionado en `tableau/workbook/Red_Metropolitana_Fase2.twbx` y consume cinco de las seis vistas Gold disponibles; v_tableau_transbordos queda como análisis adicional no referenciado en el TWBX actual. Sus cinco conexiones PostgreSQL usan `tableau_ro`; la migración manual fue validada por el usuario, con guardado y reapertura correctos, y confirmada mediante lectura del XML.
+
+## Reparto del tablero
 
 ### Hector
 
@@ -715,11 +723,11 @@ Entidad:
 
 > una fila por usuario.
 
-Ejemplos:
+Features implementadas en `silver.silver_features_usuario`:
 
-- viajes últimos 7 días;
-- viajes últimos 30 días;
-- viajes últimos 90 días;
+- eventos de movilidad registrados en los últimos 7 días;
+- eventos de movilidad registrados en los últimos 30 días;
+- eventos de movilidad registrados en los últimos 90 días;
 - modo más usado;
 - cantidad de modos;
 - días desde último viaje;
@@ -728,7 +736,7 @@ Ejemplos:
 - gasto acumulado;
 - gasto promedio.
 
-Se deberá declarar una **fecha de corte**.
+Cutoff real aplicado: **2026-07-15 23:44:33**, hora local Guatemala, incluyendo salida MR; eventos y viajes cerrados se filtran hasta ese instante. Una fila por identidad, 70,380 filas. Ver `docs/features_usuario.md` para las 25 columnas y sus límites.
 
 ---
 
@@ -836,7 +844,7 @@ Debe agregarse a `.gitignore`.
 
 ## Gold
 
-Antes de Gold, el usuario canónico deberá seudonimizarse.
+Gold aplica HMAC-SHA256 al ID canónico Silver mediante `GOLD_PSEUDONYM_KEY`; Silver conserva un ID enlazable y no aplica SHA-256 salteado a tarjetas. `tableau_ro` sólo recibe permisos Gold, con contraseña externa opcional; el workbook ya usa tableau_ro y su migración manual está validada. Ver `docs/seguridad/seguridad_y_datos_personales.md`.
 
 Tableau no necesita conocer las tarjetas originales.
 
@@ -966,73 +974,43 @@ Cualquier IA que reciba este documento debe respetar estas reglas:
 
 # 25. Estado del proyecto
 
-## Completado
+## Implementado y validado
 
-- ✅ Enunciado revisado.
-- ✅ Archivos recibidos.
-- ✅ Generador revisado.
-- ✅ Inventario inicial.
-- ✅ Hallazgos de calidad iniciales.
-- ✅ Matriz del bus preliminar.
-- ✅ Grano definido.
-- ✅ Estrategia de identidad definida.
-- ✅ Contradicción del CDC identificada.
-- ✅ Tratamiento del CDC acordado.
-- ✅ Transurbano decidido como Batch.
-- ✅ Bronze decidido como lake + Parquet.
-- ✅ PostgreSQL seleccionado.
-- ✅ Estructura del repositorio definida.
-- ✅ Sprint 0 completado.
+- Ingesta por vías, Bronze Parquet, reconstrucción Staging y CDC.
+- Silver: normalización, cuarentena, SCD2, puente de identidad y tabla de features.
+- Gold: seis dimensiones, dos hechos, cuatro marts y seis vistas finales.
+- Tableau final versionado, con demanda, cobertura, multimodalidad y caso MetroRiel.
+- Gobernanza: diccionario de 18 modelos/197 campos, definiciones, dueños, reglas y linaje.
+- Seguridad: HMAC Gold, credenciales fuera de Git, matriz de roles y retención; tableau_ro con LOGIN y permisos Gold verificados, migración del workbook completada.
+- Prefect completo: dos corridas finales iguales en 005 y referencia Gold OK; 003 histórica preservada.
+- Cleanup de reproducibilidad: prefijo obligatorio, no sobrescritura por defecto, resumen dbt automático y cobertura ampliada para nuevas evidencias.
 
-## Pendiente de implementación
+## Pendientes manuales
 
-- ⬜ Crear repositorio Git.
-- ⬜ Crear estructura de carpetas.
-- ⬜ Crear `docker-compose.yml`.
-- ⬜ Levantar PostgreSQL.
-- ⬜ Preparar Kafka.
-- ⬜ Implementar ingesta Batch.
-- ⬜ Implementar ingesta Streaming.
-- ⬜ Implementar CDC.
-- ⬜ Configurar dbt.
-- ⬜ Construir Silver.
-- ⬜ Construir Gold.
-- ⬜ Configurar Prefect.
-- ⬜ Construir Tableau.
-- ⬜ Construir tabla de features.
-- ⬜ Documentar gobernanza.
-- ⬜ Probar idempotencia.
-- ⬜ Preparar defensa.
+- Aplicar posteriormente shm_size de PostgreSQL recreando sólo el contenedor y preservando el volumen; no se ejecutó esa recreación durante el cleanup.
+- Preparar y realizar la defensa oral, incluida la demostración completa con un prefijo nuevo. **Defensa pendiente**.
+- Opcionalmente crear un tag en el commit histórico validado antes de futuras demostraciones; no se creó ni publicó ningún tag automáticamente.
 
 ---
 
 # 26. Próximo paso recomendado
 
-El Sprint 0 ya está cerrado.
+Revisar el cleanup en `fix/cierre-fase2` y ensayar la defensa con una evidencia nueva; la migración manual de las cinco conexiones Tableau a tableau_ro ya fue validada:
 
-El siguiente paso debe ser compartido por los tres:
-
-> **Crear físicamente el repositorio y levantar el entorno base reproducible.**
-
-Orden recomendado:
-
-```text
-1. Crear repositorio Git
-2. Crear estructura de carpetas
-3. Crear .gitignore
-4. Crear .env.example
-5. Crear docker-compose.yml
-6. Levantar PostgreSQL
-7. Verificar conexión
-8. Agregar Kafka
-9. Hacer primer commit de infraestructura
+```powershell
+python orchestration/flows/fase1_pipeline.py --evidence-prefix 006-defensa
 ```
 
-Después de que el entorno base funcione, cada integrante puede comenzar su responsabilidad principal sin separarse de la arquitectura acordada.
+Si existe ese prefijo, elegir otro. No reutilizar 003/005 ni rellenar retroactivamente sus métricas ausentes. El tag sugerido y cualquier commit/push/integración posterior requieren una decisión del equipo; este cleanup deja los cambios sin commit.
 
 ---
 
 # 27. Registro de cambios
+
+## v1.2 — Cierre de Fase 2 (12 de octubre de 2026)
+
+Fases implementadas, workbook final, evidencia 005 y resultados aprobados incorporados. Nueva protección de evidencia con prefijo obligatorio, resumen dbt desde artefactos, cobertura de marts/vistas y excepción de auditoría. Seguridad/RBAC refleja la migración validada de las cinco conexiones del workbook a tableau_ro, con LOGIN y acceso Gold comprobados. La defensa sigue pendiente.
+
 
 ## v1.0 — Sprint 0 cerrado
 

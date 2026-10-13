@@ -42,7 +42,7 @@ En Git Bash:
 cp .env.example .env
 ```
 
-Edita `.env` y cambia `POSTGRES_PASSWORD`.
+Edita `.env` y cambia `POSTGRES_PASSWORD` y `GOLD_PSEUDONYM_KEY`. Para habilitar el rol BI, sustituye también la plantilla `TABLEAU_RO_PASSWORD` por un valor privado de al menos 16 caracteres; si todavía no vas a habilitar LOGIN, elimina esa línea de tu `.env` local. El script rechaza la contraseña de plantilla.
 
 > `.env` está ignorado por Git y nunca debe subirse.
 
@@ -132,7 +132,7 @@ data/bronze/
 
 ## Reconstrucción manual hasta Silver (opcional)
 
-Esta ruta sirve para depurar manualmente las capas previas. Para reproducir y demostrar **toda la Fase 1**, use preferentemente el flujo Prefect de la sección **Ejecución completa de Fase 1**.
+Esta ruta sirve para depurar manualmente las capas previas. Para reproducir y demostrar todo el proyecto, use el flujo Prefect de **Ejecución completa del proyecto**.
 
 Desde la raíz del repositorio, con el entorno virtual activo y `.env` configurado:
 
@@ -166,41 +166,53 @@ El build crea Silver y Gold y ejecuta pruebas de claves, relaciones y conteos. E
 
 ### Marts y vistas para Tableau
 
-Sobre los hechos y dimensiones hay dos marts y tres vistas:
+Sobre los hechos y dimensiones hay cuatro marts y seis vistas finales:
 
 - `gold.mart_demanda_hora`: demanda por fecha × hora × modo × zona.
 - `gold.mart_cobertura`: una fila por zona de `dim_zona` (16), con la oferta (puntos totales y por modo) y la actividad observada.
-- `gold.v_tableau_demanda_abordajes`, `gold.v_tableau_demanda_viajes_mr` y `gold.v_tableau_cobertura`: las vistas que consume Tableau.
+- `gold.mart_metroriel_zonas`: demanda y oferta en el trazado MR, con ranking frente al universo de la red.
+- `gold.mart_multimodalidad`: pares consecutivos de eventos en distintos modos, separados por >0 y <=90 minutos; transbordos inferidos, no físicamente confirmados.
+- Vistas Tableau: `gold.v_tableau_demanda_abordajes`, `gold.v_tableau_demanda_viajes_mr`, `gold.v_tableau_cobertura`, `gold.v_tableau_metroriel`, `gold.v_tableau_multimodalidad` y `gold.v_tableau_transbordos`.
+
+El workbook final está versionado en [tableau/workbook/Red_Metropolitana_Fase2.twbx](tableau/workbook/Red_Metropolitana_Fase2.twbx). El TWBX referencia cinco vistas (las de demanda, cobertura, MetroRiel y multimodalidad); `v_tableau_transbordos` está disponible como análisis adicional. Sus cinco conexiones PostgreSQL usan `tableau_ro`: la migración manual fue validada en Tableau y el archivo se guardó y reabrió correctamente. La inspección del XML confirma ese usuario sin contraseñas ni tokens guardados; PostgreSQL confirma LOGIN y lectura Gold, con denegación Staging/Silver. Ver [estado y procedimiento reproducible](docs/seguridad/tableau_ro.md).
 
 **Tableau se conecta a las vistas, no a los marts.** `mart_demanda_hora` mezcla abordajes (Transmetro, Transurbano, Aerómetro) y viajes (MetroRiel) en `cantidad_eventos`; las vistas los separan para que no se sumen por error. MetroRiel cuenta una vez por viaje, en la zona de origen, y las vistas lo nombran así (`zona_origen`, `viajes_iniciados`).
 
 Para reconstruirlos:
 
 ```powershell
-python scripts/run_dbt.py build --select mart_demanda_hora mart_cobertura v_tableau_demanda_abordajes v_tableau_demanda_viajes_mr v_tableau_cobertura --threads 1
+python scripts/run_dbt.py build --select mart_demanda_hora mart_cobertura mart_metroriel_zonas mart_multimodalidad v_tableau_demanda_abordajes v_tableau_demanda_viajes_mr v_tableau_cobertura v_tableau_metroriel v_tableau_multimodalidad v_tableau_transbordos --threads 1
 ```
 
 Documentación: [marts y vistas](docs/arquitectura/marts_gold.md), [decisiones de Fase 2](docs/decisiones/002-fase2-marts.md), [corrección de zonas](docs/evidencias/004-correccion-zonas.md) y [métricas de rendimiento](docs/metricas/rendimiento_fase2.md).
 
-## Ejecución completa de Fase 1
+## Ejecución completa del proyecto
 
 Desde la raíz del repositorio, coloca los nueve archivos oficiales en `data/raw/` y configura `.env` a partir de `.env.example`: contraseña PostgreSQL, host/puerto y una `GOLD_PSEUDONYM_KEY` privada y estable de al menos 32 bytes. Activa el entorno virtual e instala las dependencias:
 
 ```powershell
 pip install -r requirements.txt
 docker compose up -d
-python orchestration/flows/fase1_pipeline.py
+python orchestration/flows/fase1_pipeline.py --evidence-prefix 006-defensa
 ```
 
 El comando inicia localmente el flujo Prefect **dos veces** para demostrar idempotencia. En cada corrida valida PostgreSQL/Kafka, ingiere Batch y CDC a Bronze Parquet, publica y consume ambos CSV por Kafka, reconstruye las 13 tablas Staging, ejecuta `python scripts/run_dbt.py build` (Silver, Gold y pruebas) y consulta los conteos finales. Los consumidores terminan tras 15 segundos sin mensajes, con un límite de 30 minutos por proceso; una etapa fallida detiene el flujo.
 
-El flujo no borra Bronze, el estado de deduplicación ni volúmenes. Compara SHA-256 de Raw, filas por archivo Parquet y los conteos de Staging, Silver y Gold; termina con error si cambian. Repetir las mismas fuentes debe dejar igual el estado analítico final. Los JSON de cada corrida y el resultado legible se guardan en [la evidencia de idempotencia](docs/evidencias/003-idempotencia-flujo-completo.md). La segunda publicación Kafka puede consumirse como duplicado técnico por `_event_id` sin añadir filas a Bronze.
+El flujo no borra Bronze, el estado de deduplicación ni volúmenes. Compara SHA-256 Raw, filas por Parquet, 13 tablas Staging, diez relaciones Silver, doce dimensiones/hechos/marts Gold y las seis vistas Tableau. Captura además fingerprints deterministas de contenido de negocio de Silver/Gold/vistas; cada relación conserva su grano. Sólo excluye `bridge_identidad_usuario.fecha_proceso` y `silver_cuarentena.fecha_deteccion`, auditoría dependiente de ejecución. No se afirma igualdad byte a byte de esas tablas. Termina con error si el estado relevante cambia o difiere de la referencia Gold aprobada.
 
-Si falla la segunda ejecución después de guardarse `003-corrida-1.json`, corrige la causa y usa `python orchestration/flows/fase1_pipeline.py --resume-second` para repetir únicamente esa corrida y compararla con la primera.
+`--evidence-prefix` es obligatorio y no tiene default. El ejemplo produce `docs/evidencias/006-defensa-corrida-1.json`, `006-defensa-corrida-2.json` y `006-defensa-idempotencia.md`. Si algún destino existe, aborta antes del flujo; usa un prefijo nuevo para cada demostración. `--overwrite` permite reemplazar explícitamente destinos, pero no es el uso habitual. Cada build captura su `target/run_results.json` y diferencia pruebas PASS, modelos/hook success, warnings, errores y skips, sin totales fijos.
+
+La [evidencia 003](docs/evidencias/003-idempotencia-flujo-completo.md) es histórica de Fase 1 y se conserva. La [evidencia 005](docs/evidencias/005-idempotencia-final-fase2.md) documenta las dos corridas completas finales del proyecto/Fase 2: IGUALES y referencia Gold OK. El resumen recuperado de la segunda corrida respalda 158 pruebas PASS +30 modelos success +1 hook success (189 resultados). El JSON de la primera no contiene ese desglose; su alcance está explicado en el reporte. La segunda publicación Kafka puede ser duplicado técnico por `_event_id` sin añadir filas a Bronze.
+
+Si falla la segunda ejecución después de guardar la primera, usa `python orchestration/flows/fase1_pipeline.py --evidence-prefix 006-defensa --resume-second`. Conserva la primera del mismo prefijo y repite sólo la segunda. Si ya existen la segunda o el reporte, requiere un prefijo nuevo o `--overwrite` explícito. Evidencias del formato antiguo (003/005, sin la cobertura ampliada) no se reanudan con esta CLI: no rellenar métricas históricas ausentes.
 
 Si `.env` utiliza otro puerto local de PostgreSQL, `docker compose` lo respeta con `POSTGRES_PORT`. El broker Kafka se configura opcionalmente con `KAFKA_BOOTSTRAP_SERVERS` (predeterminado `localhost:9092`). Prefect arranca su servidor temporal local automáticamente; no hay que levantar manualmente Prefect Server ni usar Prefect Cloud.
 
 Para repetir únicamente las pruebas dbt en un Docker con poca memoria compartida, usa `python scripts/run_dbt.py test --threads 1`.
+
+PostgreSQL declara `shm_size: "1gb"` para evitar el agotamiento histórico de los 64 MB de `/dev/shm` con paralelismo. Esta edición no recrea contenedores ni volúmenes; aplicar la definición requiere posteriormente recrear sólo el contenedor conservando `postgres_data`, nunca `docker compose down -v`.
+
+Antes de futuras demostraciones, se recomienda revisar y crear manualmente un tag como `fase1-validada` en el commit histórico validado. Este cleanup no crea tags ni hace push; la protección principal es el prefijo obligatorio y el rechazo de sobrescritura.
 
 
 ### Multimodalidad y features (revision Fase 2)
@@ -209,7 +221,7 @@ Para repetir únicamente las pruebas dbt en un Docker con poca memoria compartid
 - `gold.mart_multimodalidad` y `gold.v_tableau_transbordos`: pares consecutivos inferidos >0 y <=90 minutos; trazabilidad de ambos registros Bronze.
 - `silver.silver_features_usuario`: features exclusivamente Silver, cutoff maximo real guardado en cada fila, ventanas 7/30/90 dias, recencia, modo/zona frecuentes, hora pico y tarifas. Ver [diccionario y fecha de corte](docs/features_usuario.md).
 
-Aerometro permanece aislado: sus enlaces persona-a-persona con los otros modos no son medibles. Las cifras de multimodalidad son observables con la identidad disponible. El workbook local no fue modificado.
+Aerómetro permanece aislado: sus enlaces persona-a-persona con los otros modos no son medibles. TM/TU/MR se enlazan por una inferencia académica de patrón numérico, no identidad personal confirmada. Resultado aprobado: 70,380 usuarios observados, 36,827 multimodales (52.33 %); 1,393,448 abordajes TM/TU/AM y, por separado, 295,511 viajes completos MR. Santa Catarina Pinula no tiene puntos de servicio en el catálogo; no demuestra ausencia de transporte fuera del dataset.
 
 ```powershell
 python scripts/run_dbt.py parse
@@ -221,4 +233,6 @@ python scripts/validar_raw.py --raw-dir datos_red
 python scripts/configurar_tableau_ro.py
 ```
 
-`datos_red/` esta ignorado y se conserva localmente; las ingestas existentes usan `data/raw/`. La provision de `tableau_ro` no guarda contrasenas y crea NOLOGIN por defecto; requiere una variable privada `TABLEAU_RO_PASSWORD` para habilitarlo y cambiar la conexion Tableau manualmente. Ver [seguridad y estado RBAC](docs/seguridad/seguridad_y_datos_personales.md) y [validacion final](docs/metricas/validacion_fase2.md).
+`datos_red/` está ignorado y se conserva localmente; las ingestas existentes usan `data/raw/`. En un entorno nuevo, el provisionamiento de `tableau_ro` crea NOLOGIN si no recibe una contraseña privada mediante `TABLEAU_RO_PASSWORD`. En el entorno validado ya tiene LOGIN y las cinco conexiones del workbook usan ese rol. No se guardan contraseñas en Git. Ver [seguridad y estado RBAC](docs/seguridad/seguridad_y_datos_personales.md) y [validación histórica de Fase 2](docs/metricas/validacion_fase2.md).
+
+Nota de alcance: el prefijo protege los JSON/reportes de `docs/evidencias`. Los scripts de ingesta todavía actualizan sus reportes auxiliares de `docs/metricas`; esos archivos no son snapshots inmutables. Para una demostración futura, revisar ese diff antes de integrar cambios y no sustituir evidencias históricas aprobadas por métricas recién generadas. Este cleanup no ejecutó ingestas ni cambió esos reportes.

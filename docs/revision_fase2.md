@@ -1,5 +1,11 @@
 # Reporte integral de revision/correccion de Alejandro
 
+> **Documento histórico:** esta revisión describe el estado previo al commit e integración.
+> Las afirmaciones 'No hice commit', 'No hice push' y 'workbook untracked' corresponden
+> al momento de la revisión y ya no representan el estado actual.
+>
+> Consulte el [estado final en README](../README.md) y la [evidencia completa 005](evidencias/005-idempotencia-final-fase2.md).
+
 Fecha: 12 de octubre de 2026 (America/Guatemala). Rama: `feature/fase2-jonatan`. Base aprobada: `f64a23e8ca89eddc2d39cee482f73f4d645fbe03`. Trabajo revisado: `a4a8112c9e0b438ab0b8d6117d2c4b4ece65287e`.
 
 **Estado listo para revision:** correcciones en working tree, todas las pruebas finales pasan. El checkout inicial estaba en f64a23e, no en a4a8112; se descargo el commit de Alejandro y se recuperaron sus archivos sin mover HEAD. Sus datasets se conservaron localmente; se omitieron sus sobrescrituras historicas. No hubo checkout de otra rama, reset, rebase ni reconstruccion de commits.
