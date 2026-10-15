@@ -2,6 +2,8 @@
 
 Repositorio del proyecto de integración de datos de Transmetro, Transurbano, MetroRiel y Aerómetro.
 
+Para ejecutar el proyecto desde cero en otra computadora, ver [docs/GUIA_EJECUCION_EQUIPO.md](docs/GUIA_EJECUCION_EQUIPO.md).
+
 ## Arquitectura acordada
 
 ```text
