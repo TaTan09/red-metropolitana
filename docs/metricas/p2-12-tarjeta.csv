@@ -1,0 +1,3 @@
+corte,fecha_corte,poblacion,positivos,tasa_positiva,positivos_poblacion,positivos_con_actividad_otro_operador,proporcion_costo,costo_positivos,positivos_aerometro
+A,2026-07-01 00:00:00,77411,11211,0.14482438,11211 / 77411,2394,0.21354027,2394 / 11211,1460
+B,2026-07-31 00:00:00,76378,10312,0.13501270,10312 / 76378,2394,0.23215671,2394 / 10312,1360

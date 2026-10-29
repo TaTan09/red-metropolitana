@@ -1,0 +1,152 @@
+{
+  "requisito": "1.2",
+  "unidad": "(operador, llave_operacional)",
+  "verificado_en": "2026-10-29 00:55:46.200300",
+  "verificacion": {
+    "transaccion_solo_lectura": true,
+    "diferencias_recalculo": 0,
+    "diferencias_costo": 0,
+    "cobertura_diaria_28_y_30_dias": true
+  },
+  "politica_cdc": "Cualquier DELETE Transmetro con valid_from < fecha_corte excluye; reactivación no anula exclusión.",
+  "metroriel": "Un uso por viaje cerrado, fechado por ingreso y disponible desde salida; cierre anterior al límite de cada ventana.",
+  "limitacion_identidad": "Costo por patrón numérico inferido P1; no identidad personal verificada. Aerómetro aislado; cero enlaces detectables no significa cero actividad real cruzada.",
+  "resultados": [
+    {
+      "corte": "A",
+      "fecha_corte": "2026-07-01 00:00:00",
+      "poblacion": 77411,
+      "positivos": 11211,
+      "tasa_positiva": "0.14482438",
+      "positivos_con_actividad_otro_operador": 2394,
+      "proporcion_costo": "0.21354027",
+      "positivos_aerometro": 1460
+    },
+    {
+      "corte": "B",
+      "fecha_corte": "2026-07-31 00:00:00",
+      "poblacion": 76378,
+      "positivos": 10312,
+      "tasa_positiva": "0.13501270",
+      "positivos_con_actividad_otro_operador": 2394,
+      "proporcion_costo": "0.23215671",
+      "positivos_aerometro": 1360
+    }
+  ],
+  "por_operador": [
+    {
+      "corte": "A",
+      "operador": "Aerometro",
+      "poblacion": 10429,
+      "positivos": 1460
+    },
+    {
+      "corte": "A",
+      "operador": "MetroRiel",
+      "poblacion": 15746,
+      "positivos": 2261
+    },
+    {
+      "corte": "A",
+      "operador": "Transmetro",
+      "poblacion": 18918,
+      "positivos": 3196
+    },
+    {
+      "corte": "A",
+      "operador": "Transurbano",
+      "poblacion": 32318,
+      "positivos": 4294
+    },
+    {
+      "corte": "B",
+      "operador": "Aerometro",
+      "poblacion": 10284,
+      "positivos": 1360
+    },
+    {
+      "corte": "B",
+      "operador": "MetroRiel",
+      "poblacion": 15687,
+      "positivos": 2102
+    },
+    {
+      "corte": "B",
+      "operador": "Transmetro",
+      "poblacion": 18786,
+      "positivos": 2967
+    },
+    {
+      "corte": "B",
+      "operador": "Transurbano",
+      "poblacion": 31621,
+      "positivos": 3883
+    }
+  ],
+  "cobertura": [
+    {
+      "corte": "A",
+      "operador": "Aerometro",
+      "primer_uso": "2026-06-01 04:00:29",
+      "ultimo_uso": "2026-08-29 22:53:16",
+      "dias_con_usos_previos": 28,
+      "dias_con_usos_futuros": 30
+    },
+    {
+      "corte": "A",
+      "operador": "MetroRiel",
+      "primer_uso": "2026-06-01 04:00:15",
+      "ultimo_uso": "2026-08-29 22:57:48",
+      "dias_con_usos_previos": 28,
+      "dias_con_usos_futuros": 30
+    },
+    {
+      "corte": "A",
+      "operador": "Transmetro",
+      "primer_uso": "2026-06-01 04:00:34",
+      "ultimo_uso": "2026-08-29 22:56:47",
+      "dias_con_usos_previos": 28,
+      "dias_con_usos_futuros": 30
+    },
+    {
+      "corte": "A",
+      "operador": "Transurbano",
+      "primer_uso": "2026-06-01 04:00:24",
+      "ultimo_uso": "2026-08-29 22:57:03",
+      "dias_con_usos_previos": 28,
+      "dias_con_usos_futuros": 30
+    },
+    {
+      "corte": "B",
+      "operador": "Aerometro",
+      "primer_uso": "2026-06-01 04:00:29",
+      "ultimo_uso": "2026-08-29 22:53:16",
+      "dias_con_usos_previos": 28,
+      "dias_con_usos_futuros": 30
+    },
+    {
+      "corte": "B",
+      "operador": "MetroRiel",
+      "primer_uso": "2026-06-01 04:00:15",
+      "ultimo_uso": "2026-08-29 22:57:48",
+      "dias_con_usos_previos": 28,
+      "dias_con_usos_futuros": 30
+    },
+    {
+      "corte": "B",
+      "operador": "Transmetro",
+      "primer_uso": "2026-06-01 04:00:34",
+      "ultimo_uso": "2026-08-29 22:56:47",
+      "dias_con_usos_previos": 28,
+      "dias_con_usos_futuros": 30
+    },
+    {
+      "corte": "B",
+      "operador": "Transurbano",
+      "primer_uso": "2026-06-01 04:00:24",
+      "ultimo_uso": "2026-08-29 22:57:03",
+      "dias_con_usos_previos": 28,
+      "dias_con_usos_futuros": 30
+    }
+  ]
+}
