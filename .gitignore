@@ -16,6 +16,7 @@ venv/
 
 # Data: keep folders, not generated/heavy files
 datos_red/
+/data/*.zip
 data/raw/*
 !data/raw/.gitkeep
 data/bronze/*
