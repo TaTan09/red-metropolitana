@@ -1,13 +1,13 @@
 # Evidencia de consumo Streaming — Aerómetro
 
-- **Fecha:** `2026-09-12T23:09:22-06:00`
+- **Fecha:** `2026-10-28T20:20:58-06:00`
 - **Topic:** `aerometro-boardings`
 - **Consumer group:** `bronze-aerometro-v1`
-- **Mensajes consumidos:** 203,554
-- **Eventos nuevos escritos a Bronze:** 203,544
-- **Repeticiones técnicas omitidas:** 10
+- **Mensajes consumidos:** 387,053
+- **Eventos nuevos escritos a Bronze:** 0
+- **Repeticiones técnicas omitidas:** 387,053
 - **Mensajes inválidos:** 0
-- **Archivos Parquet creados:** 41
+- **Archivos Parquet creados:** 0
 
 ## Interpretación
 

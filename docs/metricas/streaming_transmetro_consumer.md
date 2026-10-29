@@ -1,13 +1,13 @@
 # Evidencia de consumo Streaming — Transmetro
 
-- **Fecha:** `2026-09-12T22:58:24-06:00`
+- **Fecha:** `2026-10-28T20:19:04-06:00`
 - **Topic:** `transmetro-validaciones`
 - **Consumer group:** `bronze-transmetro-v1`
-- **Mensajes consumidos:** 363,221
-- **Eventos nuevos escritos a Bronze:** 363,211
-- **Repeticiones técnicas omitidas:** 10
+- **Mensajes consumidos:** 713,786
+- **Eventos nuevos escritos a Bronze:** 0
+- **Repeticiones técnicas omitidas:** 713,786
 - **Mensajes inválidos:** 0
-- **Archivos Parquet creados:** 73
+- **Archivos Parquet creados:** 0
 
 ## Interpretación
 

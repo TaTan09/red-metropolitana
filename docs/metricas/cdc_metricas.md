@@ -1,33 +1,33 @@
 # Métricas CDC y padrón vigente de Transmetro
 
-- **Fecha:** `2026-09-22T11:25:53-06:00`
+- **Fecha:** `2026-10-28T20:15:42-06:00`
 - **Archivo:** `cdc_padron_usuarios.csv`
-- **SHA-256:** `68e4d9dd258809dd4a45a0c5f9023ad6f3b5d32912e4447b9d20b9a7258de5c4`
-- **Total CDC:** 31,050
+- **SHA-256:** `f1b483aba844ad1c5c1da71003c621bcbc8ce231ecf5283e42d18050261f480f`
+- **Total CDC:** 77,636
 
 ## Operaciones
 
 | Operación | Cantidad |
 |---|---:|
-| INSERT | 10,800 |
-| UPDATE | 16,200 |
-| DELETE | 4,050 |
+| INSERT | 29,700 |
+| UPDATE | 35,841 |
+| DELETE | 12,095 |
 
 ## Llaves observadas
 
 | Tipo | Cantidad |
 |---|---:|
-| METRORIEL | 1,295 |
-| SIN_TARJETA | 2,206 |
-| TRANSMETRO | 22,326 |
-| TRANSURBANO | 5,223 |
+| METRORIEL | 3,398 |
+| SIN_TARJETA | 5,510 |
+| TRANSMETRO | 55,403 |
+| TRANSURBANO | 13,325 |
 
 ## Padrón Transmetro derivado
 
-- Tarjetas únicas finales: **17,432**
-- Activas finales: **15,096**
-- Inactivas finales: **2,336**
-- DELETE sin atributos previos visibles: **1,821**
+- Tarjetas únicas finales: **40,612**
+- Activas finales: **32,544**
+- Inactivas finales: **8,068**
+- DELETE sin atributos previos visibles: **4,189**
 
 ## Decisión de arquitectura
 
