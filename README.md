@@ -210,6 +210,71 @@ Si falla la segunda ejecución después de guardar la primera, usa `python orche
 
 Si `.env` utiliza otro puerto local de PostgreSQL, `docker compose` lo respeta con `POSTGRES_PORT`. El broker Kafka se configura opcionalmente con `KAFKA_BOOTSTRAP_SERVERS` (predeterminado `localhost:9092`). Prefect arranca su servidor temporal local automáticamente; no hay que levantar manualmente Prefect Server ni usar Prefect Cloud.
 
+### Proyecto 2: reconstrucción explícita desde las nuevas fuentes
+
+Con Docker Desktop en ejecución, `.env` configurado y las dependencias instaladas en el entorno virtual, coloca los **nueve archivos nuevos** en `data/raw/` y ejecuta desde la raíz:
+
+```powershell
+python orchestration/flows/fase1_pipeline.py --fresh-start --evidence-prefix p2-jonatan-001
+```
+
+Este comando es **destructivo para los datos generados del proyecto**. La opción es explícita: el comando normal sin `--fresh-start` sigue ejecutando sus dos corridas sin limpiar estado ni levantar/recrear servicios.
+
+Antes de borrar nada, comprueba los destinos de evidencia y valida que Raw contenga exactamente estos archivos (se permite `.gitkeep`): `tm_estaciones.csv`, `tu_paradas.csv`, `mr_estaciones.csv`, `am_estaciones.csv`, `transmetro_validaciones.csv`, `transurbano_transacciones.csv`, `metroriel_viajes.jsonl`, `aerometro_boardings.csv` y `cdc_padron_usuarios.csv`. Reutiliza el contrato de `scripts/validar_raw.py`: verifica encabezados CSV, llaves/JSON válido en todas las filas JSONL y al menos un registro por fuente. Los conteos históricos de Proyecto 1 no se exigen para las fuentes nuevas. Calcula SHA-256 y registra filas sin modificar Raw.
+
+También valida rutas locales sin enlaces simbólicos/junctions, archivos versionados y la configuración resuelta de Compose. Sólo admite los dos servicios actuales, el volumen local del proyecto `postgres_data`, el montaje de inicialización SQL de sólo lectura, endpoints locales y un daemon Docker local mediante npipe/unix. Si hay archivos versionados distintos de `.gitkeep` en las rutas generadas, archivos no reconocidos como datos/estado en Bronze o cuarentena, montajes adicionales, volúmenes externos/compartidos o servicios adicionales, aborta antes de limpiar. La configuración con contraseñas no se imprime.
+
+La preparación elimina únicamente:
+
+- El contenido generado de `data/bronze/`, incluidos los Parquet, `batch_manifest.json`, `cdc_manifest.json` y `data/bronze/_control/streaming_state.sqlite` con sus archivos auxiliares WAL/SHM.
+- El contenido generado de `data/quarantine/`, si existe.
+- Los artefactos y cachés de `dbt/red_metropolitana/target/` y los logs de `dbt/red_metropolitana/logs/`, incluido el estado auxiliar `revision_fase2_estado.json`. Conserva las raíces y los `.gitkeep`.
+- Los contenedores y volúmenes del Compose de este repositorio mediante `docker compose --file <ruta-del-repositorio>/docker-compose.yml down --volumes`. Se elimina el volumen PostgreSQL `<proyecto-compose>_postgres_data`: **todo el clúster local de ese volumen**, con bases, tablas, esquemas, roles, snapshots e incrementales. Se descartan también los mensajes, topics y offsets del broker Kafka y cualquier volumen anónimo de esos contenedores. No se ejecuta `docker system prune` ni se eliminan imágenes o volúmenes de otros proyectos.
+
+Conserva **todo `data/raw/`**, `datos_red/`, `.env`, código, modelos y definiciones dbt (incluida la carpeta fuente `snapshots/`), SQL de inicialización, documentación, evidencias históricas y archivos Tableau. La limpieza no toca `docs/`. Como en el flujo existente, las ingestas posteriores actualizan sus reportes auxiliares de `docs/metricas/`; esas métricas no son snapshots inmutables.
+
+Después de `down`, comprueba que no queden contenedores del proyecto ni el volumen PostgreSQL anterior; si Docker no pudo retirarlos, aborta para evitar reutilizar datos. Levanta PostgreSQL y Kafka con el mismo Compose, espera su disponibilidad y crea los dos topics existentes con una partición. PostgreSQL ejecuta automáticamente `sql/init/` sobre su volumen nuevo. Luego corre **dos veces el pipeline completo existente**, sin volver a limpiar entre corridas. Los servicios quedan disponibles al finalizar. No se necesita ejecutar manualmente `docker compose up`, crear topics ni reconstruir Staging/dbt por separado.
+
+La primera evidencia JSON incluye `preparacion_fresh_start`, con inventario Raw, volumen PostgreSQL y tiempos de validación, reinicio Docker, limpieza local, arranque, espera y creación de topics. Ambas corridas conservan las mediciones existentes de ingesta, carga Staging, dbt y métricas. El reporte incluye los tiempos de preparación. Para Proyecto 2, Gold se reconcilia contra los conteos Silver del dataset nuevo, además de las pruebas dbt y de la comparación de hashes/conteos/fingerprints entre corridas. La ejecución normal conserva su referencia histórica de Proyecto 1.
+
+**Entregable 1.1: conteos oficiales del Proyecto 2 contra Bronze.** La ejecución de Proyecto 2 no usa los conteos históricos de Proyecto 1, pero sí compara las filas cargadas a Bronze con los valores del LEEME oficial de Proyecto 2:
+
+| archivo | filas_esperadas |
+|---|---:|
+| aerometro_boardings.csv | 387053 |
+| am_estaciones.csv | 14 |
+| cdc_padron_usuarios.csv | 77636 |
+| metroriel_viajes.jsonl | 590844 |
+| mr_estaciones.csv | 22 |
+| tm_estaciones.csv | 104 |
+| transmetro_validaciones.csv | 713786 |
+| transurbano_transacciones.csv | 1635788 |
+| tu_paradas.csv | 328 |
+
+Cada JSON `docs/evidencias/<prefijo>-corrida-1.json` y `<prefijo>-corrida-2.json` incorpora `requisito_1_1.tabla`, con exactamente las columnas `archivo`, `filas_esperadas`, `filas_cargadas`, `diferencia`. `filas_cargadas` reutiliza `metricas.bronze[fuente].filas`: la suma de `metadata.num_rows` de todos los Parquet en `data/bronze/<fuente>/fecha_ingesta=*/*.parquet`, medida al final de cada corrida. No equivale a mensajes Kafka consumidos, eventos nuevos de la segunda corrida ni filas aceptadas en Silver. `diferencia = filas_cargadas - filas_esperadas`: un valor negativo indica faltantes y uno positivo indica filas de más.
+
+Los conteos Raw ya disponibles de la validación estructural se guardan aparte en `requisito_1_1.conteos_raw` y en una tabla adicional `archivo`, `filas_raw`; no sustituyen las cuatro columnas obligatorias. Los nueve conteos oficiales constituyen una referencia separada: no se cambia el contrato estructural Raw ni el validador histórico de Proyecto 1.
+
+El reporte `docs/evidencias/<prefijo>-idempotencia.md` incluye las tablas de ambas corridas. También se generan dos Markdown reutilizables para pegar en el informe: `docs/metricas/<prefijo>-requisito-1-1-corrida-1.md` y `docs/metricas/<prefijo>-requisito-1-1-corrida-2.md`. Cada tabla se guarda junto con la evidencia de su corrida, por lo que la primera queda disponible si falla la segunda. Los nuevos Markdown están protegidos por el prefijo y requieren `--overwrite` explícito para reemplazarlos. No se generan en la ejecución normal de Proyecto 1.
+
+Si alguna diferencia no es cero, JSON y Markdown muestran **CON_DIFERENCIAS** y detallan los archivos afectados con su diferencia con signo; también se informa en consola. Las diferencias se conservan para documentar su explicación, sin impedir la segunda corrida. El código de salida sigue comprobando idempotencia y reconciliación Gold/Silver; no debe interpretarse por sí solo como confirmación de que todas las diferencias del requisito 1.1 son cero.
+
+Usa un prefijo nuevo para conservar las evidencias anteriores. `--overwrite` sigue permitiendo reemplazar explícitamente sólo los destinos de evidencia de ese prefijo; por sí solo no limpia datos. Si falla la segunda corrida después de guardar la primera:
+
+```powershell
+python orchestration/flows/fase1_pipeline.py --evidence-prefix p2-jonatan-001 --resume-second
+```
+
+La reanudación conserva la primera evidencia y su referencia Proyecto 2; verifica que Raw siga teniendo los mismos SHA-256 antes de procesar. Si ya existen la segunda evidencia o el reporte, agrega `--overwrite` para reemplazarlos explícitamente. **`--fresh-start` y `--resume-second` son incompatibles**: limpiar al reanudar invalidaría la demostración de idempotencia. Si falla antes de guardar la primera corrida, vuelve a usar el comando completo con `--fresh-start`.
+
+`--resume-second` también genera la tabla 1.1 de la segunda corrida. Si la primera evidencia es anterior a este entregable, el reporte conjunto deriva su tabla de las métricas Bronze guardadas y del Raw validado, sin sobrescribir el JSON ni el Markdown de la primera corrida.
+
+Ejecuta esta preparación sin otros productores, consumidores o corridas del proyecto en paralelo. No hay respaldo automático del volumen ni rollback de una limpieza interrumpida. Las pruebas de seguridad usan directorios temporales y simulan Docker/Kafka/PostgreSQL:
+
+```powershell
+python -m unittest discover -s tests -v
+```
+
 Para repetir únicamente las pruebas dbt en un Docker con poca memoria compartida, usa `python scripts/run_dbt.py test --threads 1`.
 
 PostgreSQL declara `shm_size: "1gb"` para evitar el agotamiento histórico de los 64 MB de `/dev/shm` con paralelismo. Esta edición no recrea contenedores ni volúmenes; aplicar la definición requiere posteriormente recrear sólo el contenedor conservando `postgres_data`, nunca `docker compose down -v`.
