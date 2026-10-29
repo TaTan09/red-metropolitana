@@ -22,7 +22,11 @@ with parsed_dates as (
 
 transurbano_base as (
     select
-        ('TU-' || row_number() over(order by fecha_valida, hora_raw, id_tarjeta))::text as id_transaccion,
+        -- Fecha/hora/tarjeta admiten empates: el linaje Bronze único y estable
+        -- evita reasignar IDs según el orden físico de lectura entre builds.
+        ('TU-' || row_number() over(
+            order by fecha_valida, hora_raw, id_tarjeta, bronze_record_id
+        ))::text as id_transaccion,
         id_tarjeta,
         (fecha_valida + hora_raw::time)::timestamp as fecha_hora,
         cod_parada,
