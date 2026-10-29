@@ -115,7 +115,8 @@ def collect_evidence(conn) -> dict:
         raise RuntimeError("El costo no coincide con el recálculo por operadores futuros de cada identidad inferida")
     operators = conn.execute("""select corte, operador, count(*) as poblacion,
         count(*) filter(where etiqueta=1) as positivos
-        from silver.silver_p2_poblacion_tarjeta group by 1,2 order by 1,2""").fetchall()
+        from silver.silver_p2_poblacion_tarjeta
+        where corte in ('A', 'B') group by 1,2 order by 1,2""").fetchall()
     for row in summary:
         own = [r for r in operators if r["corte"] == row["corte"]]
         if (sum(r["poblacion"] for r in own) != row["poblacion"]
