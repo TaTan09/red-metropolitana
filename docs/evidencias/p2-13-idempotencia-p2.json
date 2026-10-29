@@ -1,0 +1,32 @@
+{
+  "diferencias": 0,
+  "filas": 230209,
+  "cortes": [
+    {
+      "corte": "A",
+      "fecha_corte": "2026-07-01 00:00:00",
+      "filas": 77411,
+      "etiquetas_nulas": 0,
+      "sha256_filas_ordenadas": "9ad9b2ac9edd1c6d2bf5ed898163df7973dde5d14e0bbe794c9128af5e1634c8"
+    },
+    {
+      "corte": "B",
+      "fecha_corte": "2026-07-31 00:00:00",
+      "filas": 76378,
+      "etiquetas_nulas": 0,
+      "sha256_filas_ordenadas": "85e6a5e7628bd855b6e5ab01efc66cbce5fc52638c29e8100f01c211a21cb50a"
+    },
+    {
+      "corte": "C",
+      "fecha_corte": "2026-08-30 00:00:00",
+      "filas": 76420,
+      "etiquetas_nulas": 76420,
+      "sha256_filas_ordenadas": "d2feedacdb6ce2897ee6530e48b51429f80cc6a4b0aa7bc32ed3437760cb8020"
+    }
+  ],
+  "invocation_id_primera": "4f9dcc94-34fc-4982-92e1-93c19f4582e1",
+  "invocation_id_segunda": "1f1ae7a4-a49f-43c8-aa0a-e19d145ac651",
+  "segunda_verificacion_en": "2026-10-29 10:25:02.557929",
+  "comparacion": "SHA256 por corte de todas las filas ordenadas, con metadata y etiqueta, tras dos builds independientes",
+  "segundos_features_segundo_build": 38.36663341522217
+}

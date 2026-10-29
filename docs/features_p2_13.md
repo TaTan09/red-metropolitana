@@ -62,6 +62,11 @@ según el log dbt; el cálculo de población es una etapa separada. Ver
 y SHA-256 de las filas ordenadas de cada corte, incluyendo etiquetas. El
 generador falla ante duplicados, predictores nulos, cortes vacíos o etiqueta C.
 
+Las huellas de los tres cortes se conservaron exactamente tras dos builds
+independientes: ver [idempotencia real de features](evidencias/p2-13-idempotencia-p2.json).
+La segunda materialización tardó 38.37 s. El CSV completo no se versiona;
+la tabla permanece en PostgreSQL y el código permite regenerarla.
+
 ## Contrato
 
 Tabla de salida: `silver.silver_p2_features_tarjeta`.
@@ -206,7 +211,7 @@ no se presenta como un defecto encontrado en esos datos reales.
 | Enfoque | Problema concreto | Corrección y verificación |
 |---|---|---|
 | Corrección funcional | 1.2 sólo tenía A/B; C habría recibido etiqueta observada | C comparte la selección de población y tiene etiqueta y conteo futuro NULL; prueba PostgreSQL de los tres cortes |
-| Corrección funcional | Incorporar C hacía que el verificador A/B de 1.2 reportara filas sobrantes | Su FULL JOIN limita la población a A/B; 21 pruebas previas de 1.2 pasan |
+| Corrección funcional | Incorporar C hacía que el verificador A/B de 1.2 reportara filas sobrantes y mostrara C sin etiqueta como cero positivos en el desglose | El FULL JOIN y el desglose por operador se limitan a A/B; 21 pruebas previas pasan y el verificador se ejecutó sobre P2 con C presente |
 | ML y temporalidad | P1 utiliza persona inferida, ventanas 30/90 y límites inclusivos | Tarjeta de 1.2, ventanas 7/14/28, límites superiores estrictos y disponibilidad de cierre MR; pruebas de fronteras y gasto |
 | ML y temporalidad | Comparar etiqueta en el recorte exigiría datos futuros | La auditoría compara sólo predictores y población; A/B se prueban separadamente, C es NULL |
 | ML y temporalidad | Un resultado cero podría venir de una auditoría que nunca detecta fugas | Control positivo elimina los filtros temporales del SQL; detecta diferencias en viajes y gasto |
@@ -216,7 +221,8 @@ no se presenta como un defecto encontrado en esos datos reales.
 
 Validación ejecutada el 29 de octubre de 2026:
 
-- Suite completa con `P2_TEST_POSTGRES=1`: 81 pruebas, todas correctas, sin omitidas.
+- Suite completa con `P2_TEST_POSTGRES=1`: 87 pruebas finales correctas, sin omitidas
+  (81 antes de añadir las seis pruebas de segmentación).
 - Incluye 11 nuevas de 1.3: 3 del comparador y 8 contra PostgreSQL real con
   fuentes TEMP controladas. Se ejecuta el SQL de integridad dbt y se verifica
   que detecte una etiqueta C incorrecta. Repetir la transformación da lo mismo.
@@ -224,10 +230,15 @@ Validación ejecutada el 29 de octubre de 2026:
   presentes en modelos p2_12 y p2_13, sin errores de parseo. Se mantiene la
   compatibilidad declarada con dbt >=1.9.
 - `git diff --check`: correcto.
-- `dbt build` materializó la población y las 230209 filas de features sobre P2;
-  `p2_12_integridad` y `p2_13_integridad` pasaron contra esas tablas reales.
-  La evidencia de las dos corridas completas de 1.1 se registra por separado
-  con el prefijo `p2-hector-001` cuando termina la segunda corrida.
+- Dos `dbt build` completos sobre P2: 183 pruebas, 34 modelos y un hook correctos
+  en cada corrida (`PASS=218`, `ERROR=0`, `SKIP=0`, `WARN=0`). Las advertencias
+  de deprecación del parser son independientes del contador de pruebas WARN.
+  `p2_12_integridad` y `p2_13_integridad` pasaron contra las tablas reales.
+  Ver [dos corridas del flujo completo](evidencias/p2-hector-001-idempotencia.md):
+  conteos y fingerprints IGUALES y nueve diferencias Bronze iguales a cero.
+- El verificador independiente de 1.2 recalculó A/B sin diferencias de población,
+  etiqueta ni costo. El desglose contiene ocho filas (cuatro operadores por
+  corte) y excluye C; la cobertura diaria previa/futura quedó verificada.
 - Dos pruebas nuevas comprueban la huella del resumen y sus errores ante
   cortes faltantes, duplicados, nulos y etiqueta C inválida.
 
@@ -236,7 +247,7 @@ Validación ejecutada el 29 de octubre de 2026:
 La tabla A/B/C y la auditoría oficial de 1.3 están completas. Después de publicar
 esa evidencia se implementó [2.3, KMeans/PCA sobre A](segmentacion_p2_23.md),
 con código y resultados separados.
-La segunda corrida de 1.1 comprueba además la idempotencia del flujo completo.
+La segunda corrida de 1.1 comprobó además la idempotencia del flujo completo.
 No se implementó 2.2: aún no están disponibles modelos y predicciones OOF
 de Alejandro. No se entrenó un clasificador ni se usaron etiquetas B para elegir
 features, hiperparámetros o umbrales.

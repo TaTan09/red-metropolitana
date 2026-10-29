@@ -351,6 +351,12 @@ La [auditoría oficial P2](docs/evidencias/p2-13-auditoria-p2.json) compara
 P1 se conserva como histórico separado. Ver también el
 [resumen y huellas de features](docs/metricas/p2-13-features.json).
 
+La ejecución local con `--fresh-start --evidence-prefix p2-hector-001` completó
+dos corridas: nueve conteos Bronze con diferencia cero, `PASS=218` en cada
+`dbt build` y fingerprints **IGUALES**. Ver
+[evidencia del flujo completo](docs/evidencias/p2-hector-001-idempotencia.md) y
+[huellas A/B/C después de dos builds](docs/evidencias/p2-13-idempotencia-p2.json).
+
 ## Proyecto 2 — requisito 2.3: segmentación sobre A
 
 KMeans y PCA utilizan sólo A y las diez features numéricas escaladas. Se eligió
