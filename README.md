@@ -333,4 +333,17 @@ El exportador usa una transacción PostgreSQL `REPEATABLE READ, READ ONLY`, reca
 
 Genera `docs/metricas/p2-12-tarjeta.md`, `.csv` y `.json`, con las cuentas completas `positivos / población` y `positivos_con_actividad_otro_operador / positivos`. Las exportaciones son agregadas: las llaves originales permanecen en la tabla Silver. Para conservar otra ejecución usa `--output-prefix`; para reemplazar esos archivos requiere `--overwrite` explícito. Los resultados verificados están en [la evidencia del requisito 1.2](docs/metricas/p2-12-tarjeta.md).
 
-Este requisito no modifica `silver_features_usuario`, no implementa 1.3 ni entrena modelos. La etiqueta B se reporta exclusivamente como entregable, sin usarla para decisiones de modelado. No requiere ingesta, Docker ni `--fresh-start`.
+Este requisito no modifica `silver_features_usuario` ni entrena modelos. La etiqueta B se reporta exclusivamente como entregable, sin usarla para decisiones de modelado. Con Silver ya cargado, no requiere nueva ingesta ni `--fresh-start`.
+
+## Proyecto 2 — requisito 1.3: features y auditoría temporal
+
+`silver.silver_p2_features_tarjeta` implementa features por tarjeta en A/B/C,
+con ventanas de 7, 14 y 28 días, sin Gold y con etiqueta C NULL. La población
+de 1.2 se amplía a C; su evidencia y costo descriptivo siguen limitados a A/B.
+Las fechas se parametrizan mediante `p2_cortes`.
+
+Ver [diccionario, regeneración, auditoría y tres revisiones](docs/features_p2_13.md).
+El código está probado; la validación oficial P2 queda pendiente de cargar los
+nueve archivos nuevos y revisar el PDF oficial. El dataset local observado el
+29 de octubre de 2026 todavía es P1. La auditoría diagnóstica P1 compara
+113785 filas y 11 columnas con cero diferencias; no sustituye la evidencia P2.

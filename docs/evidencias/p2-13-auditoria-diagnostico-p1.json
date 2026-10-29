@@ -1,0 +1,38 @@
+{
+  "filas_completas": 113785,
+  "filas_recortadas": 113785,
+  "filas_comparadas": 113785,
+  "columnas_evaluadas": [
+    "operador",
+    "viajes_28d",
+    "viajes_7d",
+    "viajes_14d",
+    "dias_activos_28d",
+    "dias_desde_ultimo_uso",
+    "gasto_28d_gtq",
+    "tarifa_media_gtq",
+    "puntos_origen_28d",
+    "proporcion_hora_pico",
+    "proporcion_fin_semana"
+  ],
+  "cantidad_columnas": 11,
+  "diferencias": 0,
+  "diferencias_por_columna": {},
+  "fecha_corte": "2026-07-01 00:00:00",
+  "registros_eliminados_por_fuente": {
+    "silver_transmetro_validaciones": 119033,
+    "silver_transurbano_transacciones": 279342,
+    "silver_aerometro_boardings": 69662,
+    "silver_metroriel_viajes": 100275,
+    "silver_padron_transmetro_scd2": 7439
+  },
+  "etiqueta_comparada": false,
+  "alcance": "Silver operacional y CDC; no reconstruye ingesta/Staging",
+  "sql_sha256": {
+    "silver_p2_usos_tarjeta": "2904c811fcba40d97637453ffd963086285844beda153026ac6eccc45a85ce54",
+    "silver_p2_poblacion_tarjeta": "7e29d72580380fabf19b4efe92933f77fd7dd094068d443cba50a0bc82ca8cdb",
+    "silver_p2_features_tarjeta": "df84dd9b7c3ba6589e20d9e4b5389fef1d1d3dfbe1b0fb5eaac4c3ce95e92a80"
+  },
+  "ejecutado_en": "2026-10-29T09:08:56.633597-06:00",
+  "dataset": "diagnostico-proyecto-1-no-valida-resultados-oficiales-p2"
+}
