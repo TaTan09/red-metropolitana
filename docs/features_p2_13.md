@@ -233,11 +233,12 @@ Validación ejecutada el 29 de octubre de 2026:
 
 ## Pendientes y defensa oral
 
-La tabla A/B/C y la auditoría oficial de 1.3 están completas. Continúa 2.3
-(KMeans/PCA sobre A), en commits separados después de publicar esta evidencia.
+La tabla A/B/C y la auditoría oficial de 1.3 están completas. Después de publicar
+esa evidencia se implementó [2.3, KMeans/PCA sobre A](segmentacion_p2_23.md),
+con código y resultados separados.
 La segunda corrida de 1.1 comprueba además la idempotencia del flujo completo.
 No se implementó 2.2: aún no están disponibles modelos y predicciones OOF
-de Alejandro. No se entrenaron modelos ni se usaron etiquetas B para elegir
+de Alejandro. No se entrenó un clasificador ni se usaron etiquetas B para elegir
 features, hiperparámetros o umbrales.
 
 Para explicarlo: tomo las tarjetas elegibles definidas por Jonatán y miro

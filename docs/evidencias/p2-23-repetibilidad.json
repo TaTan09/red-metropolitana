@@ -1,0 +1,14 @@
+{
+  "filas": 77411,
+  "k": 2,
+  "sha256_features_a": "9ad9b2ac9edd1c6d2bf5ed898163df7973dde5d14e0bbe794c9128af5e1634c8",
+  "metricas_y_segmentos_identicos": true,
+  "asignaciones_y_pca_identicos": true,
+  "sha256_asignaciones": "1953fa139481f83298cac05324be942726174c35e0d23425d5be302aeba1cdd1",
+  "figuras_identicas": {
+    "codo.png": true,
+    "silueta.png": true,
+    "pca.png": true
+  },
+  "comparacion": "Dos ejecuciones completas; sólo se excluye el tiempo de ejecución de resultados.json"
+}

@@ -350,3 +350,10 @@ La [auditoría oficial P2](docs/evidencias/p2-13-auditoria-p2.json) compara
 77411 filas y 11 predictores con **cero diferencias**. El diagnóstico anterior
 P1 se conserva como histórico separado. Ver también el
 [resumen y huellas de features](docs/metricas/p2-13-features.json).
+
+## Proyecto 2 — requisito 2.3: segmentación sobre A
+
+KMeans y PCA utilizan sólo A y las diez features numéricas escaladas. Se eligió
+k=2 por silueta (0.4929), frente a un codo en k=4; PCA conserva 65.35 % de la
+varianza en dos componentes. Las etiquetas sólo describen los grupos después
+del ajuste. Ver [método, reproducción y resultados](docs/segmentacion_p2_23.md).
