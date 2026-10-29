@@ -303,3 +303,34 @@ python scripts/configurar_tableau_ro.py
 `datos_red/` está ignorado y se conserva localmente; las ingestas existentes usan `data/raw/`. En un entorno nuevo, el provisionamiento de `tableau_ro` crea NOLOGIN si no recibe una contraseña privada mediante `TABLEAU_RO_PASSWORD`. En el entorno validado ya tiene LOGIN y las cinco conexiones del workbook usan ese rol. No se guardan contraseñas en Git. Ver [seguridad y estado RBAC](docs/seguridad/seguridad_y_datos_personales.md) y [validación histórica de Fase 2](docs/metricas/validacion_fase2.md).
 
 Nota de alcance: el prefijo protege los JSON/reportes de `docs/evidencias`. Los scripts de ingesta todavía actualizan sus reportes auxiliares de `docs/metricas`; esos archivos no son snapshots inmutables. Para una demostración futura, revisar ese diff antes de integrar cambios y no sustituir evidencias históricas aprobadas por métricas recién generadas. Este cleanup no ejecutó ingestas ni cambió esos reportes.
+
+## Proyecto 2 — requisito 1.2: población y etiqueta por TARJETA
+
+La unidad es `(operador, llave_operacional)`, no `usuario_canonico_id`. Se materializa en `silver.silver_p2_poblacion_tarjeta` con `unidad_id` estable (MD5 de operador y llave con namespace), operador, llave original, corte, fecha_corte, eventos_previos_28d, eventos_futuros_30d y etiqueta. La clave lógica de fila es `(unidad_id, fecha_corte)`. `eventos_futuros_30d` es únicamente auditoría de la etiqueta, nunca una feature predictora.
+
+| Corte | Fecha de corte | Ventana previa de población | Ventana futura de etiqueta |
+|---|---|---|---|
+| A | 2026-07-01 00:00:00 | [2026-06-03 00:00:00, 2026-07-01 00:00:00) | [2026-07-01 00:00:00, 2026-07-31 00:00:00) |
+| B | 2026-07-31 00:00:00 | [2026-07-03 00:00:00, 2026-07-31 00:00:00) | [2026-07-31 00:00:00, 2026-08-30 00:00:00) |
+
+`silver.silver_p2_usos_tarjeta` es una vista que unifica exclusivamente las cuatro operaciones Silver. Excluye registros presentes en `silver_cuarentena` por operador e ID Bronze, sin multiplicar filas por motivos de rechazo. Un evento válido TM/TU/AM es un uso en su timestamp Silver local. Un viaje **cerrado** de MetroRiel cuenta una vez, fechado por ingreso y disponible cuando se conoce su salida, siguiendo la convención existente de features. No se inventa un segundo uso al salir.
+
+Para entrar en la población se exigen al menos dos usos en la ventana previa, ambos disponibles **antes** del corte. En MetroRiel el cierre debe ser también anterior al corte: un viaje que ingresa antes y termina después no se incorpora retroactivamente. Se aplica la interpretación literal confirmada del CDC: cualquier `DELETE` Transmetro con `valid_from < fecha_corte` excluye, incluso si después hubo `INSERT`/`UPDATE`; un DELETE exactamente en el corte o posterior no decide la población. Se consulta el historial `silver_padron_transmetro_scd2`, no su estado vigente actual. No se extrapola ese padrón a otros operadores.
+
+La etiqueta es 1 si no hay usos de esa tarjeta en la ventana futura y 0 si hay uno o más. El cierre de MR debe ser anterior al extremo superior de la ventana; no se usan cierres posteriores para conocer un viaje en ese horizonte. Por convención, un viaje que ingresa antes de un límite y cierra después no se desplaza artificialmente al instante de salida. Los extremos superiores son exclusivos: un uso exactamente en el corte pertenece al futuro, y uno exactamente 30 días después queda fuera de la etiqueta de ese corte.
+
+`silver.silver_p2_costo_tarjeta` informa, para A y B, población, positivos, tasa y positivos con actividad futura en otro operador bajo la misma identidad **inferida** del bridge P1. Cuenta cada positivo una vez; la otra llave no necesita formar parte de la población. El bridge sólo participa en este costo descriptivo y nunca decide población, unidad ni etiqueta. Se usa el patrón `USR-*`/`PATRON_NUMERICO_INFERIDO`; no se inventan equivalencias de Aerómetro. Un cero de enlaces AM no demuestra ausencia de actividad real de esa persona en otros modos.
+
+Con Silver ya disponible en PostgreSQL, construir **sólo** este requisito y exportar evidencia agregada:
+
+```powershell
+python scripts/run_dbt.py build --select tag:p2_12 --threads 1
+python scripts/generar_evidencia_p2_12.py
+python -m unittest discover -s tests -p test_p2_12_tarjeta.py -v
+```
+
+El exportador usa una transacción PostgreSQL `REPEATABLE READ, READ ONLY`, recalcula el universo completo de candidatos y las etiquetas con agregados condicionales y aborta ante cualquier diferencia con la tabla materializada. Verifica independientemente el costo agrupando los operadores con actividad futura por identidad inferida. Reconcilia también los totales por operador y registra las fechas con usos: 28 previas y 30 futuras por operador/corte. Esa comprobación de cobertura no certifica exhaustividad de registros.
+
+Genera `docs/metricas/p2-12-tarjeta.md`, `.csv` y `.json`, con las cuentas completas `positivos / población` y `positivos_con_actividad_otro_operador / positivos`. Las exportaciones son agregadas: las llaves originales permanecen en la tabla Silver. Para conservar otra ejecución usa `--output-prefix`; para reemplazar esos archivos requiere `--overwrite` explícito. Los resultados verificados están en [la evidencia del requisito 1.2](docs/metricas/p2-12-tarjeta.md).
+
+Este requisito no modifica `silver_features_usuario`, no implementa 1.3 ni entrena modelos. La etiqueta B se reporta exclusivamente como entregable, sin usarla para decisiones de modelado. No requiere ingesta, Docker ni `--fresh-start`.
