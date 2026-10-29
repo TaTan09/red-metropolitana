@@ -5,16 +5,20 @@
 with operaciones as (
     select 'Transmetro'::text as operador, tarjeta_id as llave_operacional,
            bronze_record_id as evento_id, fecha_hora as fecha_uso,
-           fecha_hora as disponible_desde
+           fecha_hora as disponible_desde, tarifa_quetzales,
+           estacion_id::text as punto_origen
     from {{ ref('silver_transmetro_validaciones') }}
     union all
-    select 'Transurbano', id_tarjeta, bronze_record_id, fecha_hora, fecha_hora
+    select 'Transurbano', id_tarjeta, bronze_record_id, fecha_hora, fecha_hora,
+           tarifa_quetzales, cod_parada::text
     from {{ ref('silver_transurbano_transacciones') }}
     union all
-    select 'MetroRiel', tarjeta_mr, bronze_record_id, fecha_hora_ingreso, fecha_hora_salida
+    select 'MetroRiel', tarjeta_mr, bronze_record_id, fecha_hora_ingreso, fecha_hora_salida,
+           tarifa_quetzales, origen_estacion_id::text
     from {{ ref('silver_metroriel_viajes') }}
     union all
-    select 'Aerometro', user_hash, bronze_record_id, fecha_hora, fecha_hora
+    select 'Aerometro', user_hash, bronze_record_id, fecha_hora, fecha_hora,
+           tarifa_quetzales, station_code::text
     from {{ ref('silver_aerometro_boardings') }}
 )
 select o.*

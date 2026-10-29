@@ -1,7 +1,7 @@
 {{ config(materialized='table', tags=['p2_12']) }}
 
 with cortes as (
-    {{ p2_12_cortes() }}
+    {{ p2_12_cortes(incluir_c=true) }}
 ), previos as (
     select c.corte, c.fecha_corte, u.operador, u.llave_operacional,
            count(*) as eventos_previos_28d
@@ -33,6 +33,7 @@ with cortes as (
       on u.fecha_uso >= c.fecha_corte
      and u.fecha_uso < c.fecha_corte + interval '30 days'
      and u.disponible_desde < c.fecha_corte + interval '30 days'
+     and c.corte <> 'C'
     group by c.corte, u.operador, u.llave_operacional
 )
 select
@@ -41,8 +42,9 @@ select
     md5(p.operador || ':' || p.llave_operacional) as unidad_id,
     p.operador, p.llave_operacional, p.corte, p.fecha_corte,
     p.eventos_previos_28d,
-    coalesce(f.eventos_futuros_30d, 0) as eventos_futuros_30d,
-    case when coalesce(f.eventos_futuros_30d, 0) = 0 then 1 else 0 end as etiqueta
+    case when p.corte <> 'C' then coalesce(f.eventos_futuros_30d, 0) end as eventos_futuros_30d,
+    case when p.corte = 'C' then null
+         when coalesce(f.eventos_futuros_30d, 0) = 0 then 1 else 0 end as etiqueta
 from poblacion p
 left join futuros f
   on f.corte = p.corte and f.operador = p.operador

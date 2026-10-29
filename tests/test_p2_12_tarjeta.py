@@ -26,7 +26,7 @@ SPEC.loader.exec_module(REPORT)
 
 def model_sql(name):
     env = Environment()
-    env.globals.update(ref=lambda name: name, config=lambda **kwargs: "")
+    env.globals.update(ref=lambda name: name, config=lambda **kwargs: "", var=lambda name, default: default)
     macro = env.from_string((ROOT / "dbt/red_metropolitana/macros/p2_12_cortes.sql").read_text(encoding="utf-8")).module
     env.globals["p2_12_cortes"] = macro.p2_12_cortes
     sql = env.from_string((MODELS / f"{name}.sql").read_text(encoding="utf-8")).render()
@@ -52,16 +52,23 @@ class TarjetaTest(unittest.TestCase):
             create table bridge_identidad_usuario(sistema_origen text, llave_origen text, usuario_canonico_id text, metodo_match text);
         """)
         self.event_number = 0
+        for table, point in (("silver_transmetro_validaciones", "estacion_id"),
+                             ("silver_transurbano_transacciones", "cod_parada"),
+                             ("silver_aerometro_boardings", "station_code"),
+                             ("silver_metroriel_viajes", "origen_estacion_id")):
+            self.db.execute(f"alter table {table} add column tarifa_quetzales numeric default 1")
+            self.db.execute(f"alter table {table} add column {point} text default 'punto'")
 
     def event(self, operator, key, timestamp, *, close=None, quarantine=False):
         self.event_number += 1
         eid = f"fixture-{self.event_number}"
         if operator == "MetroRiel":
-            self.db.execute("insert into silver_metroriel_viajes values (?,?,?,?)", (key, timestamp, close, eid))
+            self.db.execute("insert into silver_metroriel_viajes(tarjeta_mr,fecha_hora_ingreso,fecha_hora_salida,bronze_record_id) values (?,?,?,?)", (key, timestamp, close, eid))
         else:
             table = {"Transmetro": "silver_transmetro_validaciones", "Transurbano": "silver_transurbano_transacciones",
                      "Aerometro": "silver_aerometro_boardings"}[operator]
-            self.db.execute(f"insert into {table} values (?,?,?)", (key, timestamp, eid))
+            key_column = {"Transmetro": "tarjeta_id", "Transurbano": "id_tarjeta", "Aerometro": "user_hash"}[operator]
+            self.db.execute(f"insert into {table}({key_column},fecha_hora,bronze_record_id) values (?,?,?)", (key, timestamp, eid))
         if quarantine:
             self.db.execute("insert into silver_cuarentena values (?,?)", (operator, eid))
         return eid

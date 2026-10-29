@@ -47,7 +47,7 @@ with cortes as (
 )
 select count(*) as diferencias
 from esperado e
-full join silver.silver_p2_poblacion_tarjeta p
+full join (select * from silver.silver_p2_poblacion_tarjeta where corte in ('A', 'B')) p
   on p.corte = e.corte and p.operador = e.operador and p.llave_operacional = e.llave_operacional
 where e.corte is null or p.corte is null
    or p.fecha_corte is distinct from e.fecha_corte
