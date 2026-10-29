@@ -1,0 +1,47 @@
+{
+  "tabla": "silver.silver_p2_features_tarjeta",
+  "verificado_en": "2026-10-29 09:52:17.038127",
+  "predictores_numericos": [
+    "viajes_28d",
+    "viajes_7d",
+    "viajes_14d",
+    "dias_activos_28d",
+    "dias_desde_ultimo_uso",
+    "gasto_28d_gtq",
+    "tarifa_media_gtq",
+    "puntos_origen_28d",
+    "proporcion_hora_pico",
+    "proporcion_fin_semana"
+  ],
+  "predictor_categorico": "operador",
+  "clave": [
+    "unidad_id",
+    "fecha_corte"
+  ],
+  "cortes": [
+    {
+      "corte": "A",
+      "fecha_corte": "2026-07-01 00:00:00",
+      "filas": 77411,
+      "etiquetas_nulas": 0,
+      "sha256_filas_ordenadas": "9ad9b2ac9edd1c6d2bf5ed898163df7973dde5d14e0bbe794c9128af5e1634c8"
+    },
+    {
+      "corte": "B",
+      "fecha_corte": "2026-07-31 00:00:00",
+      "filas": 76378,
+      "etiquetas_nulas": 0,
+      "sha256_filas_ordenadas": "85e6a5e7628bd855b6e5ab01efc66cbce5fc52638c29e8100f01c211a21cb50a"
+    },
+    {
+      "corte": "C",
+      "fecha_corte": "2026-08-30 00:00:00",
+      "filas": 76420,
+      "etiquetas_nulas": 76420,
+      "sha256_filas_ordenadas": "d2feedacdb6ce2897ee6530e48b51429f80cc6a4b0aa7bc32ed3437760cb8020"
+    }
+  ],
+  "nulos_predictores": 0,
+  "duplicados": 0,
+  "huella": "SHA256 de JSON por fila con claves ordenadas, NUMERIC como texto; orden unidad_id/fecha_corte; incluye etiqueta"
+}

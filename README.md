@@ -343,7 +343,10 @@ de 1.2 se amplía a C; su evidencia y costo descriptivo siguen limitados a A/B.
 Las fechas se parametrizan mediante `p2_cortes`.
 
 Ver [diccionario, regeneración, auditoría y tres revisiones](docs/features_p2_13.md).
-El código está probado; la validación oficial P2 queda pendiente de cargar los
-nueve archivos nuevos y revisar el PDF oficial. El dataset local observado el
-29 de octubre de 2026 todavía es P1. La auditoría diagnóstica P1 compara
-113785 filas y 11 columnas con cero diferencias; no sustituye la evidencia P2.
+El código está probado y contrastado con el PDF oficial. Los nueve archivos P2
+se verificaron y cargaron desde cero, conservando un respaldo local de P1.
+La tabla contiene 77411 filas A, 76378 B y 76420 C, todas las etiquetas C NULL.
+La [auditoría oficial P2](docs/evidencias/p2-13-auditoria-p2.json) compara
+77411 filas y 11 predictores con **cero diferencias**. El diagnóstico anterior
+P1 se conserva como histórico separado. Ver también el
+[resumen y huellas de features](docs/metricas/p2-13-features.json).
