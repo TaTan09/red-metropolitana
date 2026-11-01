@@ -1,8 +1,8 @@
 {
-  "fecha": "2026-10-28T20:15:42-06:00",
+  "fecha": "2026-11-01T16:24:27-06:00",
   "source_file": "cdc_padron_usuarios.csv",
   "source_sha256": "f1b483aba844ad1c5c1da71003c621bcbc8ce231ecf5283e42d18050261f480f",
-  "bronze_path": "data/bronze/cdc_padron_usuarios/fecha_ingesta=2026-10-28/part-f1b483aba844.parquet",
+  "bronze_path": "data/bronze/cdc_padron_usuarios/fecha_ingesta=2026-11-01/part-f1b483aba844.parquet",
   "bronze_created_this_run": false,
   "total_cdc": 77636,
   "operaciones": {

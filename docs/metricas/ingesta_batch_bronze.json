@@ -1,5 +1,5 @@
 {
-  "fecha": "2026-10-28T20:15:25-06:00",
+  "fecha": "2026-11-01T16:24:25-06:00",
   "resultados": [
     {
       "archivo": "tm_estaciones.csv",
@@ -8,7 +8,7 @@
       "detalle": "Mismo SHA-256 ya presente en Bronze",
       "sha256": "4d53a95abb4f115b7da7f69db2c392e1748d6704807d81408a5e510f791624d0",
       "registros": 104,
-      "output_path": "data/bronze/tm_estaciones/fecha_ingesta=2026-10-28/part-4d53a95abb4f.parquet"
+      "output_path": "data/bronze/tm_estaciones/fecha_ingesta=2026-11-01/part-4d53a95abb4f.parquet"
     },
     {
       "archivo": "tu_paradas.csv",
@@ -17,7 +17,7 @@
       "detalle": "Mismo SHA-256 ya presente en Bronze",
       "sha256": "a888a09c45189cfeac0a0577377d1b4c662923ee55f798d961f418aa2ac93b90",
       "registros": 328,
-      "output_path": "data/bronze/tu_paradas/fecha_ingesta=2026-10-28/part-a888a09c4518.parquet"
+      "output_path": "data/bronze/tu_paradas/fecha_ingesta=2026-11-01/part-a888a09c4518.parquet"
     },
     {
       "archivo": "mr_estaciones.csv",
@@ -26,7 +26,7 @@
       "detalle": "Mismo SHA-256 ya presente en Bronze",
       "sha256": "c302ffbc6f0bdcf926c8eaaf9a5427ec5d38d482cc44431e3aeb20a8febb8e8c",
       "registros": 22,
-      "output_path": "data/bronze/mr_estaciones/fecha_ingesta=2026-10-28/part-c302ffbc6f0b.parquet"
+      "output_path": "data/bronze/mr_estaciones/fecha_ingesta=2026-11-01/part-c302ffbc6f0b.parquet"
     },
     {
       "archivo": "am_estaciones.csv",
@@ -35,7 +35,7 @@
       "detalle": "Mismo SHA-256 ya presente en Bronze",
       "sha256": "e3acbeed8608fb9a6b9a8df87646bf5294e644aa64bd95484f1424b92ae21723",
       "registros": 14,
-      "output_path": "data/bronze/am_estaciones/fecha_ingesta=2026-10-28/part-e3acbeed8608.parquet"
+      "output_path": "data/bronze/am_estaciones/fecha_ingesta=2026-11-01/part-e3acbeed8608.parquet"
     },
     {
       "archivo": "transurbano_transacciones.csv",
@@ -44,7 +44,7 @@
       "detalle": "Mismo SHA-256 ya presente en Bronze",
       "sha256": "d5c61aee5f642563638bab6b174a397d2fbd5136a368063deeee6715a648bd65",
       "registros": 1635788,
-      "output_path": "data/bronze/transurbano_transacciones/fecha_ingesta=2026-10-28/part-d5c61aee5f64.parquet"
+      "output_path": "data/bronze/transurbano_transacciones/fecha_ingesta=2026-11-01/part-d5c61aee5f64.parquet"
     },
     {
       "archivo": "metroriel_viajes.jsonl",
@@ -53,7 +53,7 @@
       "detalle": "Mismo SHA-256 ya presente en Bronze",
       "sha256": "5fc6b782a29b6b33e218c52d1dc371526e1ae563d3a01b6bf706f3d7ccbc1812",
       "registros": 590844,
-      "output_path": "data/bronze/metroriel_viajes/fecha_ingesta=2026-10-28/part-5fc6b782a29b.parquet"
+      "output_path": "data/bronze/metroriel_viajes/fecha_ingesta=2026-11-01/part-5fc6b782a29b.parquet"
     }
   ],
   "total_ingested": 0,
