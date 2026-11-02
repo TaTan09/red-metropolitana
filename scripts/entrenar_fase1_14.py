@@ -2,6 +2,7 @@ import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import roc_auc_score
@@ -10,8 +11,19 @@ from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.linear_model import LogisticRegression
 
-# 1. Conexión y lectura del Corte A
-db_url = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@127.0.0.1:5432/red_metropolitana")
+# 1. Cargar variables de entorno y construir conexión robusta
+load_dotenv()
+
+pg_user = os.getenv("POSTGRES_USER", "postgres")
+pg_pass = os.getenv("POSTGRES_PASSWORD", "postgres")
+pg_host = os.getenv("POSTGRES_HOST", "127.0.0.1")
+pg_port = os.getenv("POSTGRES_PORT", "5432")
+pg_db = os.getenv("POSTGRES_DB", "red_metropolitana")
+
+db_url = os.getenv(
+    "DATABASE_URL",
+    f"postgresql://{pg_user}:{pg_pass}@{pg_host}:{pg_port}/{pg_db}"
+)
 engine = create_engine(db_url)
 
 print("Cargando datos del Corte A desde silver.silver_p2_features_tarjeta...")
@@ -38,7 +50,7 @@ WHERE corte = 'A';
 df_a = pd.read_sql(query, engine)
 print(f"Filas cargadas: {len(df_a)} (esperadas: 77411)")
 
-# 2. Definición de variables
+# 2. Definición de predictores y variable objetivo
 num_cols = [
     'viajes_28d', 'viajes_7d', 'viajes_14d', 'dias_activos_28d',
     'dias_desde_ultimo_uso', 'gasto_28d_gtq', 'tarifa_media_gtq',
@@ -52,21 +64,31 @@ y = df_a['etiqueta'].values
 # 3. 5 Folds estratificados con semilla fija
 skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=2026)
 
-# 4. Baselines
+# 4. Evaluación de Baselines de forma explícita en cada fold
 print("\n--- Evaluando Baselines en Validación Cruzada ---")
-# Baseline 1: Probabilidad constante (ROC-AUC formal = 0.5000)
-b1_mean, b1_std = 0.5000, 0.0000
+
+# Baseline 1: Probabilidad constante igual a la tasa positiva de entrenamiento en cada pliegue
+b1_scores = []
+for train_idx, val_idx in skf.split(X, y):
+    tasa_positiva_train = np.mean(y[train_idx])
+    probs_b1 = np.full(shape=len(val_idx), fill_value=tasa_positiva_train)
+    # roc_auc_score con vector constante produce 0.5 evaluado directamente
+    score_b1 = roc_auc_score(y[val_idx], probs_b1)
+    b1_scores.append(score_b1)
+
+b1_mean, b1_std = np.mean(b1_scores), np.std(b1_scores)
 print(f"Baseline 1 (Tasa positiva constante): ROC-AUC = {b1_mean:.4f} +/- {b1_std:.4f}")
 
 # Baseline 2: Puntaje directo por recencia (dias_desde_ultimo_uso)
 b2_scores = []
 for _, val_idx in skf.split(X, y):
-    score = roc_auc_score(y[val_idx], df_a.iloc[val_idx]['dias_desde_ultimo_uso'])
-    b2_scores.append(score)
+    score_b2 = roc_auc_score(y[val_idx], df_a.iloc[val_idx]['dias_desde_ultimo_uso'])
+    b2_scores.append(score_b2)
+
 b2_mean, b2_std = np.mean(b2_scores), np.std(b2_scores)
 print(f"Baseline 2 (dias_desde_ultimo_uso): ROC-AUC = {b2_mean:.4f} +/- {b2_std:.4f}")
 
-# 5. Preprocesamiento dentro del pipeline
+# 5. Preprocesamiento aislado dentro del pipeline
 preprocessor = ColumnTransformer(
     transformers=[
         ('num', StandardScaler(), num_cols),
