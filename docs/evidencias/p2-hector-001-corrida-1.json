@@ -1,0 +1,1830 @@
+{
+  "fecha_fin": "2026-10-29T10:05:08-06:00",
+  "duracion_total_segundos": 2849.6,
+  "etapas": {
+    "validar_servicios": {
+      "segundos": 0.14,
+      "postgres": "OK",
+      "kafka": "OK"
+    },
+    "batch_to_bronze": {
+      "segundos": 19.39,
+      "codigo_salida": 0
+    },
+    "cdc_to_bronze": {
+      "segundos": 22.41,
+      "codigo_salida": 0
+    },
+    "streaming_transmetro": {
+      "producer": {
+        "segundos": 30.65,
+        "codigo_salida": 0,
+        "eventos_procesados": 713786
+      },
+      "consumer": {
+        "segundos": 692.5,
+        "codigo_salida": 0
+      },
+      "mensajes_consumidos": 713786,
+      "eventos_nuevos": 713786,
+      "duplicados_tecnicos": 0,
+      "mensajes_invalidos": 0,
+      "parquet_creados": 143,
+      "fuente": "transmetro_validaciones"
+    },
+    "streaming_aerometro": {
+      "producer": {
+        "segundos": 13.66,
+        "codigo_salida": 0,
+        "eventos_procesados": 387053
+      },
+      "consumer": {
+        "segundos": 371.57,
+        "codigo_salida": 0
+      },
+      "mensajes_consumidos": 387053,
+      "eventos_nuevos": 387053,
+      "duplicados_tecnicos": 0,
+      "mensajes_invalidos": 0,
+      "parquet_creados": 78,
+      "fuente": "aerometro_boardings"
+    },
+    "rebuild_staging": {
+      "segundos": 614.59,
+      "codigo_salida": 0
+    },
+    "dbt_build": {
+      "segundos": 720.43,
+      "codigo_salida": 0,
+      "resumen_dbt": {
+        "pruebas_pass": 183,
+        "modelos_success": 34,
+        "hooks_success": 1,
+        "warnings": 0,
+        "errores": 0,
+        "skips": 0,
+        "modelos_hooks_success": 35,
+        "total_resultados": 218,
+        "estados": {
+          "success": 35,
+          "pass": 183
+        },
+        "otros_estados": {},
+        "comando": "build",
+        "generated_at": "2026-10-29T15:59:00.889720Z",
+        "invocation_id": "4f9dcc94-34fc-4982-92e1-93c19f4582e1",
+        "duracion_dbt_segundos": 687.8758158683777,
+        "fuente": "dbt/red_metropolitana/target/run_results.json",
+        "resultados": [
+          {
+            "unique_id": "operation.red_metropolitana.red_metropolitana-on-run-start-0",
+            "tipo": "operation",
+            "status": "success"
+          },
+          {
+            "unique_id": "model.red_metropolitana.silver_catalogo_puntos",
+            "tipo": "model",
+            "status": "success"
+          },
+          {
+            "unique_id": "model.red_metropolitana.silver_padron_transmetro_scd2",
+            "tipo": "model",
+            "status": "success"
+          },
+          {
+            "unique_id": "model.red_metropolitana.silver_metroriel_viajes",
+            "tipo": "model",
+            "status": "success"
+          },
+          {
+            "unique_id": "model.red_metropolitana.silver_aerometro_boardings",
+            "tipo": "model",
+            "status": "success"
+          },
+          {
+            "unique_id": "model.red_metropolitana.silver_transmetro_validaciones",
+            "tipo": "model",
+            "status": "success"
+          },
+          {
+            "unique_id": "model.red_metropolitana.stg_cat_usuarios_minimos",
+            "tipo": "model",
+            "status": "success"
+          },
+          {
+            "unique_id": "model.red_metropolitana.dim_modo",
+            "tipo": "model",
+            "status": "success"
+          },
+          {
+            "unique_id": "model.red_metropolitana.dim_punto_transporte",
+            "tipo": "model",
+            "status": "success"
+          },
+          {
+            "unique_id": "model.red_metropolitana.silver_universo_zonas",
+            "tipo": "model",
+            "status": "success"
+          },
+          {
+            "unique_id": "test.red_metropolitana.padron_scd2_integridad",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_dim_modo_modo_sk.7885fa3eb8",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.padron_scd2_intervalos",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.unique_dim_modo_modo_sk.8a7a47f357",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_dim_punto_transporte_punto_sk.7b43c333b7",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.unique_dim_punto_transporte_punto_sk.ae9bacfccc",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "model.red_metropolitana.dim_zona",
+            "tipo": "model",
+            "status": "success"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_dim_zona_puntos_aerometro.d4a9a85d2e",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_dim_zona_puntos_metroriel.3309fb8ee6",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_dim_zona_puntos_transmetro.8f07fc0ac0",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_dim_zona_puntos_transurbano.ada72d64e2",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_dim_zona_zona_sk.d4706bcfbd",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.relationships_dim_punto_transporte_zona_sk__zona_sk___ref_dim_zona_.15dc4513e4",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.unique_dim_zona_zona_sk.0b934a2da9",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "model.red_metropolitana.silver_cuarentena",
+            "tipo": "model",
+            "status": "success"
+          },
+          {
+            "unique_id": "model.red_metropolitana.silver_metricas_calidad",
+            "tipo": "model",
+            "status": "success"
+          },
+          {
+            "unique_id": "model.red_metropolitana.silver_transurbano_transacciones",
+            "tipo": "model",
+            "status": "success"
+          },
+          {
+            "unique_id": "model.red_metropolitana.silver_p2_usos_tarjeta",
+            "tipo": "model",
+            "status": "success"
+          },
+          {
+            "unique_id": "test.red_metropolitana.accepted_values_silver_p2_usos_tarjeta_operador__Transmetro__Transurbano__MetroRiel__Aerometro.82ccee7a87",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_silver_p2_usos_tarjeta_disponible_desde.18eb260211",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_silver_p2_usos_tarjeta_evento_id.8555ab227d",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_silver_p2_usos_tarjeta_fecha_uso.38cc245eba",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_silver_p2_usos_tarjeta_llave_operacional.a0efa4eeb0",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_silver_p2_usos_tarjeta_operador.69a775ffd1",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "model.red_metropolitana.dim_servicio",
+            "tipo": "model",
+            "status": "success"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_dim_servicio_servicio_sk.08cc161696",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.relationships_dim_servicio_modo_sk__modo_sk___ref_dim_modo_.5eeefca3c1",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.unique_dim_servicio_servicio_sk.449ebe23b7",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "model.red_metropolitana.bridge_identidad_usuario",
+            "tipo": "model",
+            "status": "success"
+          },
+          {
+            "unique_id": "model.red_metropolitana.dim_usuario",
+            "tipo": "model",
+            "status": "success"
+          },
+          {
+            "unique_id": "model.red_metropolitana.fact_viajes_metroriel",
+            "tipo": "model",
+            "status": "success"
+          },
+          {
+            "unique_id": "model.red_metropolitana.dim_tiempo",
+            "tipo": "model",
+            "status": "success"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_dim_usuario_usuario_sk.c12138c6c2",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.unique_dim_usuario_usuario_sk.12836fa160",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_fact_viajes_metroriel_bronze_record_id.32b9403407",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_fact_viajes_metroriel_viaje_sk.4fe8b3ec77",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.relationships_fact_viajes_metroriel_modo_sk__modo_sk___ref_dim_modo_.7233c12619",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.relationships_fact_viajes_metroriel_punto_destino_sk__punto_sk___ref_dim_punto_transporte_.2d43d06d8c",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.relationships_fact_viajes_metroriel_punto_origen_sk__punto_sk___ref_dim_punto_transporte_.1f37ec6f5d",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.relationships_fact_viajes_metroriel_servicio_sk__servicio_sk___ref_dim_servicio_.6c662d3fdd",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.relationships_fact_viajes_metroriel_usuario_sk__usuario_sk___ref_dim_usuario_.af100eb9c1",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.relationships_fact_viajes_metroriel_zona_destino_sk__zona_sk___ref_dim_zona_.2641657090",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.relationships_fact_viajes_metroriel_zona_origen_sk__zona_sk___ref_dim_zona_.eb9e019654",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.unique_fact_viajes_metroriel_bronze_record_id.780e59c89e",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.unique_fact_viajes_metroriel_viaje_sk.e0a8bec34d",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_dim_tiempo_tiempo_sk.f2824aaeb4",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.unique_dim_tiempo_tiempo_sk.6fe50a4ab6",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.relationships_fact_viajes_metroriel_tiempo_ingreso_sk__tiempo_sk___ref_dim_tiempo_.918b10e20e",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.relationships_fact_viajes_metroriel_tiempo_salida_sk__tiempo_sk___ref_dim_tiempo_.0dadc23826",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "model.red_metropolitana.v_tableau_multimodalidad",
+            "tipo": "model",
+            "status": "success"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_v_tableau_multimodalidad_metodo_identidad.b854c760e9",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_v_tableau_multimodalidad_modos_observados.46d68e8a22",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_v_tableau_multimodalidad_total_usuarios_observados.ec1e063f4b",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_v_tableau_multimodalidad_usuarios.c9fff5e159",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_v_tableau_multimodalidad_usuarios_multimodales_total.9e4532196d",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_v_tableau_multimodalidad_usuarios_unimodales_total.8fb2632280",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.v_tableau_multimodalidad_reconciliacion",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.v_tableau_multimodalidad_sin_identidad",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "model.red_metropolitana.fact_abordajes",
+            "tipo": "model",
+            "status": "success"
+          },
+          {
+            "unique_id": "test.red_metropolitana.gold_conteos_hechos",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.gold_conteos_modo",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.gold_sin_identificadores_crudos",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "model.red_metropolitana.silver_p2_poblacion_tarjeta",
+            "tipo": "model",
+            "status": "success"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_fact_abordajes_abordaje_sk.ccef2dbc2e",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_fact_abordajes_usuario_sk.93ec8995be",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.relationships_fact_abordajes_modo_sk__modo_sk___ref_dim_modo_.188803c455",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_fact_abordajes_bronze_record_id.e88169862e",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.relationships_fact_abordajes_punto_sk__punto_sk___ref_dim_punto_transporte_.5b93d761f9",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.relationships_fact_abordajes_servicio_sk__servicio_sk___ref_dim_servicio_.e72a45730d",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.relationships_fact_abordajes_usuario_sk__usuario_sk___ref_dim_usuario_.dcdce48420",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.relationships_fact_abordajes_zona_sk__zona_sk___ref_dim_zona_.8a2f350f31",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.relationships_fact_abordajes_tiempo_sk__tiempo_sk___ref_dim_tiempo_.19370d0b1a",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.accepted_values_silver_p2_poblacion_tarjeta_corte__A__B__C.d1d7396945",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.accepted_values_silver_p2_poblacion_tarjeta_etiqueta__False__0__1.76a12b65ae",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_silver_p2_poblacion_tarjeta_corte.1505115328",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_silver_p2_poblacion_tarjeta_fecha_corte.926ca7990b",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_silver_p2_poblacion_tarjeta_llave_operacional.8f71d956cf",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_silver_p2_poblacion_tarjeta_operador.578765581e",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_silver_p2_poblacion_tarjeta_unidad_id.d4f2b25c22",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.p2_12_integridad",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "model.red_metropolitana.silver_features_usuario",
+            "tipo": "model",
+            "status": "success"
+          },
+          {
+            "unique_id": "test.red_metropolitana.unique_fact_abordajes_abordaje_sk.976365f419",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_silver_features_usuario_dias_activos.b9d2e85cd2",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_silver_features_usuario_dias_desde_ultimo_evento.07d882d281",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_silver_features_usuario_es_multimodal.abd7365646",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_silver_features_usuario_eventos_aerometro.61b46df4d0",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_silver_features_usuario_eventos_metroriel.b1f0032879",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_silver_features_usuario_eventos_transmetro.1d1248a9b0",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_silver_features_usuario_eventos_transurbano.1dbe0d9a08",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_silver_features_usuario_eventos_ultimos_30_dias.8b4fea27a2",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_silver_features_usuario_eventos_ultimos_7_dias.5a44e3acbd",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_silver_features_usuario_eventos_ultimos_90_dias.d26f9ff516",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_silver_features_usuario_fecha_corte.2000fe6c11",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_silver_features_usuario_gasto_total_gtq.6ad9cfd48a",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_silver_features_usuario_metodo_match.79beff04b1",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_silver_features_usuario_modo_mas_usado.17aaa24797",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_silver_features_usuario_modos_utilizados.e0504c2bdb",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_silver_features_usuario_nivel_confianza.a871bd3b07",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_silver_features_usuario_primer_evento.7c9e9d3122",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_silver_features_usuario_proporcion_eventos_hora_pico.160baf8863",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_silver_features_usuario_span_dias_uso.799db6fe66",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_silver_features_usuario_tarifa_promedio_gtq.4bb04f85c1",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_silver_features_usuario_total_eventos.0d2dfc5dd2",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_silver_features_usuario_ultimo_evento.64e7845459",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_silver_features_usuario_usa_aerometro.2dc5381fc5",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_silver_features_usuario_usuario_canonico_id.2d76bcaea9",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_silver_features_usuario_zona_origen_frecuente.818fab4454",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.silver_features_usuario_integridad",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.unique_fact_abordajes_bronze_record_id.396b133997",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.unique_silver_features_usuario_usuario_canonico_id.e1d7b02567",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "model.red_metropolitana.mart_demanda_hora",
+            "tipo": "model",
+            "status": "success"
+          },
+          {
+            "unique_id": "model.red_metropolitana.mart_metroriel_zonas",
+            "tipo": "model",
+            "status": "success"
+          },
+          {
+            "unique_id": "model.red_metropolitana.silver_p2_features_tarjeta",
+            "tipo": "model",
+            "status": "success"
+          },
+          {
+            "unique_id": "test.red_metropolitana.mart_demanda_grano",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.mart_demanda_reconciliacion",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_mart_demanda_hora_cantidad_eventos.57b14c52fb",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_mart_demanda_hora_fecha.b511c35259",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_mart_demanda_hora_hora.1df17965fb",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_mart_demanda_hora_modo.cfd089a7a3",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_mart_demanda_hora_zona.8787771c52",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.accepted_values_mart_metroriel_zonas_nombre_zona__Zona_12__Zona_8__Zona_1__Zona_6__Zona_17.8dd98e5bd4",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.mart_metroriel_zonas_grano",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.mart_metroriel_zonas_ranking",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.mart_metroriel_zonas_reconciliacion",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_mart_metroriel_zonas_abordajes_aerometro.69f53dcea1",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_mart_metroriel_zonas_abordajes_otros_modos.192e9d92c3",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_mart_metroriel_zonas_abordajes_transmetro.6fc2c00bec",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_mart_metroriel_zonas_abordajes_transurbano.3906d9baf0",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_mart_metroriel_zonas_areas_en_ranking_red.251b9abd1a",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_mart_metroriel_zonas_estaciones_metroriel.2ff83a9b85",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_mart_metroriel_zonas_nombre_zona.ebd9ae1280",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_mart_metroriel_zonas_pct_abordajes_otros_modos_red.1f3752867c",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_mart_metroriel_zonas_ranking_demanda_otros_modos.dacc992471",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_mart_metroriel_zonas_total_abordajes_otros_modos_red.c0c7dfaacd",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_mart_metroriel_zonas_viajes_metroriel_iniciados.4a47103502",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_mart_metroriel_zonas_zona_sk.3389da2734",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.relationships_mart_metroriel_zonas_zona_sk__zona_sk___ref_dim_zona_.430e1c6b78",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.unique_mart_metroriel_zonas_nombre_zona.3d6245c98b",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.unique_mart_metroriel_zonas_zona_sk.21c35211d4",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.accepted_values_silver_p2_features_tarjeta_etiqueta__False__0__1.b43fff63b7",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_silver_p2_features_tarjeta_fecha_corte.f59f603a50",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_silver_p2_features_tarjeta_gasto_28d_gtq.2a68bb7088",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_silver_p2_features_tarjeta_unidad_id.3727c67a4e",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_silver_p2_features_tarjeta_viajes_28d.6616174a8b",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.p2_13_integridad",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "model.red_metropolitana.mart_cobertura",
+            "tipo": "model",
+            "status": "success"
+          },
+          {
+            "unique_id": "model.red_metropolitana.v_tableau_demanda_abordajes",
+            "tipo": "model",
+            "status": "success"
+          },
+          {
+            "unique_id": "model.red_metropolitana.v_tableau_demanda_viajes_mr",
+            "tipo": "model",
+            "status": "success"
+          },
+          {
+            "unique_id": "model.red_metropolitana.v_tableau_metroriel",
+            "tipo": "model",
+            "status": "success"
+          },
+          {
+            "unique_id": "test.red_metropolitana.mart_cobertura_consistencia",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.mart_cobertura_grano",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.mart_cobertura_puntos_por_modo",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.mart_cobertura_reconciliacion",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_mart_cobertura_eventos_totales.6160261496",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_mart_cobertura_nombre_zona.63e6bd176b",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_mart_cobertura_zona_sk.c3f95d2beb",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.unique_mart_cobertura_nombre_zona.8ea1cc4e75",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.unique_mart_cobertura_zona_sk.5fdc002687",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_v_tableau_metroriel_abordajes_otros_modos.3cacb93414",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_v_tableau_metroriel_estaciones_metroriel.77f6acfc49",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_v_tableau_metroriel_nombre_zona.ef1bc52e31",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_v_tableau_metroriel_pct_abordajes_otros_modos_red.5f6099a6b7",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_v_tableau_metroriel_ranking_demanda_otros_modos.32a8bd4c5d",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_v_tableau_metroriel_viajes_metroriel_iniciados.4f25a35160",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.unique_v_tableau_metroriel_nombre_zona.00a78b3ee2",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.v_tableau_metroriel_reconciliacion",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "model.red_metropolitana.v_tableau_cobertura",
+            "tipo": "model",
+            "status": "success"
+          },
+          {
+            "unique_id": "test.red_metropolitana.v_tableau_reconciliacion",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.silver_features_usuario_reconciliacion",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "model.red_metropolitana.mart_multimodalidad",
+            "tipo": "model",
+            "status": "success"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_mart_multimodalidad_bronze_record_id_destino.6bb2099b3e",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.mart_multimodalidad_reglas",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_mart_multimodalidad_bronze_record_id_origen.e6b044534b",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_mart_multimodalidad_cantidad_transbordos.8c2086acfb",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_mart_multimodalidad_combinacion_modos.8d1420ec17",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_mart_multimodalidad_fecha_transbordo.13ab0825a3",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_mart_multimodalidad_hora_transbordo.e6b201252e",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_mart_multimodalidad_incluye_aerometro.cc135adde0",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_mart_multimodalidad_modo_destino.94d2f70f74",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_mart_multimodalidad_modo_origen.f33f81bf75",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_mart_multimodalidad_momento_fin_transbordo.939b503220",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_mart_multimodalidad_momento_inicio_transbordo.9aa74acd33",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_mart_multimodalidad_tiempo_transferencia_minutos.2c8f757b78",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_mart_multimodalidad_transbordo_sk.63c9b28ef2",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_mart_multimodalidad_usuario_sk.1af910e072",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_mart_multimodalidad_zona_destino.14e3ba5ac0",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_mart_multimodalidad_zona_origen.0f3ed1ea7e",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.unique_mart_multimodalidad_transbordo_sk.8d84ed6ac1",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.relationships_mart_multimodalidad_usuario_sk__usuario_sk__ref_dim_usuario_.7518b15422",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.mart_multimodalidad_secuencia",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "model.red_metropolitana.v_tableau_transbordos",
+            "tipo": "model",
+            "status": "success"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_v_tableau_transbordos_fecha.b340cef713",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_v_tableau_transbordos_combinacion_modos.94a4fedd56",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_v_tableau_transbordos_hora.76bd3974cb",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_v_tableau_transbordos_modo_origen.bf76421c0b",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_v_tableau_transbordos_incluye_aerometro.77c0454352",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_v_tableau_transbordos_modo_destino.83d2012160",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_v_tableau_transbordos_zona_destino.5e98b356e6",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_v_tableau_transbordos_zona_origen.4f31fa9cba",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_v_tableau_transbordos_total_transbordos.26ef3ea85e",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_v_tableau_transbordos_tiempo_promedio_transferencia_minutos.04c264167e",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.v_tableau_transbordos_reconciliacion",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "model.red_metropolitana.silver_p2_costo_tarjeta",
+            "tipo": "model",
+            "status": "success"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_silver_p2_costo_tarjeta_corte.22d5c2b149",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_silver_p2_costo_tarjeta_positivos.536fd4d056",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_silver_p2_costo_tarjeta_poblacion.83eee0f50d",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.not_null_silver_p2_costo_tarjeta_positivos_con_actividad_otro_operador.0601b43b4a",
+            "tipo": "test",
+            "status": "pass"
+          },
+          {
+            "unique_id": "test.red_metropolitana.unique_silver_p2_costo_tarjeta_corte.12b763bc33",
+            "tipo": "test",
+            "status": "pass"
+          }
+        ]
+      }
+    },
+    "collect_metrics": {
+      "segundos": 363.33
+    }
+  },
+  "metricas": {
+    "raw_sha256": {
+      "aerometro_boardings.csv": "cb203b5e4a49c27cfaa5012fe0f81f70ee41fe666f84689514df7e72cd442eed",
+      "am_estaciones.csv": "e3acbeed8608fb9a6b9a8df87646bf5294e644aa64bd95484f1424b92ae21723",
+      "cdc_padron_usuarios.csv": "f1b483aba844ad1c5c1da71003c621bcbc8ce231ecf5283e42d18050261f480f",
+      "metroriel_viajes.jsonl": "5fc6b782a29b6b33e218c52d1dc371526e1ae563d3a01b6bf706f3d7ccbc1812",
+      "mr_estaciones.csv": "c302ffbc6f0bdcf926c8eaaf9a5427ec5d38d482cc44431e3aeb20a8febb8e8c",
+      "tm_estaciones.csv": "4d53a95abb4f115b7da7f69db2c392e1748d6704807d81408a5e510f791624d0",
+      "transmetro_validaciones.csv": "972e9f511d628a18bd5f906ee9074733ea8c380ce1df48dc60db19a62eb9e370",
+      "transurbano_transacciones.csv": "d5c61aee5f642563638bab6b174a397d2fbd5136a368063deeee6715a648bd65",
+      "tu_paradas.csv": "a888a09c45189cfeac0a0577377d1b4c662923ee55f798d961f418aa2ac93b90"
+    },
+    "bronze": {
+      "tm_estaciones": {
+        "filas": 104,
+        "archivos": 1,
+        "filas_por_parquet": {
+          "data/bronze/tm_estaciones/fecha_ingesta=2026-10-29/part-4d53a95abb4f.parquet": 104
+        }
+      },
+      "tu_paradas": {
+        "filas": 328,
+        "archivos": 1,
+        "filas_por_parquet": {
+          "data/bronze/tu_paradas/fecha_ingesta=2026-10-29/part-a888a09c4518.parquet": 328
+        }
+      },
+      "mr_estaciones": {
+        "filas": 22,
+        "archivos": 1,
+        "filas_por_parquet": {
+          "data/bronze/mr_estaciones/fecha_ingesta=2026-10-29/part-c302ffbc6f0b.parquet": 22
+        }
+      },
+      "am_estaciones": {
+        "filas": 14,
+        "archivos": 1,
+        "filas_por_parquet": {
+          "data/bronze/am_estaciones/fecha_ingesta=2026-10-29/part-e3acbeed8608.parquet": 14
+        }
+      },
+      "transurbano_transacciones": {
+        "filas": 1635788,
+        "archivos": 1,
+        "filas_por_parquet": {
+          "data/bronze/transurbano_transacciones/fecha_ingesta=2026-10-29/part-d5c61aee5f64.parquet": 1635788
+        }
+      },
+      "metroriel_viajes": {
+        "filas": 590844,
+        "archivos": 1,
+        "filas_por_parquet": {
+          "data/bronze/metroriel_viajes/fecha_ingesta=2026-10-29/part-5fc6b782a29b.parquet": 590844
+        }
+      },
+      "cdc_padron_usuarios": {
+        "filas": 77636,
+        "archivos": 1,
+        "filas_por_parquet": {
+          "data/bronze/cdc_padron_usuarios/fecha_ingesta=2026-10-29/part-f1b483aba844.parquet": 77636
+        }
+      },
+      "transmetro_validaciones": {
+        "filas": 713786,
+        "archivos": 143,
+        "filas_por_parquet": {
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000000000-000000004999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000005000-000000009999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000010000-000000014999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000015000-000000019999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000020000-000000024999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000025000-000000029999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000030000-000000034999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000035000-000000039999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000040000-000000044999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000045000-000000049999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000050000-000000054999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000055000-000000059999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000060000-000000064999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000065000-000000069999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000070000-000000074999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000075000-000000079999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000080000-000000084999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000085000-000000089999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000090000-000000094999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000095000-000000099999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000100000-000000104999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000105000-000000109999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000110000-000000114999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000115000-000000119999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000120000-000000124999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000125000-000000129999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000130000-000000134999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000135000-000000139999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000140000-000000144999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000145000-000000149999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000150000-000000154999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000155000-000000159999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000160000-000000164999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000165000-000000169999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000170000-000000174999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000175000-000000179999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000180000-000000184999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000185000-000000189999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000190000-000000194999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000195000-000000199999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000200000-000000204999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000205000-000000209999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000210000-000000214999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000215000-000000219999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000220000-000000224999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000225000-000000229999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000230000-000000234999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000235000-000000239999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000240000-000000244999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000245000-000000249999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000250000-000000254999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000255000-000000259999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000260000-000000264999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000265000-000000269999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000270000-000000274999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000275000-000000279999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000280000-000000284999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000285000-000000289999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000290000-000000294999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000295000-000000299999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000300000-000000304999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000305000-000000309999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000310000-000000314999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000315000-000000319999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000320000-000000324999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000325000-000000329999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000330000-000000334999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000335000-000000339999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000340000-000000344999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000345000-000000349999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000350000-000000354999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000355000-000000359999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000360000-000000364999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000365000-000000369999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000370000-000000374999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000375000-000000379999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000380000-000000384999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000385000-000000389999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000390000-000000394999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000395000-000000399999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000400000-000000404999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000405000-000000409999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000410000-000000414999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000415000-000000419999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000420000-000000424999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000425000-000000429999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000430000-000000434999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000435000-000000439999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000440000-000000444999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000445000-000000449999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000450000-000000454999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000455000-000000459999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000460000-000000464999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000465000-000000469999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000470000-000000474999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000475000-000000479999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000480000-000000484999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000485000-000000489999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000490000-000000494999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000495000-000000499999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000500000-000000504999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000505000-000000509999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000510000-000000514999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000515000-000000519999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000520000-000000524999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000525000-000000529999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000530000-000000534999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000535000-000000539999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000540000-000000544999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000545000-000000549999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000550000-000000554999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000555000-000000559999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000560000-000000564999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000565000-000000569999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000570000-000000574999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000575000-000000579999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000580000-000000584999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000585000-000000589999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000590000-000000594999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000595000-000000599999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000600000-000000604999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000605000-000000609999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000610000-000000614999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000615000-000000619999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000620000-000000624999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000625000-000000629999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000630000-000000634999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000635000-000000639999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000640000-000000644999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000645000-000000649999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000650000-000000654999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000655000-000000659999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000660000-000000664999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000665000-000000669999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000670000-000000674999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000675000-000000679999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000680000-000000684999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000685000-000000689999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000690000-000000694999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000695000-000000699999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000700000-000000704999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000705000-000000709999.parquet": 5000,
+          "data/bronze/transmetro_validaciones/fecha_ingesta=2026-10-29/part-p0-000000710000-000000713785.parquet": 3786
+        }
+      },
+      "aerometro_boardings": {
+        "filas": 387053,
+        "archivos": 78,
+        "filas_por_parquet": {
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000000000-000000004999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000005000-000000009999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000010000-000000014999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000015000-000000019999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000020000-000000024999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000025000-000000029999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000030000-000000034999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000035000-000000039999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000040000-000000044999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000045000-000000049999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000050000-000000054999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000055000-000000059999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000060000-000000064999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000065000-000000069999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000070000-000000074999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000075000-000000079999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000080000-000000084999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000085000-000000089999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000090000-000000094999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000095000-000000099999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000100000-000000104999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000105000-000000109999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000110000-000000114999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000115000-000000119999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000120000-000000124999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000125000-000000129999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000130000-000000134999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000135000-000000139999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000140000-000000144999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000145000-000000149999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000150000-000000154999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000155000-000000159999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000160000-000000164999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000165000-000000169999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000170000-000000174999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000175000-000000179999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000180000-000000184999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000185000-000000189999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000190000-000000194999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000195000-000000199999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000200000-000000204999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000205000-000000209999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000210000-000000214999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000215000-000000219999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000220000-000000224999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000225000-000000229999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000230000-000000234999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000235000-000000239999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000240000-000000244999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000245000-000000249999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000250000-000000254999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000255000-000000259999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000260000-000000264999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000265000-000000269999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000270000-000000274999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000275000-000000279999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000280000-000000284999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000285000-000000289999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000290000-000000294999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000295000-000000299999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000300000-000000304999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000305000-000000309999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000310000-000000314999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000315000-000000319999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000320000-000000324999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000325000-000000329999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000330000-000000334999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000335000-000000339999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000340000-000000344999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000345000-000000349999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000350000-000000354999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000355000-000000359999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000360000-000000364999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000365000-000000369999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000370000-000000374999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000375000-000000379999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000380000-000000384999.parquet": 5000,
+          "data/bronze/aerometro_boardings/fecha_ingesta=2026-10-29/part-p0-000000385000-000000387052.parquet": 2053
+        }
+      }
+    },
+    "staging": {
+      "tm_estaciones": 104,
+      "tu_paradas": 328,
+      "mr_estaciones": 22,
+      "am_estaciones": 14,
+      "transurbano_transacciones": 1635788,
+      "metroriel_viajes": 590844,
+      "cdc_registro_ambiguo": 77636,
+      "transmetro_validaciones": 713786,
+      "aerometro_boardings": 387053,
+      "padron_transmetro_actual": 40612,
+      "usuarios_transurbano_min": 45685,
+      "usuarios_metroriel_min": 26414,
+      "usuarios_aerometro_min": 16930
+    },
+    "silver": {
+      "silver_transmetro_validaciones": 711684,
+      "silver_transurbano_transacciones": 1626075,
+      "silver_metroriel_viajes": 583745,
+      "silver_aerometro_boardings": 387053,
+      "silver_cuarentena": 18922,
+      "silver_padron_transmetro_scd2": 55403,
+      "bridge_identidad_usuario": 130322,
+      "silver_features_usuario": 87102,
+      "silver_catalogo_puntos": 468,
+      "silver_universo_zonas": 16
+    },
+    "gold": {
+      "dim_usuario": 87102,
+      "dim_tiempo": 2320223,
+      "dim_zona": 16,
+      "dim_punto_transporte": 468,
+      "dim_modo": 4,
+      "dim_servicio": 52,
+      "fact_abordajes": 2724812,
+      "fact_viajes_metroriel": 583745,
+      "mart_demanda_hora": 74440,
+      "mart_cobertura": 16,
+      "mart_metroriel_zonas": 5,
+      "mart_multimodalidad": 74174
+    },
+    "tableau": {
+      "v_tableau_demanda_abordajes": 65915,
+      "v_tableau_demanda_viajes_mr": 8525,
+      "v_tableau_cobertura": 16,
+      "v_tableau_metroriel": 5,
+      "v_tableau_multimodalidad": 4,
+      "v_tableau_transbordos": 66045
+    },
+    "fingerprints_negocio": {
+      "silver.silver_transmetro_validaciones": {
+        "filas": 711684,
+        "fingerprint": "55926274c120e633ef5c4df3353bc544",
+        "auditoria_excluida": []
+      },
+      "silver.silver_transurbano_transacciones": {
+        "filas": 1626075,
+        "fingerprint": "026195c4478d4c3f9417d7c2ebba3103",
+        "auditoria_excluida": []
+      },
+      "silver.silver_metroriel_viajes": {
+        "filas": 583745,
+        "fingerprint": "db2ea32f0bdb1b29755c7be599e3ccf2",
+        "auditoria_excluida": []
+      },
+      "silver.silver_aerometro_boardings": {
+        "filas": 387053,
+        "fingerprint": "8a6ad86d6102404deedbcaf5f6c22029",
+        "auditoria_excluida": []
+      },
+      "silver.silver_cuarentena": {
+        "filas": 18922,
+        "fingerprint": "e9dbf5667b3ae5aafe95ff12b5a44cb7",
+        "auditoria_excluida": [
+          "fecha_deteccion"
+        ]
+      },
+      "silver.silver_padron_transmetro_scd2": {
+        "filas": 55403,
+        "fingerprint": "0ab2a043f7ad8fd30046977eafeff34b",
+        "auditoria_excluida": []
+      },
+      "silver.bridge_identidad_usuario": {
+        "filas": 130322,
+        "fingerprint": "5859a1db5775a8608ae89aca1dcded81",
+        "auditoria_excluida": [
+          "fecha_proceso"
+        ]
+      },
+      "silver.silver_features_usuario": {
+        "filas": 87102,
+        "fingerprint": "873f702eb1aa9735a759bcd5aefef952",
+        "auditoria_excluida": []
+      },
+      "silver.silver_catalogo_puntos": {
+        "filas": 468,
+        "fingerprint": "954481794bc5dee10341d1e0aaa1eaad",
+        "auditoria_excluida": []
+      },
+      "silver.silver_universo_zonas": {
+        "filas": 16,
+        "fingerprint": "c6c2348c47d3f6995f14a9d3862b17a2",
+        "auditoria_excluida": []
+      },
+      "gold.dim_usuario": {
+        "filas": 87102,
+        "fingerprint": "430de3f2d20ce04951e499851a7bdcad",
+        "auditoria_excluida": []
+      },
+      "gold.dim_tiempo": {
+        "filas": 2320223,
+        "fingerprint": "5cbef65329c4e3af92e14c70b6534bfe",
+        "auditoria_excluida": []
+      },
+      "gold.dim_zona": {
+        "filas": 16,
+        "fingerprint": "bcfc5d21e8a5e6ee01b8a272398e5d70",
+        "auditoria_excluida": []
+      },
+      "gold.dim_punto_transporte": {
+        "filas": 468,
+        "fingerprint": "1225471f8f31839c7ffc88aa8c0c732d",
+        "auditoria_excluida": []
+      },
+      "gold.dim_modo": {
+        "filas": 4,
+        "fingerprint": "1dfaa5143881cf0f1d380b2f09ec32c4",
+        "auditoria_excluida": []
+      },
+      "gold.dim_servicio": {
+        "filas": 52,
+        "fingerprint": "9fe56925c2c725091bd55cf740798753",
+        "auditoria_excluida": []
+      },
+      "gold.fact_abordajes": {
+        "filas": 2724812,
+        "fingerprint": "5ed1f38eca15accb2725d0bed1746db7",
+        "auditoria_excluida": []
+      },
+      "gold.fact_viajes_metroriel": {
+        "filas": 583745,
+        "fingerprint": "432846bf887645e124a250357049efdd",
+        "auditoria_excluida": []
+      },
+      "gold.mart_demanda_hora": {
+        "filas": 74440,
+        "fingerprint": "b70e428192f25118f3531debc38db897",
+        "auditoria_excluida": []
+      },
+      "gold.mart_cobertura": {
+        "filas": 16,
+        "fingerprint": "3794beccdac473f3a1119631d3598a2c",
+        "auditoria_excluida": []
+      },
+      "gold.mart_metroriel_zonas": {
+        "filas": 5,
+        "fingerprint": "cb6af08fb039ffaf1f4188a595f8531b",
+        "auditoria_excluida": []
+      },
+      "gold.mart_multimodalidad": {
+        "filas": 74174,
+        "fingerprint": "ab3e1712968f2874eb1dcc660da3be55",
+        "auditoria_excluida": []
+      },
+      "gold.v_tableau_demanda_abordajes": {
+        "filas": 65915,
+        "fingerprint": "0df745d052a3fc8f356a40d49bc38c4d",
+        "auditoria_excluida": []
+      },
+      "gold.v_tableau_demanda_viajes_mr": {
+        "filas": 8525,
+        "fingerprint": "e3d78f5c0a2bee3067f4e835ded9cb54",
+        "auditoria_excluida": []
+      },
+      "gold.v_tableau_cobertura": {
+        "filas": 16,
+        "fingerprint": "4215257ec107c446b16714fb0e9bf159",
+        "auditoria_excluida": []
+      },
+      "gold.v_tableau_metroriel": {
+        "filas": 5,
+        "fingerprint": "c2bab987e7b1df81c20a62ec16cb49e4",
+        "auditoria_excluida": []
+      },
+      "gold.v_tableau_multimodalidad": {
+        "filas": 4,
+        "fingerprint": "543b3e9c986234d91e430bf65f72a5ec",
+        "auditoria_excluida": []
+      },
+      "gold.v_tableau_transbordos": {
+        "filas": 66045,
+        "fingerprint": "9da85ca8f89e105a30369926117010b9",
+        "auditoria_excluida": []
+      }
+    },
+    "gold_abordajes_por_modo": {
+      "Aerometro": 387053,
+      "Transmetro": 711684,
+      "Transurbano": 1626075
+    },
+    "segundos": 363.33
+  },
+  "evidence_prefix": "p2-hector-001",
+  "preparacion_fresh_start": {
+    "duracion_total_segundos": 44.87,
+    "etapas": {
+      "validar_raw": {
+        "segundos": 12.44,
+        "archivos": {
+          "tm_estaciones.csv": {
+            "filas": 104,
+            "sha256": "4d53a95abb4f115b7da7f69db2c392e1748d6704807d81408a5e510f791624d0"
+          },
+          "tu_paradas.csv": {
+            "filas": 328,
+            "sha256": "a888a09c45189cfeac0a0577377d1b4c662923ee55f798d961f418aa2ac93b90"
+          },
+          "mr_estaciones.csv": {
+            "filas": 22,
+            "sha256": "c302ffbc6f0bdcf926c8eaaf9a5427ec5d38d482cc44431e3aeb20a8febb8e8c"
+          },
+          "am_estaciones.csv": {
+            "filas": 14,
+            "sha256": "e3acbeed8608fb9a6b9a8df87646bf5294e644aa64bd95484f1424b92ae21723"
+          },
+          "transmetro_validaciones.csv": {
+            "filas": 713786,
+            "sha256": "972e9f511d628a18bd5f906ee9074733ea8c380ce1df48dc60db19a62eb9e370"
+          },
+          "transurbano_transacciones.csv": {
+            "filas": 1635788,
+            "sha256": "d5c61aee5f642563638bab6b174a397d2fbd5136a368063deeee6715a648bd65"
+          },
+          "metroriel_viajes.jsonl": {
+            "filas": 590844,
+            "sha256": "5fc6b782a29b6b33e218c52d1dc371526e1ae563d3a01b6bf706f3d7ccbc1812"
+          },
+          "aerometro_boardings.csv": {
+            "filas": 387053,
+            "sha256": "cb203b5e4a49c27cfaa5012fe0f81f70ee41fe666f84689514df7e72cd442eed"
+          },
+          "cdc_padron_usuarios.csv": {
+            "filas": 77636,
+            "sha256": "f1b483aba844ad1c5c1da71003c621bcbc8ce231ecf5283e42d18050261f480f"
+          }
+        }
+      },
+      "validar_compose": {
+        "segundos": 0.73,
+        "codigo_salida": 0,
+        "volumen_postgres": "red-metropolitana_postgres_data"
+      },
+      "reiniciar_docker": {
+        "segundos": 3.59,
+        "codigo_salida": 0
+      },
+      "confirmar_reset_docker": {
+        "segundos": 0.88,
+        "estado": "sin estado Docker anterior"
+      },
+      "limpiar_local": {
+        "segundos": 7.09,
+        "archivos_eliminados": {
+          "data/bronze": 126,
+          "data/quarantine": 0,
+          "dbt/red_metropolitana/target": 388,
+          "dbt/red_metropolitana/logs": 1
+        }
+      },
+      "levantar_docker": {
+        "segundos": 2.65,
+        "codigo_salida": 0
+      },
+      "esperar_servicios": {
+        "segundos": 11.38,
+        "postgres": "OK",
+        "kafka": "OK"
+      },
+      "crear_topics": {
+        "segundos": 0.13,
+        "topics": [
+          "aerometro-boardings",
+          "transmetro-validaciones"
+        ]
+      }
+    }
+  },
+  "requisito_1_1": {
+    "referencia": "LEEME oficial del Proyecto 2, requisito 1.1",
+    "tabla": [
+      {
+        "archivo": "aerometro_boardings.csv",
+        "filas_esperadas": 387053,
+        "filas_cargadas": 387053,
+        "diferencia": 0
+      },
+      {
+        "archivo": "am_estaciones.csv",
+        "filas_esperadas": 14,
+        "filas_cargadas": 14,
+        "diferencia": 0
+      },
+      {
+        "archivo": "cdc_padron_usuarios.csv",
+        "filas_esperadas": 77636,
+        "filas_cargadas": 77636,
+        "diferencia": 0
+      },
+      {
+        "archivo": "metroriel_viajes.jsonl",
+        "filas_esperadas": 590844,
+        "filas_cargadas": 590844,
+        "diferencia": 0
+      },
+      {
+        "archivo": "mr_estaciones.csv",
+        "filas_esperadas": 22,
+        "filas_cargadas": 22,
+        "diferencia": 0
+      },
+      {
+        "archivo": "tm_estaciones.csv",
+        "filas_esperadas": 104,
+        "filas_cargadas": 104,
+        "diferencia": 0
+      },
+      {
+        "archivo": "transmetro_validaciones.csv",
+        "filas_esperadas": 713786,
+        "filas_cargadas": 713786,
+        "diferencia": 0
+      },
+      {
+        "archivo": "transurbano_transacciones.csv",
+        "filas_esperadas": 1635788,
+        "filas_cargadas": 1635788,
+        "diferencia": 0
+      },
+      {
+        "archivo": "tu_paradas.csv",
+        "filas_esperadas": 328,
+        "filas_cargadas": 328,
+        "diferencia": 0
+      }
+    ],
+    "conteos_raw": {
+      "aerometro_boardings.csv": 387053,
+      "am_estaciones.csv": 14,
+      "cdc_padron_usuarios.csv": 77636,
+      "metroriel_viajes.jsonl": 590844,
+      "mr_estaciones.csv": 22,
+      "tm_estaciones.csv": 104,
+      "transmetro_validaciones.csv": 713786,
+      "transurbano_transacciones.csv": 1635788,
+      "tu_paradas.csv": 328
+    },
+    "estado": "OK"
+  }
+}

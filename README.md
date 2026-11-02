@@ -210,6 +210,71 @@ Si falla la segunda ejecución después de guardar la primera, usa `python orche
 
 Si `.env` utiliza otro puerto local de PostgreSQL, `docker compose` lo respeta con `POSTGRES_PORT`. El broker Kafka se configura opcionalmente con `KAFKA_BOOTSTRAP_SERVERS` (predeterminado `localhost:9092`). Prefect arranca su servidor temporal local automáticamente; no hay que levantar manualmente Prefect Server ni usar Prefect Cloud.
 
+### Proyecto 2: reconstrucción explícita desde las nuevas fuentes
+
+Con Docker Desktop en ejecución, `.env` configurado y las dependencias instaladas en el entorno virtual, coloca los **nueve archivos nuevos** en `data/raw/` y ejecuta desde la raíz:
+
+```powershell
+python orchestration/flows/fase1_pipeline.py --fresh-start --evidence-prefix p2-jonatan-001
+```
+
+Este comando es **destructivo para los datos generados del proyecto**. La opción es explícita: el comando normal sin `--fresh-start` sigue ejecutando sus dos corridas sin limpiar estado ni levantar/recrear servicios.
+
+Antes de borrar nada, comprueba los destinos de evidencia y valida que Raw contenga exactamente estos archivos (se permite `.gitkeep`): `tm_estaciones.csv`, `tu_paradas.csv`, `mr_estaciones.csv`, `am_estaciones.csv`, `transmetro_validaciones.csv`, `transurbano_transacciones.csv`, `metroriel_viajes.jsonl`, `aerometro_boardings.csv` y `cdc_padron_usuarios.csv`. Reutiliza el contrato de `scripts/validar_raw.py`: verifica encabezados CSV, llaves/JSON válido en todas las filas JSONL y al menos un registro por fuente. Los conteos históricos de Proyecto 1 no se exigen para las fuentes nuevas. Calcula SHA-256 y registra filas sin modificar Raw.
+
+También valida rutas locales sin enlaces simbólicos/junctions, archivos versionados y la configuración resuelta de Compose. Sólo admite los dos servicios actuales, el volumen local del proyecto `postgres_data`, el montaje de inicialización SQL de sólo lectura, endpoints locales y un daemon Docker local mediante npipe/unix. Si hay archivos versionados distintos de `.gitkeep` en las rutas generadas, archivos no reconocidos como datos/estado en Bronze o cuarentena, montajes adicionales, volúmenes externos/compartidos o servicios adicionales, aborta antes de limpiar. La configuración con contraseñas no se imprime.
+
+La preparación elimina únicamente:
+
+- El contenido generado de `data/bronze/`, incluidos los Parquet, `batch_manifest.json`, `cdc_manifest.json` y `data/bronze/_control/streaming_state.sqlite` con sus archivos auxiliares WAL/SHM.
+- El contenido generado de `data/quarantine/`, si existe.
+- Los artefactos y cachés de `dbt/red_metropolitana/target/` y los logs de `dbt/red_metropolitana/logs/`, incluido el estado auxiliar `revision_fase2_estado.json`. Conserva las raíces y los `.gitkeep`.
+- Los contenedores y volúmenes del Compose de este repositorio mediante `docker compose --file <ruta-del-repositorio>/docker-compose.yml down --volumes`. Se elimina el volumen PostgreSQL `<proyecto-compose>_postgres_data`: **todo el clúster local de ese volumen**, con bases, tablas, esquemas, roles, snapshots e incrementales. Se descartan también los mensajes, topics y offsets del broker Kafka y cualquier volumen anónimo de esos contenedores. No se ejecuta `docker system prune` ni se eliminan imágenes o volúmenes de otros proyectos.
+
+Conserva **todo `data/raw/`**, `datos_red/`, `.env`, código, modelos y definiciones dbt (incluida la carpeta fuente `snapshots/`), SQL de inicialización, documentación, evidencias históricas y archivos Tableau. La limpieza no toca `docs/`. Como en el flujo existente, las ingestas posteriores actualizan sus reportes auxiliares de `docs/metricas/`; esas métricas no son snapshots inmutables.
+
+Después de `down`, comprueba que no queden contenedores del proyecto ni el volumen PostgreSQL anterior; si Docker no pudo retirarlos, aborta para evitar reutilizar datos. Levanta PostgreSQL y Kafka con el mismo Compose, espera su disponibilidad y crea los dos topics existentes con una partición. PostgreSQL ejecuta automáticamente `sql/init/` sobre su volumen nuevo. Luego corre **dos veces el pipeline completo existente**, sin volver a limpiar entre corridas. Los servicios quedan disponibles al finalizar. No se necesita ejecutar manualmente `docker compose up`, crear topics ni reconstruir Staging/dbt por separado.
+
+La primera evidencia JSON incluye `preparacion_fresh_start`, con inventario Raw, volumen PostgreSQL y tiempos de validación, reinicio Docker, limpieza local, arranque, espera y creación de topics. Ambas corridas conservan las mediciones existentes de ingesta, carga Staging, dbt y métricas. El reporte incluye los tiempos de preparación. Para Proyecto 2, Gold se reconcilia contra los conteos Silver del dataset nuevo, además de las pruebas dbt y de la comparación de hashes/conteos/fingerprints entre corridas. La ejecución normal conserva su referencia histórica de Proyecto 1.
+
+**Entregable 1.1: conteos oficiales del Proyecto 2 contra Bronze.** La ejecución de Proyecto 2 no usa los conteos históricos de Proyecto 1, pero sí compara las filas cargadas a Bronze con los valores del LEEME oficial de Proyecto 2:
+
+| archivo | filas_esperadas |
+|---|---:|
+| aerometro_boardings.csv | 387053 |
+| am_estaciones.csv | 14 |
+| cdc_padron_usuarios.csv | 77636 |
+| metroriel_viajes.jsonl | 590844 |
+| mr_estaciones.csv | 22 |
+| tm_estaciones.csv | 104 |
+| transmetro_validaciones.csv | 713786 |
+| transurbano_transacciones.csv | 1635788 |
+| tu_paradas.csv | 328 |
+
+Cada JSON `docs/evidencias/<prefijo>-corrida-1.json` y `<prefijo>-corrida-2.json` incorpora `requisito_1_1.tabla`, con exactamente las columnas `archivo`, `filas_esperadas`, `filas_cargadas`, `diferencia`. `filas_cargadas` reutiliza `metricas.bronze[fuente].filas`: la suma de `metadata.num_rows` de todos los Parquet en `data/bronze/<fuente>/fecha_ingesta=*/*.parquet`, medida al final de cada corrida. No equivale a mensajes Kafka consumidos, eventos nuevos de la segunda corrida ni filas aceptadas en Silver. `diferencia = filas_cargadas - filas_esperadas`: un valor negativo indica faltantes y uno positivo indica filas de más.
+
+Los conteos Raw ya disponibles de la validación estructural se guardan aparte en `requisito_1_1.conteos_raw` y en una tabla adicional `archivo`, `filas_raw`; no sustituyen las cuatro columnas obligatorias. Los nueve conteos oficiales constituyen una referencia separada: no se cambia el contrato estructural Raw ni el validador histórico de Proyecto 1.
+
+El reporte `docs/evidencias/<prefijo>-idempotencia.md` incluye las tablas de ambas corridas. También se generan dos Markdown reutilizables para pegar en el informe: `docs/metricas/<prefijo>-requisito-1-1-corrida-1.md` y `docs/metricas/<prefijo>-requisito-1-1-corrida-2.md`. Cada tabla se guarda junto con la evidencia de su corrida, por lo que la primera queda disponible si falla la segunda. Los nuevos Markdown están protegidos por el prefijo y requieren `--overwrite` explícito para reemplazarlos. No se generan en la ejecución normal de Proyecto 1.
+
+Si alguna diferencia no es cero, JSON y Markdown muestran **CON_DIFERENCIAS** y detallan los archivos afectados con su diferencia con signo; también se informa en consola. Las diferencias se conservan para documentar su explicación, sin impedir la segunda corrida. El código de salida sigue comprobando idempotencia y reconciliación Gold/Silver; no debe interpretarse por sí solo como confirmación de que todas las diferencias del requisito 1.1 son cero.
+
+Usa un prefijo nuevo para conservar las evidencias anteriores. `--overwrite` sigue permitiendo reemplazar explícitamente sólo los destinos de evidencia de ese prefijo; por sí solo no limpia datos. Si falla la segunda corrida después de guardar la primera:
+
+```powershell
+python orchestration/flows/fase1_pipeline.py --evidence-prefix p2-jonatan-001 --resume-second
+```
+
+La reanudación conserva la primera evidencia y su referencia Proyecto 2; verifica que Raw siga teniendo los mismos SHA-256 antes de procesar. Si ya existen la segunda evidencia o el reporte, agrega `--overwrite` para reemplazarlos explícitamente. **`--fresh-start` y `--resume-second` son incompatibles**: limpiar al reanudar invalidaría la demostración de idempotencia. Si falla antes de guardar la primera corrida, vuelve a usar el comando completo con `--fresh-start`.
+
+`--resume-second` también genera la tabla 1.1 de la segunda corrida. Si la primera evidencia es anterior a este entregable, el reporte conjunto deriva su tabla de las métricas Bronze guardadas y del Raw validado, sin sobrescribir el JSON ni el Markdown de la primera corrida.
+
+Ejecuta esta preparación sin otros productores, consumidores o corridas del proyecto en paralelo. No hay respaldo automático del volumen ni rollback de una limpieza interrumpida. Las pruebas de seguridad usan directorios temporales y simulan Docker/Kafka/PostgreSQL:
+
+```powershell
+python -m unittest discover -s tests -v
+```
+
 Para repetir únicamente las pruebas dbt en un Docker con poca memoria compartida, usa `python scripts/run_dbt.py test --threads 1`.
 
 PostgreSQL declara `shm_size: "1gb"` para evitar el agotamiento histórico de los 64 MB de `/dev/shm` con paralelismo. Esta edición no recrea contenedores ni volúmenes; aplicar la definición requiere posteriormente recrear sólo el contenedor conservando `postgres_data`, nunca `docker compose down -v`.
@@ -238,3 +303,63 @@ python scripts/configurar_tableau_ro.py
 `datos_red/` está ignorado y se conserva localmente; las ingestas existentes usan `data/raw/`. En un entorno nuevo, el provisionamiento de `tableau_ro` crea NOLOGIN si no recibe una contraseña privada mediante `TABLEAU_RO_PASSWORD`. En el entorno validado ya tiene LOGIN y las cinco conexiones del workbook usan ese rol. No se guardan contraseñas en Git. Ver [seguridad y estado RBAC](docs/seguridad/seguridad_y_datos_personales.md) y [validación histórica de Fase 2](docs/metricas/validacion_fase2.md).
 
 Nota de alcance: el prefijo protege los JSON/reportes de `docs/evidencias`. Los scripts de ingesta todavía actualizan sus reportes auxiliares de `docs/metricas`; esos archivos no son snapshots inmutables. Para una demostración futura, revisar ese diff antes de integrar cambios y no sustituir evidencias históricas aprobadas por métricas recién generadas. Este cleanup no ejecutó ingestas ni cambió esos reportes.
+
+## Proyecto 2 — requisito 1.2: población y etiqueta por TARJETA
+
+La unidad es `(operador, llave_operacional)`, no `usuario_canonico_id`. Se materializa en `silver.silver_p2_poblacion_tarjeta` con `unidad_id` estable (MD5 de operador y llave con namespace), operador, llave original, corte, fecha_corte, eventos_previos_28d, eventos_futuros_30d y etiqueta. La clave lógica de fila es `(unidad_id, fecha_corte)`. `eventos_futuros_30d` es únicamente auditoría de la etiqueta, nunca una feature predictora.
+
+| Corte | Fecha de corte | Ventana previa de población | Ventana futura de etiqueta |
+|---|---|---|---|
+| A | 2026-07-01 00:00:00 | [2026-06-03 00:00:00, 2026-07-01 00:00:00) | [2026-07-01 00:00:00, 2026-07-31 00:00:00) |
+| B | 2026-07-31 00:00:00 | [2026-07-03 00:00:00, 2026-07-31 00:00:00) | [2026-07-31 00:00:00, 2026-08-30 00:00:00) |
+
+`silver.silver_p2_usos_tarjeta` es una vista que unifica exclusivamente las cuatro operaciones Silver. Excluye registros presentes en `silver_cuarentena` por operador e ID Bronze, sin multiplicar filas por motivos de rechazo. Un evento válido TM/TU/AM es un uso en su timestamp Silver local. Un viaje **cerrado** de MetroRiel cuenta una vez, fechado por ingreso y disponible cuando se conoce su salida, siguiendo la convención existente de features. No se inventa un segundo uso al salir.
+
+Para entrar en la población se exigen al menos dos usos en la ventana previa, ambos disponibles **antes** del corte. En MetroRiel el cierre debe ser también anterior al corte: un viaje que ingresa antes y termina después no se incorpora retroactivamente. Se aplica la interpretación literal confirmada del CDC: cualquier `DELETE` Transmetro con `valid_from < fecha_corte` excluye, incluso si después hubo `INSERT`/`UPDATE`; un DELETE exactamente en el corte o posterior no decide la población. Se consulta el historial `silver_padron_transmetro_scd2`, no su estado vigente actual. No se extrapola ese padrón a otros operadores.
+
+La etiqueta es 1 si no hay usos de esa tarjeta en la ventana futura y 0 si hay uno o más. El cierre de MR debe ser anterior al extremo superior de la ventana; no se usan cierres posteriores para conocer un viaje en ese horizonte. Por convención, un viaje que ingresa antes de un límite y cierra después no se desplaza artificialmente al instante de salida. Los extremos superiores son exclusivos: un uso exactamente en el corte pertenece al futuro, y uno exactamente 30 días después queda fuera de la etiqueta de ese corte.
+
+`silver.silver_p2_costo_tarjeta` informa, para A y B, población, positivos, tasa y positivos con actividad futura en otro operador bajo la misma identidad **inferida** del bridge P1. Cuenta cada positivo una vez; la otra llave no necesita formar parte de la población. El bridge sólo participa en este costo descriptivo y nunca decide población, unidad ni etiqueta. Se usa el patrón `USR-*`/`PATRON_NUMERICO_INFERIDO`; no se inventan equivalencias de Aerómetro. Un cero de enlaces AM no demuestra ausencia de actividad real de esa persona en otros modos.
+
+Con Silver ya disponible en PostgreSQL, construir **sólo** este requisito y exportar evidencia agregada:
+
+```powershell
+python scripts/run_dbt.py build --select tag:p2_12 --threads 1
+python scripts/generar_evidencia_p2_12.py
+python -m unittest discover -s tests -p test_p2_12_tarjeta.py -v
+```
+
+El exportador usa una transacción PostgreSQL `REPEATABLE READ, READ ONLY`, recalcula el universo completo de candidatos y las etiquetas con agregados condicionales y aborta ante cualquier diferencia con la tabla materializada. Verifica independientemente el costo agrupando los operadores con actividad futura por identidad inferida. Reconcilia también los totales por operador y registra las fechas con usos: 28 previas y 30 futuras por operador/corte. Esa comprobación de cobertura no certifica exhaustividad de registros.
+
+Genera `docs/metricas/p2-12-tarjeta.md`, `.csv` y `.json`, con las cuentas completas `positivos / población` y `positivos_con_actividad_otro_operador / positivos`. Las exportaciones son agregadas: las llaves originales permanecen en la tabla Silver. Para conservar otra ejecución usa `--output-prefix`; para reemplazar esos archivos requiere `--overwrite` explícito. Los resultados verificados están en [la evidencia del requisito 1.2](docs/metricas/p2-12-tarjeta.md).
+
+Este requisito no modifica `silver_features_usuario` ni entrena modelos. La etiqueta B se reporta exclusivamente como entregable, sin usarla para decisiones de modelado. Con Silver ya cargado, no requiere nueva ingesta ni `--fresh-start`.
+
+## Proyecto 2 — requisito 1.3: features y auditoría temporal
+
+`silver.silver_p2_features_tarjeta` implementa features por tarjeta en A/B/C,
+con ventanas de 7, 14 y 28 días, sin Gold y con etiqueta C NULL. La población
+de 1.2 se amplía a C; su evidencia y costo descriptivo siguen limitados a A/B.
+Las fechas se parametrizan mediante `p2_cortes`.
+
+Ver [diccionario, regeneración, auditoría y tres revisiones](docs/features_p2_13.md).
+El código está probado y contrastado con el PDF oficial. Los nueve archivos P2
+se verificaron y cargaron desde cero, conservando un respaldo local de P1.
+La tabla contiene 77411 filas A, 76378 B y 76420 C, todas las etiquetas C NULL.
+La [auditoría oficial P2](docs/evidencias/p2-13-auditoria-p2.json) compara
+77411 filas y 11 predictores con **cero diferencias**. El diagnóstico anterior
+P1 se conserva como histórico separado. Ver también el
+[resumen y huellas de features](docs/metricas/p2-13-features.json).
+
+La ejecución local con `--fresh-start --evidence-prefix p2-hector-001` completó
+dos corridas: nueve conteos Bronze con diferencia cero, `PASS=218` en cada
+`dbt build` y fingerprints **IGUALES**. Ver
+[evidencia del flujo completo](docs/evidencias/p2-hector-001-idempotencia.md) y
+[huellas A/B/C después de dos builds](docs/evidencias/p2-13-idempotencia-p2.json).
+
+## Proyecto 2 — requisito 2.3: segmentación sobre A
+
+KMeans y PCA utilizan sólo A y las diez features numéricas escaladas. Se eligió
+k=2 por silueta (0.4929), frente a un codo en k=4; PCA conserva 65.35 % de la
+varianza en dos componentes. Las etiquetas sólo describen los grupos después
+del ajuste. Ver [método, reproducción y resultados](docs/segmentacion_p2_23.md).

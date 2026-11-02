@@ -1,0 +1,18 @@
+version: 2
+models:
+  - name: silver_p2_features_tarjeta
+    description: Requisito 1.3; una tarjeta por corte, sólo Silver disponible antes del corte, ventanas de hasta 28 días.
+    columns:
+      - name: unidad_id
+        data_tests: [not_null]
+      - name: fecha_corte
+        data_tests: [not_null]
+      - name: viajes_28d
+        data_tests: [not_null]
+      - name: gasto_28d_gtq
+        data_tests: [not_null]
+      - name: etiqueta
+        data_tests:
+          - accepted_values:
+              values: [0, 1]
+              quote: false
