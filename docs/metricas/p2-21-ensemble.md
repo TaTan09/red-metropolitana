@@ -6,6 +6,8 @@ Corte A del 1 de julio de 2026. 77,411 tarjetas, 11,211 positivas. Cinco folds e
 
 Se leyó A desde SQL original de 1.3 en CTE de solo lectura. La huella de todas las filas y etiquetas coincide con la publicada para A en 1.3.
 
+La ejecución reportada utilizó Python 3.13.3 con `scikit-learn==1.9.1`, `numpy==2.5.3`, `pandas==2.3.3`, `scipy==1.18.1`, `threadpoolctl==3.7.0`, `joblib==1.6.0`. Las versiones quedan registradas en [la evidencia JSON](../evidencias/p2-21-ensemble.json).
+
 Se ordenó por unidad_id antes de separar los folds. Se recalcularon los dos baselines y las configuraciones seleccionadas de 1.4 (L1 C=0.1, L2 C=0.01). El orden estable puede cambiar la asignación de la corrida histórica, cuya consulta carecía de ORDER BY.
 
 | Modelo | AUC entrenamiento, media ± DE | AUC validación, media ± DE | Brecha, media ± DE |
@@ -33,7 +35,9 @@ El bosque con mayor brecha fue rf_flexible. El mejor AUC de validación entre bo
 
 ## Decisión
 
-Se conserva la logística de mayor AUC de validación si ningún bosque logra una ganancia media ≥ 0.002, gana al menos 4 de 5 folds y mantiene la DE y brecha dentro de 0.002 y 0.020 adicionales respectivamente. Entre bosques elegibles separados por ≤ 0.001 del mejor se prefiere el de menor complejidad. Son márgenes prácticos fijados antes del ajuste.
+La recomendación de `rf_somero` equilibra el ROC-AUC de validación, la complejidad del modelo y la brecha de generalización. `rf_regularizado` alcanzó un AUC ligeramente mayor (0.816965 frente a 0.816470) y presentó una brecha mayor (0.037524 frente a 0.004974). La menor profundidad y la menor brecha del bosque somero justifican recomendarlo pese a esa pequeña diferencia de AUC.
+
+En esta implementación, un bosque es elegible si supera a la mejor logística convergente por al menos 0.002 de AUC medio, gana al menos 4 de 5 folds y mantiene su DE y su brecha dentro de 0.002 y 0.020 adicionales, respectivamente. Entre los bosques elegibles, se prefiere el menos complejo cuyo AUC medio quede a una distancia de hasta 0.001 del mejor. Si ningún bosque cumple los criterios, se recomienda la mejor logística convergente.
 
 | Bosque | Delta AUC medio | Folds ganados | Estabilidad | Brecha | Elegible |
 |---|---:|---:|---|---|---|
@@ -77,7 +81,15 @@ Para un bosque se limita el cálculo a 4,000 filas estratificadas por fold cuand
 | puntos_origen_28d | +0.000289 | 0.000187 | 0.000295 |
 | proporcion_fin_semana | +0.000181 | 0.000180 | 0.000207 |
 
-## Reproducción y entrega a Héctor
+## Resumen de implementación y continuidad
+
+El requisito 2.1 completó la comparación de baselines, logísticas y bosques en A, el análisis de las brechas de generalización, la importancia por permutación en validación y la generación de predicciones OOF para `rf_somero`, el modelo recomendado.
+
+Héctor debe usar las probabilidades OOF y las etiquetas de A para fijar el umbral de 2.2, junto con la configuración del modelo y el orden de predictores registrados en la evidencia. El CSV local `datos_red/p2-21-oof-a.csv` está ignorado por Git. Debe compartirse directamente o regenerarse con el comando de abajo. [Evidencia JSON](../evidencias/p2-21-ensemble.json).
+
+Después de que Héctor fije el umbral, Alejandro deberá reutilizar en 2.4 la configuración definitiva del modelo, su preprocesamiento y ese umbral.
+
+## Reproducción
 
 Desde la raíz, con el entorno de requirements-ml.txt y PostgreSQL configurado mediante POSTGRES_HOST, POSTGRES_PORT, POSTGRES_DB, POSTGRES_USER y POSTGRES_PASSWORD en .env.
 
@@ -87,7 +99,7 @@ python scripts/entrenar_p2_21_ensemble.py --recalcular-a
 
 El comando sin opciones lee la tabla materializada de 1.3. La opción `--recalcular-a` ejecuta el SQL original de 1.3 sobre Silver y la población A de 1.2 en una transacción de solo lectura. Exige coincidencia con la huella publicada de A antes de entrenar.
 
-Compartir el CSV local `datos_red/p2-21-oof-a.csv`, este informe y [la evidencia JSON](../evidencias/p2-21-ensemble.json). El CSV ignorado por Git contiene una predicción de validación por tarjeta, con fold 0–4 y configuración. El JSON conserva hashes, versiones, métricas y permutaciones por fold. Para el reajuste posterior en todo A, usar `build_model(recomendado['configuracion'])` con el orden de predictores del JSON. El umbral corresponde al apartado 2.2.
+El CSV contiene una predicción de validación por tarjeta, con fold 0–4 y configuración. El JSON conserva hashes, versiones, métricas y permutaciones por fold. Para el reajuste posterior en todo A, usar `build_model(recomendado['configuracion'])` con el orden de predictores del JSON.
 
 El AUC OOF agrupado fue 0.816293. El AUC medio de folds es la métrica principal. La selección y el AUC se calcularon en los mismos folds de A. La evaluación final del modelo elegido requiere un conjunto separado.
 

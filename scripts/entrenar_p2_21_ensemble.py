@@ -341,6 +341,9 @@ def render_report(result):
     decision = result["recomendado"]
     models = result["modelos"]
     origin = result["origen"]
+    versions = result["versiones"]
+    libraries = ", ".join(f"`{name}=={version}`" for name, version in versions.items() if name != "python")
+    criteria = result["criterio_bosque"]
     provenance = f"Se leyó A desde {origin['consulta']}."
     if origin["coincide_con_13_publicado"]:
         provenance += " La huella de todas las filas y etiquetas coincide con la publicada para A en 1.3."
@@ -353,6 +356,8 @@ def render_report(result):
              f"Corte A del 1 de julio de 2026. {result['filas']:,} tarjetas, "
              f"{result['positivos']:,} positivas. Cinco folds estratificados con mezcla y semilla 2026.", "",
              provenance, "",
+             f"La ejecución reportada utilizó Python {versions['python']} con {libraries}. "
+             "Las versiones quedan registradas en [la evidencia JSON](../evidencias/p2-21-ensemble.json).", "",
              "Se ordenó por unidad_id antes de separar los folds. Se recalcularon los dos baselines y "
              "las configuraciones seleccionadas de 1.4 (L1 C=0.1, L2 C=0.01). El orden estable puede "
              "cambiar la asignación de la corrida histórica, cuya consulta carecía de ORDER BY.", "",
@@ -391,13 +396,29 @@ def render_report(result):
                   "por árbol concentra la comparación en profundidad y tamaño de hoja. "
                   "La brecha y la DE entre folds describen optimismo y dispersión empíricos. "
                   "La descomposición matemática de sesgo y varianza requeriría otro diseño.", "",
-                  "## Decisión", "",
-                  "Se conserva la logística de mayor AUC de validación si ningún bosque logra una ganancia "
-                  "media ≥ 0.002, gana al menos 4 de 5 folds y mantiene la DE y brecha dentro de 0.002 y "
-                  "0.020 adicionales respectivamente. Entre bosques elegibles separados por ≤ 0.001 del "
-                  "mejor se prefiere el de menor complejidad. Son márgenes prácticos fijados antes del ajuste.", "",
-                  "| Bosque | Delta AUC medio | Folds ganados | Estabilidad | Brecha | Elegible |",
-                  "|---|---:|---:|---|---|---|"])
+                  "## Decisión", ""])
+    regularized = models["rf_regularizado"]
+    if (decision["modelo"] == "rf_somero"
+            and regularized["auc_validacion"]["media"] > shallow["auc_validacion"]["media"]
+            and regularized["brecha"]["media"] > shallow["brecha"]["media"]):
+        lines.extend([
+            "La recomendación de `rf_somero` equilibra el ROC-AUC de validación, "
+            "la complejidad del modelo y la brecha de generalización. "
+            f"`rf_regularizado` alcanzó un AUC ligeramente mayor ({regularized['auc_validacion']['media']:.6f} "
+            f"frente a {shallow['auc_validacion']['media']:.6f}) y presentó una brecha mayor "
+            f"({regularized['brecha']['media']:.6f} frente a {shallow['brecha']['media']:.6f}). "
+            "La menor profundidad y la menor brecha del bosque somero justifican recomendarlo "
+            "pese a esa pequeña diferencia de AUC.", ""])
+    lines.extend([
+        "En esta implementación, un bosque es elegible si supera a la mejor logística convergente "
+        f"por al menos {criteria['ganancia_minima']:.3f} de AUC medio, gana al menos "
+        f"{criteria['folds_ganados_minimos']} de {result['n_folds']} folds y mantiene su DE y su brecha "
+        f"dentro de {criteria['tolerancia_de']:.3f} y {criteria['tolerancia_brecha']:.3f} adicionales, "
+        "respectivamente. Entre los bosques elegibles, se prefiere el menos complejo cuyo AUC medio "
+        f"quede a una distancia de hasta {criteria['tolerancia_para_preferir_bosque_mas_simple']:.3f} "
+        "del mejor. Si ningún bosque cumple los criterios, se recomienda la mejor logística convergente.", "",
+        "| Bosque | Delta AUC medio | Folds ganados | Estabilidad | Brecha | Elegible |",
+        "|---|---:|---:|---|---|---|"])
     for name, comparison in decision["bosques_vs_logistica"].items():
         checks = ["Sí" if comparison[key] else "No" for key in
                   ("cumple_estabilidad", "cumple_brecha", "elegible")]
@@ -421,7 +442,19 @@ def render_report(result):
     for row in result["importancia"]["variables"][:10]:
         lines.append(f"| {row['variable']} | {row['caida_auc_media']:+.6f} | "
                      f"{row['de_entre_folds']:.6f} | {row['de_permutacion_media']:.6f} |")
-    lines.extend(["", "## Reproducción y entrega a Héctor", "",
+    lines.extend(["", "## Resumen de implementación y continuidad", "",
+                  "El requisito 2.1 completó la comparación de baselines, logísticas y bosques en A, "
+                  "el análisis de las brechas de generalización, la importancia por permutación "
+                  f"en validación y la generación de predicciones OOF para `{decision['modelo']}`, "
+                  "el modelo recomendado.", "",
+                  "Héctor debe usar las probabilidades OOF y las etiquetas de A para fijar el umbral "
+                  "de 2.2, junto con la configuración del modelo y el orden de predictores registrados "
+                  "en la evidencia. El CSV local `datos_red/p2-21-oof-a.csv` está ignorado por Git. "
+                  "Debe compartirse directamente o regenerarse con el comando de abajo. "
+                  "[Evidencia JSON](../evidencias/p2-21-ensemble.json).", "",
+                  "Después de que Héctor fije el umbral, Alejandro deberá reutilizar en 2.4 "
+                  "la configuración definitiva del modelo, su preprocesamiento y ese umbral.", "",
+                  "## Reproducción", "",
                   "Desde la raíz, con el entorno de requirements-ml.txt y PostgreSQL configurado "
                   "mediante POSTGRES_HOST, POSTGRES_PORT, POSTGRES_DB, POSTGRES_USER y POSTGRES_PASSWORD en .env.", "",
                   "```powershell", command, "```", "",
@@ -429,12 +462,10 @@ def render_report(result):
                   "`--recalcular-a` ejecuta el SQL original de 1.3 sobre Silver y la población A "
                   "de 1.2 en una transacción de solo lectura. Exige coincidencia con la huella "
                   "publicada de A antes de entrenar.", "",
-                  "Compartir el CSV local `datos_red/p2-21-oof-a.csv`, este informe y "
-                  "[la evidencia JSON](../evidencias/p2-21-ensemble.json). El CSV ignorado por Git "
-                  "contiene una predicción de validación por tarjeta, con fold 0–4 y configuración. "
+                  "El CSV contiene una predicción de validación por tarjeta, con fold 0–4 y configuración. "
                   "El JSON conserva hashes, versiones, métricas y permutaciones por fold. Para el "
                   "reajuste posterior en todo A, usar `build_model(recomendado['configuracion'])` "
-                  "con el orden de predictores del JSON. El umbral corresponde al apartado 2.2.", "",
+                  "con el orden de predictores del JSON.", "",
                   f"El AUC OOF agrupado fue {result['auc_oof_recomendado']:.6f}. "
                   "El AUC medio de folds es la métrica principal. La selección y el AUC se calcularon "
                   "en los mismos folds de A. La evaluación final del modelo elegido requiere un conjunto separado.", "",
