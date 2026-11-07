@@ -1,0 +1,4 @@
+# Evidencias 2.2: hashes y bytes de la decisión estables en Windows/Linux.
+/docs/evidencias/p2-22-*.json text eol=lf
+/docs/evidencias/p2-22-*.jsonl text eol=lf
+/docs/metricas/p2-22/*.csv text eol=lf
