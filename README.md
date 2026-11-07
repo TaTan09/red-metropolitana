@@ -363,3 +363,10 @@ KMeans y PCA utilizan sólo A y las diez features numéricas escaladas. Se eligi
 k=2 por silueta (0.4929), frente a un codo en k=4; PCA conserva 65.35 % de la
 varianza en dos componentes. Las etiquetas sólo describen los grupos después
 del ajuste. Ver [método, reproducción y resultados](docs/segmentacion_p2_23.md).
+
+## Proyecto 2 — requisito 2.2: umbral económico y test único
+
+Selección exacta del umbral con OOF A, decisión congelada en Git y evaluación
+temporal B protegida contra repeticiones. Ver [diseño y revisiones](docs/umbral_p2_22.md),
+[decisión para 2.4](docs/evidencias/p2-22-decision.json) y
+[reporte de resultados](docs/metricas/p2-22/reporte.md).
