@@ -1,0 +1,9 @@
+{
+  "comando": "python predecir.py --datos datos_red --fecha-corte 2026-08-30",
+  "commit": "132e554",
+  "resultado": "OK; se recalcularon población/features/predicciones y se conservó el CSV idéntico ya entregado",
+  "csv_sha256": "dfa5126bcb3c67962090016fc55c6d39d9936a3f17aeb2b95224cc26d4e2ed59",
+  "csv_preservado": true,
+  "segundos": 91.7906645999999,
+  "b_evaluado": false
+}
