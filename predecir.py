@@ -1,82 +1,56 @@
-import os
+"""Inferencia C: carga un Pipeline guardado; los datos provienen de --datos."""
+from __future__ import annotations
 import argparse
-import joblib
-import pandas as pd
-from sqlalchemy import create_engine
-from dotenv import load_dotenv
+from datetime import datetime, timezone
+from pathlib import Path
+import sys
+import time
+from threadpoolctl import threadpool_limits
+from scripts import p2_24 as m
+from scripts import datos_p2_24 as inputs
 
-def main():
-    parser = argparse.ArgumentParser(description="Script de inferencia para predicción de abandono.")
-    parser.add_argument("--corte", type=str, default="C", help="Corte a evaluar (ej. C)")
-    parser.add_argument("--umbral", type=float, default=0.5, help="Umbral de decisión óptimo definido en la Fase 2.2")
-    parser.add_argument("--output", type=str, default="datos_red/p2-24-predicciones-c.csv", help="Ruta del CSV de salida")
-    args = parser.parse_args()
+def predict(folder, cut, output, model_path=m.MODEL):
+    cut = inputs.cutoff(cut)
+    output = Path(output)
+    sidecar = output.with_suffix('.json')
+    if output.exists() or sidecar.exists():
+        raise FileExistsError('La salida ya existe: usar --salida con una ruta nueva')
+    started = time.perf_counter()
+    model, decision, meta = m.load_model(model_path, Path(model_path).with_suffix('.json'))
+    data, timings = inputs.calculate(folder, cut)
+    computed = time.perf_counter()
+    with threadpool_limits(limits=1):
+        result = m.predict_frame(model, data, decision['umbral'])
+    predicted = time.perf_counter()
+    output.parent.mkdir(parents=True, exist_ok=True)
+    result.to_csv(output, mode='x', index=False, lineterminator='\n', float_format='%.17g')
+    evidence = {'fecha_utc':datetime.now(timezone.utc).isoformat(), 'fecha_corte':cut,
+                'modelo_version':m.VERSION, 'modelo_sha256':meta['modelo_sha256'],
+                'decision_json_canonico_sha256':m.json_hash(decision), 'umbral':decision['umbral'],
+                'filas':len(result),'contactar':int(result.contactar.sum()),'duplicados':0,
+                'puntaje_min':float(result.puntaje.min()),'puntaje_max':float(result.puntaje.max()),
+                'csv_sha256':m.sha256(output),'columnas':m.OUTPUT_COLUMNS,
+                'identidades_sha256':m.frame_hash(data[['unidad_id','tarjetas']]),
+                **timings,'segundos_hasta_features':computed-started,
+                'segundos_predict_proba':predicted-computed,'segundos_total':time.perf_counter()-started,
+                'reentrenado':False,'etiquetas_futuras_consultadas':False}
+    m.write_json(sidecar,evidence)
+    print(f"{len(result)} predicciones; contactar={evidence['contactar']}; SHA256={evidence['csv_sha256']}")
+    return evidence
 
-    load_dotenv()
-    pg_user = os.getenv("POSTGRES_USER", "postgres")
-    pg_pass = os.getenv("POSTGRES_PASSWORD", "postgres")
-    pg_host = os.getenv("POSTGRES_HOST", "127.0.0.1")
-    pg_port = os.getenv("POSTGRES_PORT", "5432")
-    pg_db = os.getenv("POSTGRES_DB", "red_metropolitana")
+def main(argv=None):
+    parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--datos',type=Path,required=True)
+    parser.add_argument('--fecha-corte',required=True)
+    parser.add_argument('--salida','--output',type=Path,default=m.ROOT/'datos_red/p2-24-predicciones-c.csv')
+    parser.add_argument('--modelo',type=Path,default=m.MODEL)
+    args=parser.parse_args(argv)
+    try:
+        predict(args.datos,args.fecha_corte,args.salida,args.modelo)
+    except Exception as exc:
+        print(f'Error de inferencia ({type(exc).__name__}): {exc}',file=sys.stderr)
+        return 1
+    return 0
 
-    db_url = os.getenv(
-        "DATABASE_URL",
-        f"postgresql://{pg_user}:{pg_pass}@{pg_host}:{pg_port}/{pg_db}"
-    )
-    engine = create_engine(db_url)
-
-    print(f"Cargando datos del Corte {args.corte} desde PostgreSQL...")
-    query = f"""
-    SELECT 
-        unidad_id,
-        corte,
-        fecha_corte,
-        operador,
-        viajes_28d,
-        viajes_7d,
-        viajes_14d,
-        dias_activos_28d,
-        dias_desde_ultimo_uso,
-        gasto_28d_gtq,
-        tarifa_media_gtq,
-        puntos_origen_28d,
-        proporcion_hora_pico,
-        proporcion_fin_semana
-    FROM silver.silver_p2_features_tarjeta
-    WHERE corte = '{args.corte}';
-    """
-    df_c = pd.read_sql(query, engine)
-    print(f"Registros cargados para Corte {args.corte}: {len(df_c)}")
-
-    model_path = "models/modelo_abandono_v1.joblib"
-    if not os.path.exists(model_path):
-        raise FileNotFoundError(f"No se encontró el modelo serializado en {model_path}. Ejecuta primero scripts/serializar_modelo.py")
-
-    print(f"Cargando modelo desde {model_path}...")
-    model = joblib.load(model_path)
-
-    num_cols = [
-        'viajes_28d', 'viajes_7d', 'viajes_14d', 'dias_activos_28d',
-        'dias_desde_ultimo_uso', 'gasto_28d_gtq', 'tarifa_media_gtq',
-        'puntos_origen_28d', 'proporcion_hora_pico', 'proporcion_fin_semana'
-    ]
-    cat_cols = ['operador']
-
-    X_c = df_c[num_cols + cat_cols]
-
-    print("Calculando probabilidades de abandono...")
-    probs = model.predict_proba(X_c)[:, 1]
-
-    df_output = df_c[['unidad_id', 'fecha_corte']].copy()
-    df_output['tarjetas'] = 1  # Conteo unitario por tarjeta
-    df_output['puntaje'] = probs
-    df_output['contactar'] = (probs >= args.umbral).astype(int)
-    df_output['modelo_version'] = 'v1_logistica_l2'
-
-    os.makedirs(os.path.dirname(args.output), exist_ok=True)
-    df_output.to_csv(args.output, index=False)
-    print(f"Predicciones generadas y guardadas exitosamente en: {args.output}")
-    print(f"Total de usuarios a contactar según umbral {args.umbral}: {df_output['contactar'].sum()} de {len(df_output)}")
-
-if __name__ == "__main__":
-    main()
+if __name__=='__main__':
+    raise SystemExit(main())
