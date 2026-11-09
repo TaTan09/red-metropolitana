@@ -101,6 +101,24 @@ class ContractTest(unittest.TestCase):
         with self.assertRaises(SystemExit) as exc: predecir.main([])
         self.assertEqual(exc.exception.code,2)
 
+    def test_cli_recalcula_sin_fit_y_preserva_csv_identico(self):
+        data=m.validate_features(feature_rows())
+        d,_=m.official()
+        class Fake:
+            def predict_proba(self,x): return np.tile([.6,.4],(len(x),1))
+            def fit(self,*args): raise AssertionError('Inferencia no debe ajustar')
+        meta={'modelo_sha256':'hash','versiones':{}}
+        with tempfile.TemporaryDirectory() as tmp, \
+             patch.object(m,'load_model',return_value=(Fake(),d,meta)), \
+             patch.object(inputs,'calculate',return_value=(data,{})) as calc:
+            p=Path(tmp)/'salida.csv'
+            predecir.predict(tmp,'2026-08-30',p)
+            before=p.read_bytes(); evidence=p.with_suffix('.json').read_bytes()
+            predecir.predict(tmp,'2026-08-30',p)
+            self.assertEqual(calc.call_count,2)
+            self.assertEqual(p.read_bytes(),before)
+            self.assertEqual(p.with_suffix('.json').read_bytes(),evidence)
+
     def test_comparador_detecta_cambios_en_cada_campo(self):
         with tempfile.TemporaryDirectory() as tmp:
             a=Path(tmp)/'a.csv'; b=Path(tmp)/'b.csv'
