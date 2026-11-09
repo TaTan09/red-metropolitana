@@ -1,4 +1,4 @@
-cat > docs/equipo/validacion_jose_carlos_23.md <<'EOF'
+
 # Validación independiente del apartado 2.3
 
 **Proyecto:** Red Metropolitana — Ciencia de Datos  
