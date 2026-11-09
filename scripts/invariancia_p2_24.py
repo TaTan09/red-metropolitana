@@ -108,6 +108,8 @@ def run(folder, baseline, workspace, evidence):
     if workspace.exists() or evidence.exists():
         raise FileExistsError('Ya hay evidencia/escenario; usar rutas nuevas')
     baseline_meta=json.loads(baseline.with_suffix('.json').read_text(encoding='utf-8'))
+    if m.sha256(baseline) != baseline_meta['csv_sha256']:
+        raise ValueError('El CSV original cambió desde su generación')
     source, _ = inputs.read_manifest(folder,cut)
     if m.sha256(source/'manifest.json')!=baseline_meta['entrada_manifest_sha256']:
         raise ValueError('La base de comparación no proviene de esta entrada')
@@ -120,6 +122,9 @@ def run(folder, baseline, workspace, evidence):
     subprocess.run(command,cwd=ROOT,check=True)
     comparison=compare(baseline,output)
     augmented=json.loads(output.with_suffix('.json').read_text(encoding='utf-8'))
+    for key in ('modelo_sha256', 'umbral', 'decision_json_canonico_sha256'):
+        if baseline_meta[key] != augmented[key]:
+            raise ValueError(f'La comparación cambió el contrato de inferencia: {key}')
     if baseline_meta['features_sha256'] != augmented['features_sha256']:
         raise ValueError('Las features cambiaron aunque las predicciones coincidieran')
     result={'fecha_utc':datetime.now().astimezone().isoformat(),'fecha_corte':cut,

@@ -30,6 +30,9 @@ def predict(folder, cut, output, model_path=m.MODEL):
                 'filas':len(result),'contactar':int(result.contactar.sum()),'duplicados':0,
                 'puntaje_min':float(result.puntaje.min()),'puntaje_max':float(result.puntaje.max()),
                 'csv_sha256':m.sha256(output),'columnas':m.OUTPUT_COLUMNS,
+                'versiones':meta['versiones'],
+                'codigo_fuentes_sha256':{name:m.sha256(m.ROOT/name) for name in
+                    ('predecir.py','scripts/p2_24.py','scripts/datos_p2_24.py')},
                 'identidades_sha256':m.frame_hash(data[['unidad_id','tarjetas']]),
                 **timings,'segundos_hasta_features':computed-started,
                 'segundos_predict_proba':predicted-computed,'segundos_total':time.perf_counter()-started,
