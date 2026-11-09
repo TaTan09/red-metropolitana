@@ -1,0 +1,27 @@
+{
+  "verificado_en": "2026-11-07T16:55:50.048926-06:00",
+  "codigo_evaluado": "9d84ad3fc88277fbb2ed94592fcba3dea6eb5eda",
+  "decision_commit": "9d84ad3fc88277fbb2ed94592fcba3dea6eb5eda",
+  "evaluacion_b_fecha": "2026-11-07T16:53:50.818619-06:00",
+  "reservas": 1,
+  "consultas_b": 1,
+  "evaluaciones_completadas": 1,
+  "errores_test_oficial": 0,
+  "decision_inmutable": true,
+  "codigo_sin_cambios_tras_seleccion": true,
+  "aritmetica_y_matriz_guardadas_verificadas": true,
+  "hashes_modelo_predicciones_oof_verificados": true,
+  "graficas_inspeccionadas_visualmente": [
+    "ganancia-a.png",
+    "matriz-confusion-b.png"
+  ],
+  "evaluacion_repetida": false,
+  "metodo_cierre": "Lectura de JSON y bitácora, verificación aritmética de conteos y hashes de archivos; sin SQL, entrenamiento ni predicción",
+  "resultado_sha256": "3420b651854d6a2eaa8e40b1f124b90b794c37539be42b0da754bc427ff0a3f2",
+  "bitacora_sha256": "56992a8b654ccf17abb7ef29644c3ebb39c9ceb9fa8449afb2e5930c0c4e0cec",
+  "decision_sha256": "9b4230d1447a29211d98aa3e6258a6cccb31e8adab9dd6426fe363898ccd802e",
+  "reporte_sha256": "c8d024e33cba805695ac07f96e338afe6328ede3e48853ad2567fc10be5f24a8",
+  "matriz_png_sha256": "041b6496db253296a812f081e894361abe660b79fe664b6f1e14a390a4e0b291",
+  "log_ejecucion_local": "datos_red/p2-22-test-b-ejecucion.log",
+  "log_ejecucion_sha256": "77f45d915f1679d28b6106e1cb02c6f21adc8d3da53793511f3389ff7a7021a7"
+}

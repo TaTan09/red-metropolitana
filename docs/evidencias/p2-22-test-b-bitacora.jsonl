@@ -1,0 +1,8 @@
+{"fecha": "2026-11-07T16:52:50.379078-06:00", "etapa": "reserva", "codigo_commit": "9d84ad3fc88277fbb2ed94592fcba3dea6eb5eda", "decision_commit": "9d84ad3fc88277fbb2ed94592fcba3dea6eb5eda", "decision_sha256": "9b4230d1447a29211d98aa3e6258a6cccb31e8adab9dd6426fe363898ccd802e", "etiquetas_b_acceso": false, "metricas_b": false, "comando": ["scripts/umbral_p2_22.py", "test-b", "--decision-commit", "9d84ad3fc88277fbb2ed94592fcba3dea6eb5eda"]}
+{"fecha": "2026-11-07T16:52:50.382096-06:00", "etapa": "entrenamiento_a"}
+{"fecha": "2026-11-07T16:53:26.329853-06:00", "etapa": "modelo_a_ajustado", "filas": 77411, "sha256_modelo": "67a03fc2d7d820d5320006f85b52475d8bfd598f0db882724ee383366a4407be"}
+{"fecha": "2026-11-07T16:53:26.353514-06:00", "etapa": "consulta_etiquetas_b", "etiquetas_b_acceso_posible": true, "metricas_b": false, "sql_sha256": "840ba910e15e47f8c9932d476ae10e7e88894b91c4e794bdab01e3314c13733f"}
+{"fecha": "2026-11-07T16:53:49.190648-06:00", "etapa": "prediccion_b", "filas": 76378, "etiquetas_b_acceso": true}
+{"fecha": "2026-11-07T16:53:50.059037-06:00", "etapa": "confusion_b_calculada", "metricas_b": true, "contactadas": 9844, "tp": 4070, "fp": 5774, "tn": 60292, "fn": 6242, "precision": 0.413449817147501, "recall": 0.39468580294802175, "ganancia_gtq": 11830}
+{"fecha": "2026-11-07T16:53:50.103715-06:00", "etapa": "metricas_b_completadas", "metricas_b": true, "roc_auc": 0.8133878560609995, "contactadas": 9844, "tp": 4070, "fp": 5774, "tn": 60292, "fn": 6242, "precision": 0.413449817147501, "recall": 0.39468580294802175, "ganancia_gtq": 11830}
+{"fecha": "2026-11-07T16:53:50.864037-06:00", "etapa": "resultado_guardado", "resultado_sha256": "3420b651854d6a2eaa8e40b1f124b90b794c37539be42b0da754bc427ff0a3f2", "metricas_b": true}

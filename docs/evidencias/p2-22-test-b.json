@@ -1,0 +1,113 @@
+{
+  "requisito": "2.2",
+  "evaluado_en": "2026-11-07T16:53:50.818619-06:00",
+  "codigo_commit": "9d84ad3fc88277fbb2ed94592fcba3dea6eb5eda",
+  "decision_commit": "9d84ad3fc88277fbb2ed94592fcba3dea6eb5eda",
+  "decision_sha256": "9b4230d1447a29211d98aa3e6258a6cccb31e8adab9dd6426fe363898ccd802e",
+  "modelo": "rf_somero",
+  "configuracion": {
+    "familia": "bosque",
+    "parametros": {
+      "n_estimators": 100,
+      "max_features": "sqrt",
+      "bootstrap": true,
+      "criterion": "gini",
+      "random_state": 2026,
+      "n_jobs": 1,
+      "max_depth": 6,
+      "min_samples_leaf": 50
+    }
+  },
+  "umbral": 0.311210473799652,
+  "costos": {
+    "contacto_gtq": 5,
+    "retencion_probabilidad": 0.25,
+    "valor_retenido_gtq": 60,
+    "beneficio_esperado_tp_gtq": 15
+  },
+  "versiones": {
+    "python": "3.12.3",
+    "scikit-learn": "1.9.1",
+    "numpy": "2.5.3",
+    "pandas": "2.3.3",
+    "scipy": "1.18.1",
+    "threadpoolctl": "3.7.0",
+    "joblib": "1.6.0"
+  },
+  "corte": "B",
+  "fecha_corte": "2026-07-31",
+  "filas": 76378,
+  "positivos": 10312,
+  "negativos": 66066,
+  "contactadas": 9844,
+  "tp": 4070,
+  "fp": 5774,
+  "tn": 60292,
+  "fn": 6242,
+  "precision": 0.413449817147501,
+  "recall": 0.39468580294802175,
+  "ganancia_gtq": 11830,
+  "roc_auc": 0.8133878560609995,
+  "matriz_confusion_filas_real_columnas_contacto": [
+    [
+      60292,
+      5774
+    ],
+    [
+      6242,
+      4070
+    ]
+  ],
+  "a_oof": {
+    "filas": 77411,
+    "positivos": 11211,
+    "seleccionado": {
+      "umbral": 0.311210473799652,
+      "contactadas": 10625,
+      "tp": 4664,
+      "fp": 5961,
+      "tn": 60239,
+      "fn": 6547,
+      "precision": 0.4389647058823529,
+      "recall": 0.416019980376416,
+      "ganancia_gtq": 16835
+    },
+    "teorico": {
+      "contactadas": 8934,
+      "tp": 4056,
+      "fp": 4878,
+      "tn": 61322,
+      "fn": 7155,
+      "precision": 0.4539959704499664,
+      "recall": 0.36178753010436177,
+      "ganancia_gtq": 16170
+    },
+    "nadie": {
+      "contactadas": 0,
+      "tp": 0,
+      "fp": 0,
+      "tn": 66200,
+      "fn": 11211,
+      "precision": 0.0,
+      "recall": 0.0,
+      "ganancia_gtq": 0
+    },
+    "todos": {
+      "contactadas": 77411,
+      "tp": 11211,
+      "fp": 66200,
+      "tn": 0,
+      "fn": 0,
+      "precision": 0.1448243789642299,
+      "recall": 1.0,
+      "ganancia_gtq": -218890
+    },
+    "roc_auc_oof": 0.8162933638223788,
+    "roc_auc_media_folds_21": 0.8164696498133143
+  },
+  "b_filas_sha256_formato_13": "85e6a5e7628bd855b6e5ab01efc66cbce5fc52638c29e8100f01c211a21cb50a",
+  "modelo_a_sha256": "67a03fc2d7d820d5320006f85b52475d8bfd598f0db882724ee383366a4407be",
+  "predicciones_b_sha256": "346910a38c498e6253b57067840f99d81f81fe39691f250c1bda35ca33991359",
+  "estado": "completado",
+  "evaluaciones_b": 1
+}

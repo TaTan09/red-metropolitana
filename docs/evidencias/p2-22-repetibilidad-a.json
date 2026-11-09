@@ -1,0 +1,13 @@
+{
+  "verificado_en": "2026-11-07T16:51:39.626006-06:00",
+  "oof_sha256": "52427568e65f76ccfbab0e5d27cd9e905467759ce421e48f009deffe0b7dc8a0",
+  "decision_sha256": "9b4230d1447a29211d98aa3e6258a6cccb31e8adab9dd6426fe363898ccd802e",
+  "tabla_sha256": "a2d90f34ad4decffe5b652ed3eba7f184cf725974131efae6ba105750b1e2225",
+  "grafica_sha256": "bfd6d5f937f2efb6482bd1a7811e5be802ce6402a06b7125ed86ddc4d777ffb5",
+  "umbrales": 72042,
+  "recalculo_maximo_identico": true,
+  "tabla_identica_byte_a_byte": true,
+  "grafica_identica_byte_a_byte": true,
+  "matriz_seleccionada_verificada_por_calculo_directo": true,
+  "b_consultado": false
+}

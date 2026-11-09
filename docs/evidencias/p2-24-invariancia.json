@@ -1,0 +1,241 @@
+{
+  "fecha_utc": "2026-11-08T23:27:53.751381-06:00",
+  "fecha_corte": "2026-08-30",
+  "tipo": "Eventos de prueba sintéticos posteriores añadidos a una copia de Silver P2 real",
+  "intervalo": "[2026-08-30,2026-09-29)",
+  "dias_adicionales": 30,
+  "fuentes": {
+    "silver_transmetro_validaciones": {
+      "filas_originales": 711684,
+      "filas_agregadas": 3000,
+      "prefijo_original_sha256": "38371e40d652e0c4f29a3458a1e795457de5eb01c23ee074204e1a312ff484df",
+      "bytes_originales": 79266917,
+      "sha256_ampliado": "bfdf9180b082485c14fee3a187e8a9d138871b7181af42ae28f00f56d227e6dc"
+    },
+    "silver_transurbano_transacciones": {
+      "filas_originales": 1626075,
+      "filas_agregadas": 3000,
+      "prefijo_original_sha256": "7c6c82800c6714edb0ef58492ac7f3f70ac22d37b6fe2e765eede1b6ef0c0508",
+      "bytes_originales": 213019922,
+      "sha256_ampliado": "108e143208625cbf34363be131a91ddc3903d29035e376fdc084a453e7cf51f7"
+    },
+    "silver_aerometro_boardings": {
+      "filas_originales": 387053,
+      "filas_agregadas": 3000,
+      "prefijo_original_sha256": "e251c01ae56e4407ff99ac4a89d095598db9755b3a4716fa051004a4c8d781a9",
+      "bytes_originales": 41801792,
+      "sha256_ampliado": "d23e7ce5625b4e9e424e5eae48409974581c067f1cf650ece57e216fd8fd445f"
+    },
+    "silver_metroriel_viajes": {
+      "filas_originales": 583745,
+      "filas_agregadas": 3001,
+      "prefijo_original_sha256": "c24d8b8c067f7e9bc4ccc4410111a28153fef4e1a12d23b833a6677594357ab2",
+      "bytes_originales": 73980816,
+      "sha256_ampliado": "4efa69c45a79bff7803ee89d88c0c7054f48affe8ee2a9825101fdf84dce0831"
+    },
+    "silver_padron_transmetro_scd2": {
+      "filas_originales": 55403,
+      "filas_agregadas": 3000,
+      "prefijo_original_sha256": "fc2efdf0999e515311b4637ccad60badc62d55d13b8a5395ce35064fcb73970c",
+      "bytes_originales": 2160749,
+      "sha256_ampliado": "c87b47d9332c3ec332107c5bca6ca6aa1d99884d6cb6ae0c16f092ff287b8784"
+    },
+    "silver_cuarentena": {
+      "filas_originales": 18922,
+      "filas_agregadas": 30,
+      "prefijo_original_sha256": "5889cdbdff59a737873bd4835279d34f54568468a228ab669094da75c7e3c320",
+      "bytes_originales": 1560185,
+      "sha256_ampliado": "e08ad0422dd47f22e5cc79a96089ef60f9050b6be4f29c263be8f5c29dee72a5"
+    }
+  },
+  "datos_originales_preservados": true,
+  "recalculo": "Población y features SQL originales 1.2/1.3 en tablas TEMP desde CSV ampliados",
+  "ambito": "Desde Silver operacional/CDC/cuarentena hasta CSV; no certifica ingestión Raw/Bronze de archivos nuevos",
+  "modelo_sha256": "242b8e76d105327bb9c09822af640b5d3146de45d669b7d818e89774ceb7980d",
+  "umbral": 0.311210473799652,
+  "features_sha256_original": "14dcb85e33f657b5a1510a5f897d165fd5c0d4d8ccb3d13ac9108c3e46197901",
+  "features_sha256_ampliado": "14dcb85e33f657b5a1510a5f897d165fd5c0d4d8ccb3d13ac9108c3e46197901",
+  "prediccion_original": {
+    "fecha_utc": "2026-11-09T05:24:56.757676+00:00",
+    "fecha_corte": "2026-08-30",
+    "modelo_version": "v1_rf_somero",
+    "modelo_sha256": "242b8e76d105327bb9c09822af640b5d3146de45d669b7d818e89774ceb7980d",
+    "decision_json_canonico_sha256": "f5f426e66f73dda7658d487b972961087a96d68f3a6152f357e3093f930fc2d0",
+    "umbral": 0.311210473799652,
+    "filas": 76420,
+    "contactar": 10412,
+    "duplicados": 0,
+    "puntaje_min": 0.009984355570924587,
+    "puntaje_max": 0.6764988260825575,
+    "csv_sha256": "dfa5126bcb3c67962090016fc55c6d39d9936a3f17aeb2b95224cc26d4e2ed59",
+    "columnas": [
+      "unidad_id",
+      "tarjetas",
+      "puntaje",
+      "contactar"
+    ],
+    "versiones": {
+      "numpy": "2.5.3",
+      "pandas": "2.3.3",
+      "scipy": "1.18.1",
+      "scikit-learn": "1.9.1",
+      "joblib": "1.6.0",
+      "threadpoolctl": "3.7.0",
+      "psycopg": "3.3.6",
+      "psycopg-binary": "3.3.6",
+      "python-dotenv": "1.2.4",
+      "Jinja2": "3.1.6",
+      "MarkupSafe": "3.0.4",
+      "python-dateutil": "2.9.0.post0",
+      "six": "1.17.0",
+      "pytz": "2026.5",
+      "tzdata": "2026.5"
+    },
+    "codigo_fuentes_sha256": {
+      "predecir.py": "2261cd884164ef46baf312141cbba641c3277832d99ce9c8e83bea501467653b",
+      "scripts/p2_24.py": "eec85f5e5cd1c8b9467a35d8747529fc65a87670648cf8851e4234c40ffe850d",
+      "scripts/datos_p2_24.py": "2ab681fb4986810d526bd95c650b53c03c36697924bde32652a4bd7b8c380b90"
+    },
+    "identidades_sha256": "c5c696fc811415e805a0642c1c9d95fb200ae2cf1507414ca83e66c225b78b89",
+    "segundos_carga_temp": 27.05828919999999,
+    "segundos_features_y_validacion": 44.08552719999989,
+    "entrada_manifest_sha256": "f29678d402f8ce192c8ce4dcef9674b114cab3cdc2916c80c2577d1b3717cd3d",
+    "features_sha256": "14dcb85e33f657b5a1510a5f897d165fd5c0d4d8ccb3d13ac9108c3e46197901",
+    "fuentes": {
+      "silver_transmetro_validaciones": {
+        "archivo": "silver_transmetro_validaciones.csv",
+        "filas": 711684,
+        "sha256": "38371e40d652e0c4f29a3458a1e795457de5eb01c23ee074204e1a312ff484df"
+      },
+      "silver_transurbano_transacciones": {
+        "archivo": "silver_transurbano_transacciones.csv",
+        "filas": 1626075,
+        "sha256": "7c6c82800c6714edb0ef58492ac7f3f70ac22d37b6fe2e765eede1b6ef0c0508"
+      },
+      "silver_aerometro_boardings": {
+        "archivo": "silver_aerometro_boardings.csv",
+        "filas": 387053,
+        "sha256": "e251c01ae56e4407ff99ac4a89d095598db9755b3a4716fa051004a4c8d781a9"
+      },
+      "silver_metroriel_viajes": {
+        "archivo": "silver_metroriel_viajes.csv",
+        "filas": 583745,
+        "sha256": "c24d8b8c067f7e9bc4ccc4410111a28153fef4e1a12d23b833a6677594357ab2"
+      },
+      "silver_padron_transmetro_scd2": {
+        "archivo": "silver_padron_transmetro_scd2.csv",
+        "filas": 55403,
+        "sha256": "fc2efdf0999e515311b4637ccad60badc62d55d13b8a5395ce35064fcb73970c"
+      },
+      "silver_cuarentena": {
+        "archivo": "silver_cuarentena.csv",
+        "filas": 18922,
+        "sha256": "5889cdbdff59a737873bd4835279d34f54568468a228ab669094da75c7e3c320"
+      }
+    },
+    "segundos_hasta_features": 74.63778630000002,
+    "segundos_predict_proba": 1.3047022999999172,
+    "segundos_total": 76.68232149999994,
+    "reentrenado": false,
+    "etiquetas_futuras_consultadas": false
+  },
+  "prediccion_ampliada": {
+    "fecha_utc": "2026-11-09T05:27:51.812611+00:00",
+    "fecha_corte": "2026-08-30",
+    "modelo_version": "v1_rf_somero",
+    "modelo_sha256": "242b8e76d105327bb9c09822af640b5d3146de45d669b7d818e89774ceb7980d",
+    "decision_json_canonico_sha256": "f5f426e66f73dda7658d487b972961087a96d68f3a6152f357e3093f930fc2d0",
+    "umbral": 0.311210473799652,
+    "filas": 76420,
+    "contactar": 10412,
+    "duplicados": 0,
+    "puntaje_min": 0.009984355570924587,
+    "puntaje_max": 0.6764988260825575,
+    "csv_sha256": "dfa5126bcb3c67962090016fc55c6d39d9936a3f17aeb2b95224cc26d4e2ed59",
+    "columnas": [
+      "unidad_id",
+      "tarjetas",
+      "puntaje",
+      "contactar"
+    ],
+    "versiones": {
+      "numpy": "2.5.3",
+      "pandas": "2.3.3",
+      "scipy": "1.18.1",
+      "scikit-learn": "1.9.1",
+      "joblib": "1.6.0",
+      "threadpoolctl": "3.7.0",
+      "psycopg": "3.3.6",
+      "psycopg-binary": "3.3.6",
+      "python-dotenv": "1.2.4",
+      "Jinja2": "3.1.6",
+      "MarkupSafe": "3.0.4",
+      "python-dateutil": "2.9.0.post0",
+      "six": "1.17.0",
+      "pytz": "2026.5",
+      "tzdata": "2026.5"
+    },
+    "codigo_fuentes_sha256": {
+      "predecir.py": "2261cd884164ef46baf312141cbba641c3277832d99ce9c8e83bea501467653b",
+      "scripts/p2_24.py": "eec85f5e5cd1c8b9467a35d8747529fc65a87670648cf8851e4234c40ffe850d",
+      "scripts/datos_p2_24.py": "2ab681fb4986810d526bd95c650b53c03c36697924bde32652a4bd7b8c380b90"
+    },
+    "identidades_sha256": "c5c696fc811415e805a0642c1c9d95fb200ae2cf1507414ca83e66c225b78b89",
+    "segundos_carga_temp": 19.974237399999993,
+    "segundos_features_y_validacion": 48.61706470000013,
+    "entrada_manifest_sha256": "204fb73b99329f7d3bd43615c127ea638311fcb4635f26ff85f4f93eabe4850d",
+    "features_sha256": "14dcb85e33f657b5a1510a5f897d165fd5c0d4d8ccb3d13ac9108c3e46197901",
+    "fuentes": {
+      "silver_transmetro_validaciones": {
+        "archivo": "silver_transmetro_validaciones.csv",
+        "filas": 714684,
+        "sha256": "bfdf9180b082485c14fee3a187e8a9d138871b7181af42ae28f00f56d227e6dc"
+      },
+      "silver_transurbano_transacciones": {
+        "archivo": "silver_transurbano_transacciones.csv",
+        "filas": 1629075,
+        "sha256": "108e143208625cbf34363be131a91ddc3903d29035e376fdc084a453e7cf51f7"
+      },
+      "silver_aerometro_boardings": {
+        "archivo": "silver_aerometro_boardings.csv",
+        "filas": 390053,
+        "sha256": "d23e7ce5625b4e9e424e5eae48409974581c067f1cf650ece57e216fd8fd445f"
+      },
+      "silver_metroriel_viajes": {
+        "archivo": "silver_metroriel_viajes.csv",
+        "filas": 586746,
+        "sha256": "4efa69c45a79bff7803ee89d88c0c7054f48affe8ee2a9825101fdf84dce0831"
+      },
+      "silver_padron_transmetro_scd2": {
+        "archivo": "silver_padron_transmetro_scd2.csv",
+        "filas": 58403,
+        "sha256": "c87b47d9332c3ec332107c5bca6ca6aa1d99884d6cb6ae0c16f092ff287b8784"
+      },
+      "silver_cuarentena": {
+        "archivo": "silver_cuarentena.csv",
+        "filas": 18952,
+        "sha256": "e08ad0422dd47f22e5cc79a96089ef60f9050b6be4f29c263be8f5c29dee72a5"
+      }
+    },
+    "segundos_hasta_features": 71.86448399999995,
+    "segundos_predict_proba": 1.1413164999999026,
+    "segundos_total": 73.76745059999985,
+    "reentrenado": false,
+    "etiquetas_futuras_consultadas": false
+  },
+  "filas_originales": 76420,
+  "filas_ampliadas": 76420,
+  "unidades_diferentes": 0,
+  "diferencias_por_columna": {
+    "unidad_id": 0,
+    "tarjetas": 0,
+    "puntaje": 0,
+    "contactar": 0
+  },
+  "diferencias": 0,
+  "sha256_original": "dfa5126bcb3c67962090016fc55c6d39d9936a3f17aeb2b95224cc26d4e2ed59",
+  "sha256_ampliado": "dfa5126bcb3c67962090016fc55c6d39d9936a3f17aeb2b95224cc26d4e2ed59",
+  "csv_identicos_byte_a_byte": true,
+  "segundos_auditoria": 86.20572079999988,
+  "b_evaluado": false
+}
