@@ -1,71 +1,57 @@
-import os
+"""Ajusta sólo A con el modelo oficial y guarda el Pipeline completo."""
+from __future__ import annotations
+import argparse
+from datetime import datetime, timezone
+from pathlib import Path
+import subprocess
+import sys
+import time
 import joblib
-import pandas as pd
-from sqlalchemy import create_engine
-from sklearn.pipeline import Pipeline
-from sklearn.compose import ColumnTransformer
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
-from sklearn.linear_model import LogisticRegression
-from dotenv import load_dotenv
+from threadpoolctl import threadpool_limits
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+from scripts import p2_24 as m
 
-load_dotenv()
-pg_user = os.getenv("POSTGRES_USER", "postgres")
-pg_pass = os.getenv("POSTGRES_PASSWORD", "postgres")
-pg_host = os.getenv("POSTGRES_HOST", "127.0.0.1")
-pg_port = os.getenv("POSTGRES_PORT", "5432")
-pg_db = os.getenv("POSTGRES_DB", "red_metropolitana")
+def train(output=m.MODEL):
+    output = Path(output)
+    metadata = output.with_suffix('.json')
+    if output.exists() or metadata.exists():
+        raise FileExistsError('Artefacto ya existe: elegir otra versión/ruta, no sobrescribir')
+    d, e = m.official()
+    started = time.perf_counter()
+    data = m.training.load_cut_a(recalculate=True)
+    if m.training.sha256(data.to_csv(index=False, lineterminator='\n')) != e['entrada_sha256']:
+        raise ValueError('Entrenamiento A distinto al de 2.1')
+    loaded = time.perf_counter()
+    model = m.training.build_model(d['configuracion'])
+    with threadpool_limits(limits=1):
+        model.fit(data[d['predictores']], data['etiqueta'])
+    fitted = time.perf_counter()
+    output.parent.mkdir(parents=True, exist_ok=True)
+    joblib.dump(model, output, compress=3)
+    meta = {'modelo_version': m.VERSION, 'modelo': d['modelo'], 'configuracion': d['configuracion'],
+            'predictores': d['predictores'], 'umbral': d['umbral'],
+            'decision_json_canonico_sha256': m.json_hash(d), 'modelo_sha256': m.sha256(output),
+            'corte_entrenamiento': 'A', 'fecha_corte': '2026-07-01', 'filas': len(data),
+            'positivos': int(data['etiqueta'].sum()), 'entrada_21_sha256': e['entrada_sha256'],
+            'origen': data.attrs['origen'], 'versiones': m.versions(), 'python': sys.version.split()[0],
+            'creado_en_utc': datetime.now(timezone.utc).isoformat(),
+            'codigo_commit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT).decode().strip(),
+            'segundos_carga_y_features_a': loaded - started, 'segundos_fit': fitted - loaded,
+            'segundos_total': time.perf_counter() - started, 'b_evaluado': False}
+    m.write_json(metadata, meta)
+    m.load_model(output, metadata)
+    print(f"Modelo {m.VERSION}: {len(data)} filas A; SHA256 {meta['modelo_sha256']}")
+    return meta
 
-db_url = os.getenv(
-    "DATABASE_URL",
-    f"postgresql://{pg_user}:{pg_pass}@{pg_host}:{pg_port}/{pg_db}"
-)
-engine = create_engine(db_url)
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--salida', type=Path, default=m.MODEL)
+    args = parser.parse_args(argv)
+    try:
+        train(args.salida)
+    except (ValueError, OSError) as exc:
+        parser.exit(1, f'Error al serializar: {exc}\n')
 
-print("Cargando todo el Corte A para entrenar el modelo final de producción...")
-query = """
-SELECT 
-    operador,
-    viajes_28d,
-    viajes_7d,
-    viajes_14d,
-    dias_activos_28d,
-    dias_desde_ultimo_uso,
-    gasto_28d_gtq,
-    tarifa_media_gtq,
-    puntos_origen_28d,
-    proporcion_hora_pico,
-    proporcion_fin_semana,
-    etiqueta
-FROM silver.silver_p2_features_tarjeta
-WHERE corte = 'A';
-"""
-df_a = pd.read_sql(query, engine)
-
-num_cols = [
-    'viajes_28d', 'viajes_7d', 'viajes_14d', 'dias_activos_28d',
-    'dias_desde_ultimo_uso', 'gasto_28d_gtq', 'tarifa_media_gtq',
-    'puntos_origen_28d', 'proporcion_hora_pico', 'proporcion_fin_semana'
-]
-cat_cols = ['operador']
-
-X = df_a[num_cols + cat_cols]
-y = df_a['etiqueta'].values
-
-preprocessor = ColumnTransformer(
-    transformers=[
-        ('num', StandardScaler(), num_cols),
-        ('cat', OneHotEncoder(drop='first', sparse_output=False), cat_cols)
-    ]
-)
-
-# Modelo definitivo seleccionado en la Fase 1 (Regresión Logística L2, C=0.01)
-clf = LogisticRegression(penalty='l2', C=0.01, solver='lbfgs', max_iter=1000, random_state=2026)
-pipeline = Pipeline([('prep', preprocessor), ('clf', clf)])
-
-print("Ajustando pipeline completo con Corte A...")
-pipeline.fit(X, y)
-
-os.makedirs("models", exist_ok=True)
-model_path = "models/modelo_abandono_v1.joblib"
-joblib.dump(pipeline, model_path)
-print(f"Modelo serializado exitosamente en: {model_path}")
+if __name__ == '__main__':
+    main()

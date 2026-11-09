@@ -1,0 +1,16 @@
+# Python 3.12; entorno mínimo de entrenamiento e inferencia 2.4
+numpy==2.5.3
+pandas==2.3.3
+scipy==1.18.1
+scikit-learn==1.9.1
+joblib==1.6.0
+threadpoolctl==3.7.0
+psycopg==3.3.6
+psycopg-binary==3.3.6
+python-dotenv==1.2.4
+Jinja2==3.1.6
+MarkupSafe==3.0.4
+python-dateutil==2.9.0.post0
+six==1.17.0
+pytz==2026.5
+tzdata==2026.5
