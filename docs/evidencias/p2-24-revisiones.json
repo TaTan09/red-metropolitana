@@ -1,0 +1,87 @@
+{
+  "revisado_en_utc": "2026-11-09T05:34:31.967618+00:00",
+  "codigo_commit": "132e554",
+  "revisiones": [
+    {
+      "nombre": "Funcionalidad",
+      "estado": "aprobada",
+      "verificado": [
+        "CLI literal con datos y fecha, ruta alternativa y errores",
+        "Modelo RF serializado y hash validado",
+        "Cuatro columnas exactas; 76420 unidades; 10412 contactos",
+        "Llaves originales y features coinciden con referencia Silver",
+        "Duplicados cero; rango [0,1]; orden y contacto >= umbral correctos",
+        "El CSV versionado puede recalcularse sin sobrescribirse si coincide"
+      ]
+    },
+    {
+      "nombre": "Ciencia de datos",
+      "estado": "aprobada",
+      "verificado": [
+        "Modelo, configuración y once predictores oficiales reutilizados sin nueva selección",
+        "Entrenamiento exclusivamente A; entrada y huellas iguales a 1.3 y 2.1",
+        "C sin etiquetas; ventanas y disponibilidad anteriores al corte",
+        "15031 anexos futuros en seis fuentes sobre copia aislada; prefijos originales preservados",
+        "Cero diferencias de población, features, llaves, scores y contactos; CSV byte a byte idéntico",
+        "Control positivo con fuga deliberada detectada en fixtures; modificación de datos previos cambia features",
+        "Ninguna nueva evaluación B; evidencias 2.2 intactas"
+      ],
+      "ambito_invariancia": "Silver operacional/CDC/cuarentena -> población/features SQL 1.2/1.3 -> modelo guardado -> CSV; futuros sintéticos, no nuevos archivos Raw reales"
+    },
+    {
+      "nombre": "Ingeniería y reproducibilidad",
+      "estado": "aprobada",
+      "verificado": [
+        "Escrituras sólo TEMP con rollback; exportación original de sólo lectura",
+        "Carpeta --datos obliga manifest/headers/conteos/hashes; sin fallback a base fija",
+        "Dependencias directas/transitivas fijas y comprobadas en venv nuevo",
+        "CLI ejecutada desde otro cwd con base vacía sin Silver: CSV idéntico; base retirada",
+        "Artefacto RF, metadata y CSV final versionados; datasets y credenciales ignorados",
+        "Idempotencia sin sobrescribir archivos ajenos; modelo no reentrena en inferencia"
+      ],
+      "correcciones_antes_del_cierre": [
+        "PostgreSQL no permite CREATE TEMP en READ ONLY: transacción con escrituras exclusivamente TEMP y rollback",
+        "Fixtures Windows usan newline vacío para no mezclar CRLF con LF",
+        "Control positivo retira fecha y disponibilidad simultáneamente para crear una fuga real",
+        "CLI recalcula y valida la entrega ya existente tras clonar",
+        "Se fijaron también tres dependencias transitivas detectadas en instalación nueva"
+      ]
+    }
+  ],
+  "pruebas": {
+    "comando": "$env:P2_TEST_POSTGRES='1'; .venv\\Scripts\\python.exe -m unittest discover -s tests",
+    "ejecutadas": 123,
+    "omitidas": 0,
+    "nuevas_24": 12,
+    "resultado": "OK",
+    "segundos": 57.914,
+    "log_local": "datos_red/p2-24-pruebas-finales.log",
+    "log_sha256": "35f438c32069f2c296b0a74fd5d564d45d1807748403a3ebfe0a28583889162b"
+  },
+  "lock_sha256": "97fe166c357f8a5fbca95f1521f8a3506a6a74786ad57f95fb1425f2c46c7443",
+  "dependencias_nuevo_venv": {
+    "numpy": "2.5.3",
+    "pandas": "2.3.3",
+    "scipy": "1.18.1",
+    "scikit-learn": "1.9.1",
+    "joblib": "1.6.0",
+    "threadpoolctl": "3.7.0",
+    "psycopg": "3.3.6",
+    "psycopg-binary": "3.3.6",
+    "python-dotenv": "1.2.4",
+    "Jinja2": "3.1.6",
+    "MarkupSafe": "3.0.4",
+    "python-dateutil": "2.9.0.post0",
+    "six": "1.17.0",
+    "pytz": "2026.5",
+    "tzdata": "2026.5",
+    "cloudpickle": "3.1.2",
+    "narwhals": "2.28.0",
+    "typing-extensions": "4.16.0"
+  },
+  "modelo_sha256": "242b8e76d105327bb9c09822af640b5d3146de45d669b7d818e89774ceb7980d",
+  "csv_sha256": "dfa5126bcb3c67962090016fc55c6d39d9936a3f17aeb2b95224cc26d4e2ed59",
+  "evidencia_invariancia_final_sha256": "7df028f7b63b96f9f2e75eb1bea7e598e4cab745a32677f8aa9c174f6434cf7f",
+  "b_oficial_repetido": false,
+  "evidencia_b_sha256": "3420b651854d6a2eaa8e40b1f124b90b794c37539be42b0da754bc427ff0a3f2"
+}

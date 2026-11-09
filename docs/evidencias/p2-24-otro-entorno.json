@@ -1,0 +1,96 @@
+{
+  "entorno_nuevo": "venv creado desde cero con requirements-inferencia.txt",
+  "base_postgresql": "Base nueva vacía, sin esquema Silver, eliminada después de la prueba",
+  "directorio_de_trabajo_distinto": true,
+  "dependencias_pip_check": "OK",
+  "csv_identico_byte_a_byte": true,
+  "csv_sha256": "dfa5126bcb3c67962090016fc55c6d39d9936a3f17aeb2b95224cc26d4e2ed59",
+  "filas": 76420,
+  "contactar": 10412,
+  "segundos_verificacion": 81.0090237999998,
+  "inferencia": {
+    "fecha_utc": "2026-11-09T05:29:09.236738+00:00",
+    "fecha_corte": "2026-08-30",
+    "modelo_version": "v1_rf_somero",
+    "modelo_sha256": "242b8e76d105327bb9c09822af640b5d3146de45d669b7d818e89774ceb7980d",
+    "decision_json_canonico_sha256": "f5f426e66f73dda7658d487b972961087a96d68f3a6152f357e3093f930fc2d0",
+    "umbral": 0.311210473799652,
+    "filas": 76420,
+    "contactar": 10412,
+    "duplicados": 0,
+    "puntaje_min": 0.009984355570924587,
+    "puntaje_max": 0.6764988260825575,
+    "csv_sha256": "dfa5126bcb3c67962090016fc55c6d39d9936a3f17aeb2b95224cc26d4e2ed59",
+    "columnas": [
+      "unidad_id",
+      "tarjetas",
+      "puntaje",
+      "contactar"
+    ],
+    "versiones": {
+      "numpy": "2.5.3",
+      "pandas": "2.3.3",
+      "scipy": "1.18.1",
+      "scikit-learn": "1.9.1",
+      "joblib": "1.6.0",
+      "threadpoolctl": "3.7.0",
+      "psycopg": "3.3.6",
+      "psycopg-binary": "3.3.6",
+      "python-dotenv": "1.2.4",
+      "Jinja2": "3.1.6",
+      "MarkupSafe": "3.0.4",
+      "python-dateutil": "2.9.0.post0",
+      "six": "1.17.0",
+      "pytz": "2026.5",
+      "tzdata": "2026.5"
+    },
+    "codigo_fuentes_sha256": {
+      "predecir.py": "2261cd884164ef46baf312141cbba641c3277832d99ce9c8e83bea501467653b",
+      "scripts/p2_24.py": "eec85f5e5cd1c8b9467a35d8747529fc65a87670648cf8851e4234c40ffe850d",
+      "scripts/datos_p2_24.py": "2ab681fb4986810d526bd95c650b53c03c36697924bde32652a4bd7b8c380b90"
+    },
+    "identidades_sha256": "c5c696fc811415e805a0642c1c9d95fb200ae2cf1507414ca83e66c225b78b89",
+    "segundos_carga_temp": 17.907523300000094,
+    "segundos_features_y_validacion": 41.4125626,
+    "entrada_manifest_sha256": "f29678d402f8ce192c8ce4dcef9674b114cab3cdc2916c80c2577d1b3717cd3d",
+    "features_sha256": "14dcb85e33f657b5a1510a5f897d165fd5c0d4d8ccb3d13ac9108c3e46197901",
+    "fuentes": {
+      "silver_transmetro_validaciones": {
+        "archivo": "silver_transmetro_validaciones.csv",
+        "filas": 711684,
+        "sha256": "38371e40d652e0c4f29a3458a1e795457de5eb01c23ee074204e1a312ff484df"
+      },
+      "silver_transurbano_transacciones": {
+        "archivo": "silver_transurbano_transacciones.csv",
+        "filas": 1626075,
+        "sha256": "7c6c82800c6714edb0ef58492ac7f3f70ac22d37b6fe2e765eede1b6ef0c0508"
+      },
+      "silver_aerometro_boardings": {
+        "archivo": "silver_aerometro_boardings.csv",
+        "filas": 387053,
+        "sha256": "e251c01ae56e4407ff99ac4a89d095598db9755b3a4716fa051004a4c8d781a9"
+      },
+      "silver_metroriel_viajes": {
+        "archivo": "silver_metroriel_viajes.csv",
+        "filas": 583745,
+        "sha256": "c24d8b8c067f7e9bc4ccc4410111a28153fef4e1a12d23b833a6677594357ab2"
+      },
+      "silver_padron_transmetro_scd2": {
+        "archivo": "silver_padron_transmetro_scd2.csv",
+        "filas": 55403,
+        "sha256": "fc2efdf0999e515311b4637ccad60badc62d55d13b8a5395ce35064fcb73970c"
+      },
+      "silver_cuarentena": {
+        "archivo": "silver_cuarentena.csv",
+        "filas": 18922,
+        "sha256": "5889cdbdff59a737873bd4835279d34f54568468a228ab669094da75c7e3c320"
+      }
+    },
+    "segundos_hasta_features": 64.95526599999994,
+    "segundos_predict_proba": 1.9441486000000623,
+    "segundos_total": 68.28765420000013,
+    "reentrenado": false,
+    "etiquetas_futuras_consultadas": false
+  },
+  "b_evaluado": false
+}

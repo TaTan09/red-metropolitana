@@ -370,3 +370,26 @@ Selección exacta del umbral con OOF A, decisión congelada en Git y evaluación
 temporal B protegida contra repeticiones. Ver [diseño y revisiones](docs/umbral_p2_22.md),
 [decisión para 2.4](docs/evidencias/p2-22-decision.json) y
 [reporte de resultados](docs/metricas/p2-22/reporte.md).
+
+## Proyecto 2 — requisito 2.4: inferencia reproducible
+
+Modelo oficial `rf_somero`, versión `v1_rf_somero`, entrenado sólo con A y
+umbral exacto `0.311210473799652` desde la decisión congelada. Instalar las
+versiones fijas de `requirements-inferencia.txt`, configurar PostgreSQL 16 en
+`.env` y preparar la carpeta portable desde Silver:
+
+```powershell
+python scripts/datos_p2_24.py --fecha-corte 2026-08-30
+python predecir.py --datos datos_red --fecha-corte 2026-08-30
+```
+
+La carpeta se usa realmente: carga fuentes a tablas TEMP, recalcula población
+y features y carga el Pipeline guardado, sin entrenamiento ni etiquetas C.
+Salida [CSV final C](datos_red/p2-24-predicciones-c.csv): **76,420 predicciones,
+10,412 contactos**, llaves originales y cuatro columnas exactas. Si ya existe,
+se recalcula y conserva cuando los bytes coinciden; para otra salida utilizar
+`--salida datos_red/defensa-c.csv`.
+
+La invariancia con 30 días añadidos a una copia aislada dio cero diferencias.
+Ver [instalación, preparación, comandos, hashes, tiempos e invariancia](docs/README_P2_24.md)
+y [ficha del modelo](docs/modelo_ficha.md). No se volvió a evaluar B.

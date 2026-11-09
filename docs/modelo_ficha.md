@@ -1,28 +1,15 @@
-# Ficha Técnica del Modelo de Predicción de Abandono (MLOps)
+# Ficha del modelo — abandono por tarjeta (2.4)
 
-## 1. Información General
-* **Nombre del Modelo:** Regresión Logística Regularizada ($L_2$) para Predicción de Abandono.
-* **Versión:** `v1_logistica_l2`
-* **Artefacto Serializado:** `models/modelo_abandono_v1.joblib`
-* **Responsable:** Alejandro
+**Modelo y versión:** Random Forest `rf_somero`, `v1_rf_somero`. Pipeline completo en `models/modelo_abandono_rf_somero_v1.joblib`; configuración, versiones y SHA-256 en su JSON compañero. **Los datos son simulados**; las ganancias son esperadas bajo supuestos, no retenciones observadas.
 
-## 2. Definición del Problema y Datos
-* **Dominio:** Clasificación binaria para predecir el cese de actividad (*churn*) en tarjetas de la Red Metropolitana de Transporte en un horizonte de 30 días.
-* **Entrenamiento:** Ajustado con la totalidad de los datos del **Corte A** (77,411 registros).
-* **Variables de Entrada (Features):** 
-  * Numéricas: `viajes_28d`, `viajes_7d`, `viajes_14d`, `dias_activos_28d`, `dias_desde_ultimo_uso`, `gasto_28d_gtq`, `tarifa_media_gtq`, `puntos_origen_28d`, `proporcion_hora_pico`, `proporcion_fin_semana`.
-  * Categóricas: `operador`.
+**Datos, periodos y unidad.** Fuentes Silver P2 de Transmetro, Transurbano, MetroRiel y Aerómetro; CDC y cuarentena por evento. Unidad TARJETA `(operador, llave_operacional)`, ID técnico MD5 con namespace del operador. Población: al menos dos usos válidos disponibles en los 28 días previos; cualquier DELETE de Transmetro anterior al corte excluye. Un viaje MR cuenta una vez y debe estar cerrado antes del corte. Etiqueta: ausencia de usos válidos en los siguientes 30 días. A: 2026-07-01; B: 2026-07-31; C: 2026-08-30. C conserva la etiqueta oculta y no se consulta para inferencia.
 
-## 3. Rendimiento y Validación Cruzada
-* **Estrategia:** Validación cruzada estratificada de 5 pliegues (*Stratified 5-Fold CV*) con semilla fija (`random_state=2026`).
-* **Métrica Principal:** ROC-AUC.
-* **Resultado Obtenido:** ROC-AUC medio de **$0.8071 \pm 0.0020$** utilizando penalización Ridge ($L_2$) con $C = 0.01$ ($\lambda = 100.0$).
+**Predictores y ajuste.** `viajes_28d`, `viajes_7d`, `viajes_14d`, `dias_activos_28d`, `dias_desde_ultimo_uso`, `gasto_28d_gtq`, `tarifa_media_gtq`, `puntos_origen_28d`, `proporcion_hora_pico`, `proporcion_fin_semana`, `operador`. Numéricas passthrough y operador OneHotEncoder con categorías desconocidas ignoradas, todo ajustado sólo con **77,411 tarjetas A** (11,211 positivas). `build_model` de 2.1: 100 árboles, profundidad 6, mínimo 50 por hoja, `max_features=sqrt`, bootstrap, Gini, semilla 2026, un hilo. La inferencia carga el modelo guardado y no reentrena; KMeans/PCA de 2.3 no son predictores.
 
-## 4. Inferencia y Producción (Corte C)
-* **Script de Producción:** `predecir.py`
-* **Umbral de Decisión Óptimo:** `0.311192` (derivado de la optimización de ganancia y costos de la campaña en la Fase 2.2).
-* **Resultado en Corte C:** Se procesaron 76,420 registros, generando las probabilidades de abandono y marcando a **9,273 usuarios** para contacto preventivo de retención.
-* **Archivo Generado:** `datos_red/p2-24-predicciones-c.csv`
+**Validación A:** cinco folds estratificados, semilla 2026. ROC-AUC media ± DE: tasa constante **0.500000 ± 0.000000**; recencia **0.795401 ± 0.004516**; logística L2 **0.806967 ± 0.003134**; RF elegido **0.816470 ± 0.002437**. Brecha RF entrenamiento-validación: 0.004974. Evidencia: [2.1](evidencias/p2-21-ensemble.json).
 
-## 5. Reproducibilidad
-* Todas las transformaciones (escalado estándar y codificación one-hot) se encuentran encapsuladas dentro del `Pipeline` de scikit-learn serializado en `joblib`, evitando cualquier fuga de datos y garantizando inferencias idénticas ante futuras ejecuciones.
+**Decisión y test oficial B.** Umbral exacto **0.311210473799652**, contacto si `puntaje >= umbral`, consumido del [JSON congelado](evidencias/p2-22-decision.json). Contacto Q5; retención 25%; valor Q60: `G=15TP−5(TP+FP)=10TP−5FP`. Umbral teórico `p>1/3` si está calibrado; el empírico maximiza ganancia OOF A, sin asumir calibración perfecta: Q16,835, precisión 43.8965%, recall 41.6020%. B oficial: **76,378** tarjetas, 10,312 positivas; TP 4,070, FP 5,774, TN 60,292, FN 6,242; precisión **41.3450%**, recall **39.4686%**, AUC **0.813388**, ganancia **Q11,830**, 9,844 contactos. Único test: **2026-11-07 16:53:50.818619 −06:00**, commit `9d84ad3fc88277fbb2ed94592fcba3dea6eb5eda`. Se leyó su [resultado guardado](evidencias/p2-22-test-b.json); nunca se repitió.
+
+**C e invariancia.** **76,420 predicciones, 10,412 contactos**; [CSV entregado](../datos_red/p2-24-predicciones-c.csv). Se anexaron **15,031 registros** a copias de las fuentes Silver: 30 días de eventos/CDC/cuarentena y un viaje MR con cierre posterior. Recálculo de población y features con SQL 1.2/1.3 y modelo fijo: **cero diferencias** en unidades, llaves, puntajes y contactos; CSV idénticos byte a byte. [Prueba final](evidencias/p2-24-invariancia-final.json). La prueba abarca desde Silver operacional hasta CSV; no certifica una nueva ingestión Raw/Bronze del conjunto aún no entregado por el profesor.
+
+**Fugas y límites.** Ventanas `[corte−N días,corte)`, máximo 28 días; disponibilidad MR anterior al corte; CDC por `valid_from`, sin estado vigente futuro; exclusión por ID en cuarentena; sin Gold, identidad personal inferida, etiquetas C ni ajuste con B. [Auditoría de recorte A: cero diferencias](evidencias/p2-13-auditoria-p2.json). Varias tarjetas de una persona siguen separadas; los scores no garantizan calibración, causalidad ni desempeño futuro. Las diferencias A/B se conservan sin reajustes. [Reproducción, tiempos y revisiones](README_P2_24.md).
