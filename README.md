@@ -393,3 +393,13 @@ se recalcula y conserva cuando los bytes coinciden; para otra salida utilizar
 La invariancia con 30 días añadidos a una copia aislada dio cero diferencias.
 Ver [instalación, preparación, comandos, hashes, tiempos e invariancia](docs/README_P2_24.md)
 y [ficha del modelo](docs/modelo_ficha.md). No se volvió a evaluar B.
+
+## Proyecto 2 — defensa en video (noviembre de 2026)
+
+- [Informe y presentación de Fase 2](docs/entrega-fase-2/README.md).
+- [Bitácora consolidada de decisiones y responsables](docs/decisiones/003-bitacora-defensa-proyecto-2.md).
+- [Guía de reproducción e invariancia de C](docs/README_P2_24.md).
+
+**Estado del video:** aún no se ha publicado su enlace. Se incorporará aquí una vez disponible y comprobado.
+
+La etiqueta histórica `fase-2` identifica la entrega previa. El nuevo lineamiento exige una etiqueta distinta, `entrega-final`, que debe fijarse **antes de grabar** en el commit definitivo que contiene el CSV C, `predecir.py`, el modelo y la ficha; no moverla después de la congelación. La demostración debe comparar la salida con el CSV congelado, con `git log -1` visible.
